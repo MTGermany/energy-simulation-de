@@ -1,0 +1,37 @@
+# user-defined ignores (avoid committing large files)
+
+GPLv3_ProgramHeader
+*.swp
+# *.zip
+
+## save files
+
+*.save
+save
+*save.*
+tmp*
+js/save
+
+
+## generated files
+
+*~
+int
+*.bak
+
+## internal files
+
+README
+README_*
+
+dataSolarRain/
+dataSupplyDemand/
+dataWind/
+js/displayText.js
+js/seedrandom.min.js
+figs/*.fig
+figs/*.eps
+figs/Merkelraute_Template.png
+references/
+scenarios_Frauenhofer/
+*sketch*
