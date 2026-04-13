@@ -29,6 +29,7 @@ dataSupplyDemand/
 dataWind/
 js/displayText.js
 js/seedrandom.min.js
+js/*save*
 figs/*.fig
 figs/*.eps
 figs/Merkelraute_Template.png
