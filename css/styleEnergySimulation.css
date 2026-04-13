@@ -1,0 +1,286 @@
+/*
+!! check/make consistent with ../js/media.js
+
+media queries: 
+https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries
+INFO: full HD =1080p (1920×1080 px), aspect ratio 5/3; 
+*/
+
+
+
+
+
+
+/*#############################################################*/
+/* basic settings for all aspect ratios */
+/*#############################################################*/
+
+
+body{
+  margin: 10;
+  padding: 10;
+  /*overflow-x: hidden;*/ /* remove horizontal scrollbar */
+  font-family: 'helvetica', sans-serif;
+                 /*font-size: 14px;*/
+  font-size: 2.5vmin;
+  /*text-align: center;*/
+  color: #404050;   /* text color */
+  background-color: #FFFFFF;
+}
+
+button,select{    /* see also toggle control */
+    font-size: 2.4vmin;
+    width: 15vw;
+    height: 7vh;
+}
+
+
+
+
+/* text layout of sliders: tables override general text spec) */
+
+th{                    /* only used in infotext */
+  font-size: 2.4vmin;
+  font-weight: bold; 
+  color: #404060;      /* text color */
+
+}
+
+td{
+  font-size:2.0vmin; 
+  font-weight: bold; 
+  color: #404060;   /* only WITHOUT quotes here, not "#404060" etc */
+}
+
+td.important{
+  font-size:2.0vmin; 
+  font-weight: bold; 
+  color: #dd0033;
+}
+
+
+
+
+/* <h2>, <h3> not used in the main sim page but in some help pages */
+
+ h1{
+     font-family: helvetica, sans-serif;
+     font-size: 4.2vmin;
+     font-weight: bold;
+     color: #446;
+     padding-top:0px;
+ }
+
+ h2{
+     font-family: helvetica, sans-serif;
+     font-size: 3.0vmin;
+     font-weight: bold;
+     color: #446;
+     padding-top:0px;
+ }
+
+
+
+/* suppresses borders on images used as links */
+
+img {
+    border-width: 0;
+}
+
+
+/* general links */
+
+a {
+	color: #07A;
+	font-weight: normal;
+ }
+
+a:link {
+	color: #07A;
+	text-decoration: none;
+}
+
+a:visited {
+	color: #957;
+	text-decoration: none;
+}
+
+a:active {
+	text-decoration: underline;
+	background-color: #F80;
+}
+
+a:hover {
+	text-decoration: underline;
+	color: #07A;
+}
+
+table.infoTable {
+   border: 0px ridge rgb(130,130,130); /* spacing, padding DOS with border-collapse */
+   border-collapse: collapse; 
+   background-color: rgba(255,255,255,0.7);
+}
+table.infoTable td {
+   border: 2px ridge rgb(130,130,130);
+}
+
+
+
+/*#############################################################*/
+/* basic settings for landscape formats !! check with ../js/media.js */
+/*#############################################################*/
+
+@media all and  (min-aspect-ratio: 6/5){
+
+
+/* (1) landscape: the title */
+
+ 
+#header{
+  position: absolute;
+  top: 0vmin;
+  left: 20vw;
+  width:  60vw; 
+  height: 6vmin;
+  /* font-size: 2.9vmin; size and weight overridden by h1*/
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  /*background-color: rgba(255,255,255,0.7);*/
+  z-index: 4; /* the higher the integer, the more on top */
+}
+
+
+
+/* (2) landscape: control panels with button */
+/* Notice: table elements relevant for font size */
+
+#toggleControlDiv{
+  position: absolute;
+  top: 6vmin;
+  left: 20vw;
+  /*width: 14vmin;*/ /* width DOS, control at button */
+  /*height: 8vmin;*/
+  z-index: 4; /* the higher the integer, the more on top */
+}
+
+#controlSupplyDemandDiv{ /* Also contains info text for non-BaWue simulations!*/
+  position: absolute;
+  top: 5vmin;
+  height: 88vmin;
+  left: 2vmin;
+  width: 35vw;
+  background-color: rgb(230,230,255);
+  display: block;
+  z-index: 1; /* the higher the integer, the more on top */
+}
+
+#controlStrategyDiv{ /* Also contains info text for non-BaWue simulations!*/
+  position: absolute;
+  top: 5vmin;
+  height: 88vmin;
+  left: 2vmin;
+  width: 35vw;
+  background-color: rgb(230,230,255);
+  display: none;  z-index: 3; /* the higher the integer, the more on top */
+}
+
+/* (2) Merkelsmileys */
+
+#merkelsmileys{
+  position: absolute;
+  top: 72vmin;
+  left: 16vw;
+  /* DOS here; width controlled by image in javascript: */
+  z-index: 4; /* the higher the integer, the more on top */
+}
+#raute{
+  position: absolute;
+  top: 82vmin;
+  left: 16vw;
+  width: 8vmin; /* works with "%" size in <img ...> in html */
+  height: 6vmin;
+  z-index: 4; /* the higher the integer, the more on top */
+}
+
+
+/* (2) landscape: the simulation canvas */
+
+#contents{
+  position: absolute;
+  left:   40vw;
+  top:   0vmin;
+  width:  60vmin; 
+  height: 100vmin;
+  margin-right: 0vw;
+  margin-left: 0vw;
+  z-index: 1;
+}
+
+
+/* (2a) landscape: position of the info button */
+
+#infoDiv{
+  position: absolute;
+  top: 1vmin;
+  height: 8vmin;
+  left: 102vmin;
+  width: 8vmin;
+  z-index: 2; /* the higher the integer, the more on top */
+}
+
+
+/* (2f) landscape: position of the copyright left bottom of simCanvas*/
+/* Safari bug with using bottom => use always top */
+
+#impressum{ 
+  position: absolute;
+  top: 96%;  /* % takes care of scrollbars, vmin/vh not*/
+  left: 0.5vw;
+  /*background-color: rgba(255,255,255,0.7);*/
+  font-size: 1.5vmin;
+  z-index: 1; /* the higher the integer, the more on top landscape */
+}
+
+
+/* (3) landscape: position of the flags for language selection: 
+right top of simCanvas */
+
+#infoFlags{
+  position: absolute;
+  top:   94.5%;
+  left:   95vmin;
+  width:  16vmin; /* no height */
+  z-index: 2;
+}
+
+
+
+
+/* (6) landscape: infotext div-box landscape (sub-div! no pos info, just below the sliders*/
+
+ul { margin-left: 2vmin; padding: 0vmin; }
+
+ul.noindent {   /* then in html <ul class="noindent">...</ul>*/
+    margin-left: 5px;
+    margin-right: 0px;
+    padding-left: 10px;
+    padding-right: 0px;
+}
+
+#infotext{ /* inside #sliders, hence no positional info*/
+  border:0px solid black; /* 1px with frame */
+  width: 44vmin; /* DOS with calc(98.0vw-121.0vmin);*/
+  /*height: 27vmin;*/
+  text-align: left;
+  padding-top: 0vmin;
+  padding-left: 2vmin;
+  padding-right: 2vmin;
+  background-color: rgba(0,40,255,0.0);
+  overflow:auto;
+  z-index: 2;
+}
+
+
+} /* end @media filter landscape normal */

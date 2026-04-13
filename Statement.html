@@ -1,0 +1,108 @@
+
+<!DOCTYPE html public>
+<html lang="en">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+
+    <link href="css/styleSliders.css" rel="stylesheet" type="text/css" ></img>
+    <link href="css/styleTrafficSimulationDe.css" 
+          rel="stylesheet" type="text/css"></img>
+    <link rel="shortcut icon" type="image/jpg" href="./favicon.jpg">
+    </script>
+
+    
+    <title>Energie-Simulation</title> 
+</head>
+
+
+<body>
+  <h1><center>Energie-Simulation</center></h1>
+
+  Hier entsteht eine interaktive Simulation der Energiefl&uuml;sse
+  zur Bereitstellung von Elektrizit&auml;t in Deutschland mit den
+  Komponenten
+  <ul>
+    <li> Photovoltaik (PV)</li>
+    <li> Wind (on- und offshore)</li>
+    <li> Wasserkraft</li>
+    <li> Biomasse</li>
+    <li> Kohle</li>
+    <li> Gas</li>
+    <li> Kernkraftwerke (KKW)</li>
+    <li> Import</li>
+    <li> Batteriespeicher</li>
+    <li> Hydraulische Speicher</li>
+    <li> Power2gas Speicher</li>
+  </ul>
+  Die Nachfrager sind die gesamte deutsche Stromnachfrage (abgesehen
+  von Inselstrom von eigenen Solarzellen) sowie der Export.
+  <br><br>
+
+  Die fluktuierenden erneuerbaren Energien PV und Windkraft werden mit
+  Wetterdaten an den jeweiligen Standorten simuliert. Bei den
+  Energiespeichern werden die jeweiligen roundturn-Wirkungsgrade
+  ("Strom2Strom") angesetzt. Leitungskapazit&auml;ten und -grenzen werden
+  nicht ber&uuml;cksichtigt.
+  <br><br>
+
+  In der Simulation k&ouml;nnen Sie
+
+  <ul>
+    <li>Erneuerbare, Kernkraft und fossile Energietr&auml;ger nach
+      Herzenslust hinzuf&uuml;gen oder wegnehmen </li>
+    <li> Die Nachfrage erh&ouml;hen (W&auml;rmepumpen, Elektroautos) oder
+    erniedrigen (Deindustrialisierung)
+    <li> Batterie- und Power2gas-Speicher einer w&auml;hlbaren Leistung
+    (GW) und Speicherkapazit&auml;t (GWh) implementieren (hydraulische
+    Speicher k&ouml;nnen Sie nicht zubauen, da ausgereizt in Deutschland)  </li>
+  <li> Strategien einstellen (z.B. welche Energieart nutzen, wann
+  Speicher bef&uuml;llen oder daraus Energie entnehmen)</li>
+    <li> Und dann ein Jahr simulieren oder einen 30-Jahre Stresstest
+    machen </li> 
+  </ul>
+
+  Ist jederzeit genug Strom da? Welchen Emissionsfaktor (Gramm
+  CO<sub>2</sub>/kWh) hat der mit gegebenen Ressourcen und gegebener
+  Strategie erzielte Energiemix?
+
+  <br>
+  <hr>
+
+<a href="mailto:martin@mtreiber.de"> <i>Martin Treiber</i></a> 
+<a href="https://www.mtreiber.de/index.html" target="_top">(Homepage)</a>
+<br>
+
+  
+
+<!-- ########################################################## -->
+<!-- specific scripts; position below any simulation elements ! -->
+<!-- ########################################################## -->
+
+
+<script src="js/seedrandom.min.js"></script> <!-- random w seed debug -->
+
+<script src="js/timeView.js" type="text/javascript"></script>
+<script src="js/media.js" type="text/javascript"></script>
+<script src="js/displayText.js" type="text/javascript"></script>
+
+<!--
+<script src="js/control_gui.js"></script> 
+<script src="js/canvas_gui.js"></script> 
+<script src="js/TrafficObjects.js"></script> 
+<script src="js/TrafficLightControlEditor.js"></script> 
+<script src="js/colormanip.js"></script>
+
+<script src="js/models.js"></script> 
+<script src="js/vehicle.js"></script>
+
+<script src="js/paths.js"></script>
+<script src="js/road.js"></script>
+<script src="js/debug.js"></script>
+<script src="js/stationaryDetector.js"></script> 
+-->
+
+<!--<script src="js/onramp.js"></script> -->
+
+</body>
+</html>

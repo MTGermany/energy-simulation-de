@@ -1,0 +1,304 @@
+
+<!DOCTYPE html public>
+<html lang="en">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+
+    <link href="css/styleSliders.css" rel="stylesheet" type="text/css" ></img>
+    <link href="css/styleEnergySimulation.css" 
+          rel="stylesheet" type="text/css"></img>
+    <link rel="shortcut icon" type="image/jpg" href="./favicon.jpg">
+    </script>
+
+    
+    <title>Energie-Simulation</title>
+</head>
+
+
+<body>
+
+<div id="header"> 
+  <h1><center>Energie-Simulation 2025</center></h1>
+</div>
+
+
+<!-- ################################################# -->
+<!-- Toggle which control panel to show
+<!-- ################################################# -->
+
+  
+<div id="toggleControlDiv"><button id="toggleControlButton"
+				   onclick='toggleControl()'>
+    Gehe zu Speicher/Strategie</button>
+</div>
+
+
+<!-- ################################################# -->
+<!-- Control panel 1: supply and demand
+<!-- ################################################# -->
+
+<div id="controlSupplyDemandDiv">
+<center>
+
+  <br><br><br>
+
+  
+  <h2>Nachfrage</h2>
+
+
+<table id="mainTable" border="0" cellspacing="3vmin" cellpadding="1vmin" >
+
+  <!-- making table width wider DOS for slider -->
+  
+<tr>
+  <td>Allgemein</td>
+  <td> <input id="slider_Load" type="range" 
+              min="50" max="150" step="1"></td>
+  <td> <div id="slider_LoadStr"></div> </td> <!-- init in gui.js -->
+</tr>
+<tr>
+  <td>BEV (PKW und LKW)</td>
+  <td> <input id="slider_BEV" type="range" 
+              min="0" max="100" step="1"></td>
+  <td> <div id="slider_BEVStr"></div> </td>  <!-- init in gui.js -->
+</tr>
+<tr>
+  <td>W&auml;rmepumpen</td>
+  <td> <input id="slider_WP" type="range" 
+              min="0" max="100" step="1"></td>
+  <td> <div id="slider_WPStr"></div> </td>
+</tr>
+</table>
+
+
+<h2>Kraftwerkspark</h2>
+(Biomasse 4 MW und 2 Wasserkraft 2 MW konstant wie bisher)
+<br><br>
+
+<table id="mainTable" border="0" cellspacing="3vmin" cellpadding="1vmin" >
+
+<tr>
+  <td>PV</td>
+  <td> <input id="slider_PV" type="range" 
+              min="20" max="400" step="1"></td>
+  <td> <div id="slider_PVStr"></div> </td>
+</tr>
+
+<tr>
+  <td>Wind onshore</td>
+  <td> <input id="slider_WindOn" type="range" 
+              min="10" max="200" step="1"></td>
+  <td> <div id="slider_WindOnStr"></div> </td>
+</tr>
+
+<tr>
+  <td>Wind offshore</td>
+  <td> <input id="slider_WindOff" type="range" 
+              min="5" max="100" step="1"></td>
+  <td> <div id="slider_WindOffStr"></div> </td>
+</tr>
+
+<tr>
+  <td>Kernkraft</td>
+  <td> <input id="slider_Nuclear" type="range" 
+              min="0" max="50" step="1"></td>
+  <td> <div id="slider_NuclearStr"></div> </td>
+</tr>
+
+
+<!--
+<tr>
+  <td>Hydro</td>
+  <td> <input id="slider_Hydro" type="range" 
+              min="2" max="2.1" step="0.01"></td>
+  <td> 2 GW (fix) </td>
+</tr>
+
+
+<tr>
+  <td>Biomasse</td>
+  <td> <input id="slider_Bio" type="range" 
+              min="4" max="4.1" step="0.01"></td>
+  <td> 4 GW (fix) </td>
+</tr>
+-->
+
+
+<tr>
+  <td>Kohle</td>
+  <td> <input id="slider_Coal" type="range" 
+              min="0" max="30" step="1"></td>
+  <td> <div id="slider_CoalStr"></div> </td>
+</tr>
+
+
+<tr>
+  <td>Gas</td>
+  <td> <input id="slider_Gas" type="range" 
+              min="0" max="70" step="1"></td>
+  <td> <div id="slider_GasStr"></div> </td>
+</tr>
+
+</table>
+
+
+<div id="merkelsmileys">
+</div>
+
+<div id="raute">
+  <img src='figs/Merkelraute_Template.png' width="100%">
+</div>
+
+</center>
+</div>  <!--id="controlSupplyDemandDiv"-->
+
+  
+
+<!-- ################################################# -->
+<!-- Control panel 2: storage, import/export/strategy
+<!-- ################################################# -->
+<div id="controlStrategyDiv">
+<center>
+
+  <br><br><br>
+  
+<h2>Batterien (eta = 0.9 * 0.9 = 81%) &nbsp;
+  <a href="./infoBatt.html">(Info)</a></h2>
+  
+<table id="mainTable" border="0" cellspacing="3vmin" cellpadding="1vmin" >
+
+<tr>
+  <td>Lade-/Entladeleistung</td>
+  <td> <input id="slider_battCharge" type="range" 
+              min="0" max="200" step="10"></td>
+  <td> <div id="slider_battChargeStr"></div></td>  <!-- init in gui.js -->
+</tr>
+
+<tr>
+  <td>Kapazit&auml;t</td>
+  <td> <input id="slider_battEnergy" type="range" 
+              min="0" max="200" step="10"></td>
+  <td> <div id="slider_battEnergyStr"></div></td> 
+</tr>
+</table>
+
+
+<h2>Wasserstoff (eta = 0.6 * 0.4 = 24%) &nbsp;
+  <a href="./infoH2.html">(Info)</a></h2>
+
+<table id="mainTable" border="0" cellspacing="3vmin" cellpadding="1vmin" >
+
+<tr>
+  <td>Ladeleistung</td>
+  <td> <input id="slider_H2Charge" type="range" 
+              min="0" max="40" step="1"></td>
+  <td> <div id="slider_H2ChargeStr"></div></td> 
+</tr>
+
+<tr>
+  <td>Entladeleistung</td>
+  <td> <input id="slider_H2Discharge" type="range" 
+              min="0" max="100" step="1"></td>
+  <td> <div id="slider_H2DischargeStr"></div></td> 
+</tr>
+
+<tr>
+  <td>Kapazit&auml;t</td>
+  <td> <input id="slider_H2Energy" type="range" 
+              min="0" max="20000" step="10"></td>
+  <td> <div id="slider_H2EnergyStr"></div></td> 
+</tr>
+
+</table>
+
+
+
+<h2>Maximale Import- und Exportleistung </h2>
+
+<table id="mainTable" border="0" cellspacing="3vmin" cellpadding="1vmin" >
+<tr>
+  <td>allle Nachbarn</td>
+  <td> <input id="slider_importPow" type="range" 
+              min="0" max="15" step="1"></td>
+  <td> <div id="slider_importPowStr"></div></td> 
+</tr>
+
+</table>
+
+
+
+
+<h2>Strategie &nbsp; <a href="infoStrategy.html">(Info)</a> </h2>
+
+<select name="stragies" id="selectStrategy"
+	onchange="implementStrategy(this.selectedIndex)">
+  <option value="now">Aktuelle Strategie</option> 
+  <option value="climate">Klimaschoner</option> 
+  <option value="safety">Safety first</option>
+  <option value="economic">Sparfuchs</option>
+  <option value="green">Gr&uuml;n</option>
+</select>
+
+
+
+
+
+</center>
+</div>
+
+
+
+<!-- ################################################# -->
+<!-- Copyright/impressum                               -->
+<!-- ################################################# -->
+
+<div id="impressum">
+  <table class="infoTable"> <TR>
+    <td> <a href="impressum.html"> &copy; Martin Treiber</a></td>
+    <TD> <a href="https://github.com/movsim/traffic-simulation-de">
+          Offline: sources at GitHub</a></TD>
+  </TR></table>
+</div>
+
+<!-- ########################################################## -->
+<!-- specific scripts; position below any simulation elements ! -->
+<!-- ########################################################## -->
+
+
+<script src="js/gui.js" type="text/javascript"></script> 
+
+<script src="dataInput/wind2025.json" type="text/javascript"></script> 
+<script src="dataInput/solar2025.json" type="text/javascript"></script> 
+<script src="dataInput/supplyDemand2025.json" type="text/javascript"></script> 
+
+<script src="js/data.js" type="text/javascript">></script>
+
+<script src="js/simulation.js" type="text/javascript"></script> 
+
+<!--<script src="js/seedrandom.min.js"></script> 
+
+<script src="js/timeView.js" type="text/javascript"></script>
+<script src="js/media.js" type="text/javascript"></script>
+<script src="js/displayText.js" type="text/javascript"></script>
+-->
+
+<!--
+<script src="js/canvas_gui.js"></script> 
+<script src="js/TrafficObjects.js"></script> 
+<script src="js/TrafficLightControlEditor.js"></script> 
+<script src="js/colormanip.js"></script>
+
+<script src="js/models.js"></script> 
+<script src="js/vehicle.js"></script>
+
+<script src="js/paths.js"></script>
+<script src="js/road.js"></script>
+<script src="js/debug.js"></script>
+<script src="js/stationaryDetector.js"></script> 
+-->
+
+<!--<script src="js/onramp.js"></script> -->
+
+</body>
+</html>
