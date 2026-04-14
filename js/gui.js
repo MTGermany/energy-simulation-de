@@ -5,14 +5,29 @@
 //####################################################################
 
 
-//!!! check!
 
-// additional demand  (load) at 100% BEVs and heatpumps
+/* additional demand  (load) at 100% BEVs and heatpumps
 
-const load100_BEV=30;      // additional load [GW] if 100% BEVs trucks/cars
+"Wie gross ist der zuaetzliche Strombedarf bei 100% Waermepumpen 
+in TWh pro Jahr" 
+
+=> 150-200 TWh/a => +40% or avg 20 GW
+=> 40 GW*1/2(1+cos(phi_year-phi0)), load100_WP=40
+ 
+"Wie gross ist der zuaetzliche Strombedarf in TWh/Jahr, 
+wenn alle Fahrzeuge einschl. LKW elektrifiziert sind?"
+(nach Nachfragen)
+=> * 160 TWh/Jahr ist die technisch korrekte Zahl für den Fall, dass alle Fahrzeuge batterieelektrisch (BEV) fahren.
+ * 260 TWh/Jahr (und mehr) ist die Zahl für Szenarien mit einem signifikanten Anteil an wasserstoffbetriebenen Lkw oder E-Fuels.
+
+=> 160 TWh/a 
+=> 20 GW const., load100_BEV=20;
+*/
+
+const load100_BEV=20;      // additional load [GW] 100% BEVs trucks/buses/cars
 const load100_WP=40;       // additional winter load [GW] if 100% heatpumps
-const fBEV0=0.03;          // fraction BEV (car+truck) 2025
-const fWP0=0.08;            // fraction WP  2025
+const fBEV0=0.04;          // ADAC ("Anteil BEV Deutschland 2025")
+const fWP0=0.045;            // "Prozentualer Anteil der Waermepumpen am Gesamtbestand der Wohnungsheizungen 2025"
 
 // nominal powers pow00 in GW in 2025
 
@@ -28,13 +43,15 @@ const pow00_PV=102.5*70.6/87.5; // avg eff. nom power PV (2025) OK
 const pow00_WindOn=62.8;    // Nom eff power wind onshore (2025) OK
 const pow00_WindOff=9.4;   // Nom eff power wind offshore (2025) OK
 const pow00_Coal=31;        // Nominal power coal (2025) OK
-const pow00_Gas=37;         // Nominal power gas (2025) OK
+const pow00_Gas=35.5;         // Nominal power gas (2025) google, OK
 const pow00_Nuclear=0;      // Nominal power nuclear (2025) OK ;-(
-const pow_runningHydro=1.1; // assumed to be constant, electricitymaps OK 
-const pow_biomass=5;        // assumed to be constant, electricitymaps OK
+const pow_runningHydro=2.0; // assumed to be constant, google OK
+const pow_biomass=4.8;        // assumed to be constant, google OK
+
+// storage properties
 
 const battCharge0=10;     // charge and discharge power [GW] batteries (2025)
-const battEnergy0=40;     // storage energy [GWh] (2025)
+const battEnergy0=25;     // energy-charts.info
 const battEta=0.8;        // roundtrip (electricity-electricity) efficiency 
 
 const hydroCharge0=9.4;    // max charge and discharge power [GW] (OK, const)
@@ -43,12 +60,12 @@ const hydroEta=0.8;        // roundtrip (electricity-electricity) efficiency
 
 const H2Charge0=2;       // H2 (2025)  (do not use as reference)
 const H2Discharge0=5;   
-const H2Energy0=400;     
+const H2Energy0=10;       // not yet any industrial scale storage    
 const H2eta=0.24;     
 
 // maximum import/export 2025
 
-const importPow0=12;
+const importPow0=13;
 
 
 //####################################################################

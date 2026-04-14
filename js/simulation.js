@@ -3,37 +3,38 @@
 
 /* definied in GUI:
 
-// additional demand  (load) at 100% BEVs and heatpumps
+// additional load   at 100% BEVs and heatpumps
 
-const load100_BEV=30;      // additional load [GW] if 100% BEVs trucks/cars
+const load100_BEV=20;      // additional load [GW] 100% BEVs trucks/buses/cars
 const load100_WP=40;       // additional winter load [GW] if 100% heatpumps
+const fBEV0=0.04;          // ADAC ("Anteil BEV Deutschland 2025")
+const fWP0=0.045;            // "Prozentualer Anteil der Waermepumpen am Gesam
 
 // nominal supply powers pow00_* in GW in 2025
 
-const pow00_PV=107;         // Nominal power PV (2025)
-const pow00_WindOn=64;     // Nominal power wind onshore (2025)
-const pow00_WindOff=9;    // Nominal power wind offshore (2025)
-const pow00_Coal=15;       // Nominal power coal (2025)
-const pow00_Gas=35;        // Nominal power gas (2025)
-const pow00_Nuclear=0;     // Nominal power nuclear (2025)
-const pow_runningHydro=1.1; // assumed to be constant, electricitymaps OK 
-const pow_biomass=5;        // assumed to be constant, electricitymaps OK
+const pow00_PV=102.5*70.6/87.5; // avg eff. nom power PV (2025) OK
+const pow00_WindOn=62.8;    // Nom eff power wind onshore (2025) OK
+const pow00_WindOff=9.4;   // Nom eff power wind offshore (2025) OK
+const pow00_Coal=31;        // Nominal power coal (2025) OK
+const pow00_Gas=35.5;         // Nominal power gas (2025) google, OK
+const pow00_Nuclear=0;      // Nominal power nuclear (2025) OK ;-(
+const pow_runningHydro=2.0; // assumed to be constant, google OK
+const pow_biomass=4.8;        // assumed to be constant, google OK
 
 // storage properties
 
 const battCharge0=10;     // charge and discharge power [GW] batteries (2025)
-const battEnergy0=40;     // storage energy [GWh] (2025)
+const battEnergy0=25;     // energy-charts.info
 const battEta=0.8;        // roundtrip (electricity-electricity) efficiency 
 
-const hydroCharge0=6;     // charge and discharge power [GW] hydro (const)
-const hydroEnergy0=40;     // storage energy [GWh]
+const hydroCharge0=9.4;    // max charge and discharge power [GW] (OK, const)
+const hydroEnergy0=40;     // storage energy [GWh] (const)
 const hydroEta=0.8;        // roundtrip (electricity-electricity) efficiency 
 
-const H2Charge0=0.5;      // H2 (2025)  (do not use as reference)
+const H2Charge0=2;       // H2 (2025)  (do not use as reference)
 const H2Discharge0=5;   
 const H2Energy0=400;     
 const H2eta=0.24;     
-
 // maximum import/export 2025
 
 const importPow0=12;
@@ -68,12 +69,12 @@ supplydemanddata2025
 
 */
 
-const mismatch_maxImport=-48; // [GW] w/resp to minClassic, RE, storage
-const mismatch_maxExport=20; // [GW] w/resp to minClassic, RE, storage
+const mismatch_maxImport=-45; // [GW] w/resp to minClassic, RE, storage
+const mismatch_maxExport=30; // [GW] w/resp to minClassic, RE, storage
 const gas_minRelPow=0.1;
 const gas_av=0.9;         // availability
-const coal_minRelPow=0.1;
-const coal_av=0.85;
+const coal_minRelPow=0.20;
+const coal_av=0.9;
 const nuclear_minRelPow=0.6;
 const nuclear_av=0.9;
 const solar_av=0.82; // also due to suboptimal alignment
@@ -122,6 +123,29 @@ const year_dphi=2*Math.PI/12; // coldest at end of January
 // 0=M, 1=S, 2=NW, 3=NE, 4=SW, 5=SE
 
 const frac_solar=[19./109, 27./109, 21./109, 14./109, 14./109, 14./109];
+
+
+// emission factors [g/kWh]
+// github.com/electricitymaps/electricitymaps-contrib/wiki/EU-emission-factors
+// app.electricitymaps.com/map/zone/DE/5y/yearly auf Quellen hovern
+// WATCH OUT!
+// as standard settings, imports/exports are included as mix
+// at electricitymaps => at 342 g/kWh are displayed,
+// this also agrees with many publications
+// when switching off flows (right gear symbol) 371 g/kWh are displayed
+// OK also with simulated 166 Mio t at 370 g/kWh
+// (published load 168 t at 371 g/kWh)
+
+const e_nuclear=5;
+const e_solar=35;
+const e_biomass=230;
+const e_runningHydro=11;
+const e_windOn=13;
+const e_windOff=13;
+const e_gas=494;  // Pipelinegas 400, LPG 600
+const e_coal=1130;
+
+
 
 
 
@@ -345,12 +369,12 @@ simulation.prototype.supply=function(){
 	  + this.hourlymix.H2);
 }
 
-simulation.prototype.demand=function(){
-  return this.hourlymix.demand;
+simulation.prototype.load=function(){
+  return this.hourlymix.load;
 }
 
 simulation.prototype.mismatch=function(){
-  return this.supply()-this.demand();
+  return this.supply()-this.load();
 }
 
 
@@ -366,8 +390,8 @@ simulation.prototype.update=function(it){
   var maxNuclear=nuclear_av*pow0_Nuclear;
   var minGas= gas_av*gas_minRelPow*pow0_Gas;
   var maxGas= gas_av*pow0_Gas;
-  var minCoal= gas_av*gas_minRelPow*pow0_Coal;
-  var maxCoal= gas_av*pow0_Coal;
+  var minCoal= coal_av*coal_minRelPow*pow0_Coal;
+  var maxCoal= coal_av*pow0_Coal;
 
 
 
@@ -376,9 +400,9 @@ simulation.prototype.update=function(it){
   
   this.hourlymix={
     "time": winddata[it].time,
-    "demand": 0.001*fLoad*supplydemanddata2025[it].load
-      + fBEV*load100_BEV
-      + fWP*load100_WP*this.factorWP(it),  // demand 2025 in GW
+    "load": 0.001*fLoad*supplydemanddata2025[it].load
+      + (fBEV-fBEV0)*load100_BEV
+      + (fWP-fWP0)*load100_WP*this.factorWP(it),  // load 2025 in GW
     "loadShedding": 0,
     "solar": 0, 
     "windOn": 0,
@@ -572,7 +596,7 @@ simulation.prototype.update=function(it){
     //console.log("(1): mismatch=",this.mismatch());
 
 
-    // (4) import/export
+    // (2) import/export
 
     result=this.importExport(it); // updates this.hourlymix.importHrly
     if(result){
@@ -583,9 +607,9 @@ simulation.prototype.update=function(it){
       }
       return true;
     }
-    //console.log("(4): mismatch=",this.mismatch());
+    //console.log("(2): mismatch=",this.mismatch());
 
-    // (2) charge/discharge batteries and pump hydro
+    // (3) charge/discharge batteries and pump hydro
     // changes this.storage and this.hourlymix
     
     var result=this.useHydroBattStorage(); // changes this.storage
@@ -599,9 +623,9 @@ simulation.prototype.update=function(it){
       return true;
     }
     
-    //console.log("(2): mismatch=",this.mismatch());
+    //console.log("(3): mismatch=",this.mismatch());
 
-    // (3) charge/discharge  H2
+    // (4) charge/discharge  H2
 
     //if(this.mismatch()>0){ // if charge but do not discharge
     if(true){
@@ -615,13 +639,16 @@ simulation.prototype.update=function(it){
         return true;
       }
     }
-    //console.log("(3): mismatch=",this.mismatch());
+    //console.log("(4): mismatch=",this.mismatch());
 
 
 
 
+    // ############################################################
     // (5) -(6) path if still too much energy
+    // ############################################################
 
+    
     // (5) curtail supply power windOff, windOn, solar, nuclear
 
     /*
@@ -746,23 +773,16 @@ simulation.prototype.update=function(it){
       return true;
     }
 
-    // (7-9): path for too little supply
+    // ############################################################
+    // (7-9): path for too little supply (mismatch should be <0)
+    // ############################################################
 
-    // add gas
+    if(this.mismatch()>0){
+      console.log("it=",it," path (7-9): error: mismatch ",this.mismatch(),
+		  " should be <0 at this point!");
+    }
+
     
-    if(this.mismatch()<-(maxGas-minGas)){
-      this.hourlymix.gas=maxGas;
-    }
-    else{
-      this.hourlymix.gas -= this.mismatch();
-      if(Math.abs(this.mismatch())>1e-6){
-	console.log("sim.update, it=",it,
-		    " exiting in (7) after adding gas",
-		    "this.mismatch()=",this.mismatch());
-      }
-      return true;
-    }
-
     //add H2 discharge (only if not charged/discharged in step 3)
 
     if(false){
@@ -778,24 +798,64 @@ simulation.prototype.update=function(it){
     }
 
 
-    // add coal
+   /*
+
+    // add gas before coal (ecofriendly)
     
-    if(this.mismatch()<-(maxCoal-minCoal)){
-      this.hourlymix.coal=maxCoal;
+    if(this.mismatch()<-(maxGas-minGas)){
+      this.hourlymix.gas=maxGas;
     }
     else{
-      this.hourlymix.coal -= this.mismatch;
+      this.hourlymix.gas -= this.mismatch();
       if(Math.abs(this.mismatch())>1e-6){
 	console.log("sim.update, it=",it,
-		    " exiting in (7) after adding coal",
+		    " exiting in (7) after adding gas",
 		    "this.mismatch()=",this.mismatch());
       }
       return true;
     }
 
+    // add coal
+
+
+    if(this.mismatch()<-(maxCoal-minCoal)){
+      this.hourlymix.coal=maxCoal;
+    }
+    else{
+      this.hourlymix.coal -= this.mismatch();
+      if(Math.abs(this.mismatch())>1e-6){
+	console.log("sim.update, it=",it,
+		    " exiting in (8) after adding coal",
+		    "this.mismatch()=",this.mismatch());
+      return true;
+    }
+   */
+
+    // (7-8) add gas and coal in availability ratio 2:1 (Germany 2025)
+    
+    if(-this.mismatch()>(maxGas-minGas+maxCoal-minCoal)){
+      this.hourlymix.gas=maxGas;
+      this.hourlymix.coal=maxCoal;
+    }
+    else{
+      let r=-this.mismatch()/(maxGas-minGas+maxCoal-minCoal);
+      this.hourlymix.gas=(1-r)*minGas+r*maxGas;
+      this.hourlymix.coal=(1-r)*minCoal+r*maxCoal;
+      
+      this.hourlymix.gas -= this.mismatch();
+      if(Math.abs(this.mismatch())>1e-6){
+	console.log("sim.update, it=",it,
+		    " exiting in (7-8) after adding gas,coal simultaneously",
+		    "this.mismatch()=",this.mismatch());
+      }
+      return true;
+    }
+
+    
+
     // (9) prevent dunkelflaute blackout or raise dunkelflaute event
 
-    if (this.mismatch()<-loadSheddingFactor*this.hourlymix.demand){
+    if (this.mismatch()<-loadSheddingFactor*this.hourlymix.load){
       this.hourlymix.loadShedding=-this.mismatch();   
       console.log("(9) it=",it," blackout due to load shedding > maximum factor ",
 		  loadSheddingFactor);
@@ -811,6 +871,138 @@ simulation.prototype.update=function(it){
 
 
 }
+
+
+
+function displayResultsText(){
+
+  let W_solar=0; let W_solar_data=0;
+  let W_windOn=0; let W_windOn_data=0;
+  let W_windOff=0; let W_windOff_data=0;
+  let W_import=0; let W_import_data=0;
+  let W_export=0; let W_export_data=0;
+  let W_gas=0; let W_gas_data=0;
+  let W_coal=0; let W_coal_data=0;
+  let W_load=0;
+  let W_nuclear=0;
+
+  
+  let W_biomass=8760*pow_biomass;
+  let W_runningHydro=8760*pow_runningHydro;
+  
+  for (let it=0; it<nt; it++){
+    W_load += energymix[it].load;
+    W_nuclear += energymix[it].nuclear;
+    W_solar += energymix[it].solar;
+    W_solar_data += 0.001*supplydemanddata2025[it].PV;
+    W_windOn += energymix[it].windOn;
+    W_windOn_data += 0.001*supplydemanddata2025[it].w_on;
+    W_windOff += energymix[it].windOff;
+    W_windOff_data += 0.001*supplydemanddata2025[it].w_off;
+    W_import += Math.max(0,+energymix[it].importHrly);
+    W_export += Math.max(0,-energymix[it].importHrly);
+    //if(isNaN(W_import)){console.log("it=",it," error! W_import is NaN!");}
+    W_import_data += Math.max(0,-0.001*supplydemanddata2025[it].export);
+    W_export_data += Math.max(0,+0.001*supplydemanddata2025[it].export);
+    W_gas += energymix[it].gas;
+    W_gas_data += 0.001*supplydemanddata2025[it].gas;
+    W_coal += energymix[it].coal;
+//    if(isNaN(W_coal)){console.log("it=",it," W_coal is NaN!");}
+    W_coal_data +=
+      0.001*(supplydemanddata2025[it].bk+supplydemanddata2025[it].sk);
+
+    
+
+  }
+
+  let W_total= W_nuclear+W_solar+W_windOn+W_windOff+W_gas+W_coal
+      +W_biomass+W_runningHydro;
+
+  let W_CO2=W_gas+W_coal;
+
+  let W_green=W_CO2-W_total;
+
+  
+  // availabilities ("capacity factor" OK, "Kapazitaetsfaktor" OK)
+  
+  let solar_av=W_solar/(nt*pow0_PV);
+  let solar_av_data=W_solar_data/(nt*pow0_PV);
+  let windOn_av=W_windOn/(nt*pow0_WindOn);
+  let windOn_av_data=W_windOn_data/(nt*pow0_WindOn);
+  let windOff_av=W_windOff/(nt*pow0_WindOff);
+  let windOff_av_data=W_windOff_data/(nt*pow0_WindOff);
+
+
+  // emission factors w/o additional emissions of H2 technology
+  // CO2 in 
+  let emissionCO2=e_nuclear*W_nuclear+e_solar*W_solar
+      + e_biomass*W_biomass+e_runningHydro*W_runningHydro
+      + e_windOn*W_windOn+e_windOff*W_windOff
+      + e_gas*W_gas+e_coal*W_coal;
+  
+  let emissionFactor=emissionCO2/W_total;
+
+
+  console.log("Energies from ",nt," days since 2025-01-01");
+  console.log("W_solar=",W_solar," W_solar_data=",W_solar_data);
+  console.log("W_windOn=",W_windOn," W_windOn_data=",W_windOn_data);
+  console.log("W_windOff=",W_windOff," W_windOff_data=",W_windOff_data);
+  console.log("W_import=",W_import," W_import_data=",W_import_data);
+  console.log("W_export=",W_export," W_export_data=",W_export_data);
+  console.log("W_gas=",W_gas," W_gas_data=",W_gas_data);
+  console.log("W_coal=",W_coal," W_coal_data=",W_coal_data);
+  console.log("W_biomass=",W_biomass);
+  console.log("W_runningHydro=",W_runningHydro);
+  console.log("total w/o import/export:",W_total);
+  console.log("total with import-export:",W_total+W_import-W_export,
+	      " W_load (demand+losses+internal)=",W_load);
+
+  console.log("\n\nAvailabiities:",
+	      "\n solar_av=",solar_av," solar_av_data=",solar_av_data,
+	      "\n windOn_av=",windOn_av," windOn_av_data=",windOn_av_data,
+	      "\n windOff_av=",windOff_av," windOff_av_data=",windOff_av_data);
+
+  console.log("\n\nCO2:",
+	      "\n Total CO2 emissions [Mio t]: ",
+	      (1e-6*emissionCO2).toFixed(0),
+	      "\n Carbon footprint [g/kWh]:",emissionFactor.toFixed(0));
+
+} // displayResultsText
+
+
+function displayResultsRegions(){
+  let W_solarRegions=[0,0,0,0,0,0];
+  let W_windRegions=[0,0,0,0,0,0];
+
+  for (let it=0; it<nt; it++){
+    for(let i=0; i<6; i++){
+      W_solarRegions[i] +=solarRegions[it]["region"+i];
+      W_windRegions[i] +=windRegions[it]["region"+i];
+    }
+  }
+
+  console.log("Regional sun availabiities (0=M 1=S 2=NW 3=NE 4=SW 5=SE)");
+  for(let i=0; i<6; i++){
+    let av=W_solarRegions[i]/(nt*pow0_PV*frac_solar[i]);
+    console.log("solar availability region",i,": ",av);
+  }
+
+  console.log("Regional wind availabiities 0=M 1=S 2=NW 3=NE 4=offN 5=offE");
+  for(let i=0; i<4; i++){
+    let av=W_windRegions[i]/(nt*pow0_WindOn*frac_onshore[i]);
+    console.log("onshore wind availability region",i,": ",av);
+  }
+  for(let i=0; i<2; i++){
+    let av=W_windRegions[i+4]/(nt*pow0_WindOff*frac_offshore[i]);
+    console.log("offshore wind availability region",i+4,": ",av);
+  }
+}
+
+
+
+// ##############################################################
+// top-level simulation
+// ##############################################################
 
 //let nt=2;
 //let nt=4000;
@@ -830,142 +1022,22 @@ for(let it=0; (it<nt)&& noBreakdown; it++){
   storage[it]=sim.cloneStorage();
   solarRegions[it]=sim.hourlySolarRegions;
   windRegions[it]=sim.hourlyWindRegions;
-
-
-
-  // check balance
-
-  if(it>0){
-    
-    var supplyPowerplantsEco=energymix[it].solar
-	+ energymix[it].windOn
-        + energymix[it].windOff
-        + energymix[it].runningHydro
-        + energymix[it].nuclear;
-
-
-    var supplyPowerplantsCO2= energymix[it].biomass
-        + energymix[it].coal
-	+ energymix[it].gas;
-
-    var supplyImport=energymix[it].importHrly
-
-    var supplyStorage=energymix[it].pumpHydro
-	+ energymix[it].batt
-	+ energymix[it].H2;
-    
-    var demand=energymix[it].demand;
-
-    var balance=supplyPowerplantsEco+supplyPowerplantsCO2
-	+supplyImport+supplyStorage-demand;
-    
-
-    //if((it>3872)&&(it<3876)){
-    if(false){
-    console.log("\nit=",it," check balance:",
-		"\n  supplyPowerplantsEco=",supplyPowerplantsEco,
-		"\n  supplyPowerplantsCO2=",supplyPowerplantsCO2,
-		"\n  supplyImport=",supplyImport,
-		"\n  supplyStorage=",supplyStorage,
-		"\n  demand=",demand,
-		"\n  balance=",balance);
-    }
-  }
-
 }
 
-
-if(false){
-  for (let it=Math.max(0,nt-180); it<nt; it++){
-    console.log("it=",it,
-		" solar=",(1000*energymix[it].solar).toFixed(0),
-		" data solar=",supplydemanddata2025[it].PV.toFixed(0),
-		" windOn=",(1000*energymix[it].windOn).toFixed(0),
-		" data windOn=",supplydemanddata2025[it].w_on.toFixed(0),
-		" windOff=",(1000*energymix[it].windOff).toFixed(0),
-		" data windOff=",supplydemanddata2025[it].w_off.toFixed(0)
-	       );
-  }
+if(!noBreakdown){
+  console.log("Warning! Electricity system broke down during simulation!");
 }
 
-if(false){
-  for (let it=Math.max(0,nt-180); it<nt; it++){
-    console.log("it=",it,
-		" import=",(1000*energymix[it].importHrly).toFixed(0),
-		" data import=",-supplydemanddata2025[it].export.toFixed(0)
-	       );
-  }
-}
+console.log("\n\n");
+displayResultsRegions();
+console.log("\n\n");
+
+displayResultsText();
+console.log("\n\n");
 
 
-if(true){
-  let W_solar=0; let W_solar_data=0;
-  let W_windOn=0; let W_windOn_data=0;
-  let W_windOff=0; let W_windOff_data=0;
-  let W_import=0; let W_import_data=0;
-  let W_export=0; let W_export_data=0;
-
-  let W_solarRegions=[0,0,0,0,0,0];
-  let W_windRegions=[0,0,0,0,0,0];
   
-  for (let it=0; it<nt; it++){
-    W_solar += energymix[it].solar;
-    W_solar_data += 0.001*supplydemanddata2025[it].PV;
-    W_windOn += energymix[it].windOn;
-    W_windOn_data += 0.001*supplydemanddata2025[it].w_on;
-    W_windOff += energymix[it].windOff;
-    W_windOff_data += 0.001*supplydemanddata2025[it].w_off;
-    W_import += Math.max(0,+energymix[it].importHrly);
-    W_export += Math.max(0,-energymix[it].importHrly);
-    //if(isNaN(W_import)){console.log("it=",it," error! W_import is NaN!");}
-    W_import_data += Math.max(0,-0.001*supplydemanddata2025[it].export);
-    W_export_data += Math.max(0,+0.001*supplydemanddata2025[it].export);
-    for(let i=0; i<6; i++){
-      W_solarRegions[i] +=solarRegions[it]["region"+i];
-      W_windRegions[i] +=windRegions[it]["region"+i];
-    }
-  }
-
-  let solar_av=W_solar/(nt*pow0_PV);
-  let solar_av_data=W_solar_data/(nt*pow0_PV);
-
-  let windOn_av=W_windOn/(nt*pow0_WindOn);
-  let windOn_av_data=W_windOn_data/(nt*pow0_WindOn);
-  let windOff_av=W_windOff/(nt*pow0_WindOff);
-  let windOff_av_data=W_windOff_data/(nt*pow0_WindOff);
-  let import_av=W_import/(nt);
-  let import_av_data=W_import_data/(nt);
-
-  console.log("VRE balance from ",nt," days since 2025-01-01");
-  console.log("W_solar=",W_solar," W_solar_data=",W_solar_data);
-  console.log("W_windOn=",W_windOn," W_windOn_data=",W_windOn_data);
-  console.log("W_windOff=",W_windOff," W_windOff_data=",W_windOff_data);
-  console.log("W_import=",W_import," W_import_data=",W_import_data);
-  console.log("W_export=",W_export," W_export_data=",W_export_data);
-
-  console.log("Availabiities:",
-	      "\nsolar_av=",solar_av," solar_av_data=",solar_av_data,
-	      "\nwindOn_av=",windOn_av," windOn_av_data=",windOn_av_data,
-	      "\nwindOff_av=",windOff_av," windOff_av_data=",windOff_av_data);
-
-  console.log("Regional sun availabiities (0=M 1=S 2=NW 3=NE 4=SW 5=SE)");
-  for(let i=0; i<6; i++){
-    let av=W_solarRegions[i]/(nt*pow0_PV*frac_solar[i]);
-    console.log("solar availability region",i,": ",av);
-  }
-
-  console.log("Regional wind availabiities 0=M 1=S 2=NW 3=NE 4=offN 5=offE");
-  for(let i=0; i<4; i++){
-    let av=W_windRegions[i]/(nt*pow0_WindOn*frac_onshore[i]);
-    console.log("onshore wind availability region",i,": ",av);
-  }
-  for(let i=0; i<2; i++){
-    let av=W_windRegions[i+4]/(nt*pow0_WindOff*frac_offshore[i]);
-    console.log("offshore wind availability region",i+4,": ",av);
-  }
-      
-}
-
-console.log("storage=",storage,"\nenergymix=",energymix);
-console.log("solarRegions=",solarRegions);
-console.log("windRegions=",windRegions);
+//console.log("storage=",storage,"\nenergymix=",energymix);
+//console.log("solarRegions=",solarRegions);
+//console.log("windRegions=",windRegions);
+console.log("energymix=",energymix);
