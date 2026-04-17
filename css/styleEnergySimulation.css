@@ -138,9 +138,9 @@ table.infoTable td {
  
 #header{
   position: absolute;
-  top: 0vmin;
-  left: 20vw;
-  width:  60vw; 
+  top: -3vh;
+  left: 10vw;
+  /*width:  60vw; */
   height: 6vmin;
   /* font-size: 2.9vmin; size and weight overridden by h1*/
   padding-left: 0.5em;
@@ -165,12 +165,12 @@ table.infoTable td {
   z-index: 4; /* the higher the integer, the more on top */
 }
 
-#controlSupplyDemandDiv{ /* Also contains info text for non-BaWue simulations!*/
+#controlSupplyDemandDiv{ 
   position: absolute;
   top: 5vmin;
   height: 88vmin;
   left: 2vmin;
-  width: 35vw;
+  width: 38.5vw;
   background-color: rgb(230,230,255);
   display: block;
   z-index: 1; /* the higher the integer, the more on top */
@@ -181,7 +181,7 @@ table.infoTable td {
   top: 5vmin;
   height: 88vmin;
   left: 2vmin;
-  width: 35vw;
+  width: 38.5vw;
   background-color: rgb(230,230,255);
   display: none;  z-index: 3; /* the higher the integer, the more on top */
 }
@@ -205,18 +205,50 @@ table.infoTable td {
 }
 
 
-/* (2) landscape: the simulation canvas */
+/* (3) landscape: the simulation canvas */
 
-#contents{
+#areaGraphics1{
   position: absolute;
   left:   40vw;
-  top:   0vmin;
-  width:  60vmin; 
-  height: 100vmin;
+  top:   0vh;
+  width:  60vw; 
+  height: 47vh;
   margin-right: 0vw;
   margin-left: 0vw;
+  background-color: rgb(230,255,255);
+  /*display: inline-block;
+    position: relative;
+    width: 100%;*/
+    z-index: 0;
+}
+
+#areaGraphics2{
+  position: absolute;
+  left:   40vw;
+  top:   50vh;
+  width:  60vw; 
+  height: 47vh;
+  margin-right: 0vw;
+  margin-left: 0vw;
+  background-color: rgb(255,225,225);
   z-index: 1;
 }
+
+
+#clickInfo {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 8px;
+      font-size: 12px;
+      display: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+
+
+
+
 
 
 /* (2a) landscape: position of the info button */
