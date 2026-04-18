@@ -1,4 +1,13 @@
-let chart;
+Chart.defaults.font.size = Math.round(2*vmin);
+Chart.maintainAspectRatio= false;
+Chart.responsive=true;
+Chart.animation=false;
+
+let chart1; // 1-year or custom display energymix
+let chart2; // 14-day moving window energymix
+let chart3; // 1-year or custom display storage 
+let chart4; // 14-day moving window storage
+
 
 // ----------------------------
 // Example data
@@ -63,6 +72,7 @@ function ds(label, data, color, stack = "default", fill = true) {
 // ----------------------------
 // Build datasets
 // ----------------------------
+
 function buildDatasets() {
 
   function mapData(key, fn = v => v) {
@@ -90,11 +100,11 @@ function buildDatasets() {
     ds("H2 Storage (-)", mapData("H2storage", clampNegative), "#bcbd22", "neg")
   ];
 
-  // Total line
+  // Total line //!! bugfix*=1.02, charts does not draw on top althhough last
   const total = obj.map(d => ({
     x: d.timeUTC_ms,
     y:
-      clampPositive(d.coal) +
+    1.02*(clampPositive(d.coal) +  
       clampPositive(d.gas) +
       clampPositive(d.biomass) +
       clampPositive(d.runningHydro) +
@@ -102,37 +112,36 @@ function buildDatasets() {
       clampPositive(d.solar) +
       clampPositive(d.hydroStorage) +
       clampPositive(d.batteryStorage) +
-      clampPositive(d.H2storage)
+	  clampPositive(d.H2storage))
   }));
 
   datasets.push({
     label: "Total",
     data: total,
     borderColor: "#000",
-    borderWidth: 2,
+    borderWidth: 3,
     fill: false,
     pointRadius: 0
   });
   console.log("datsets=",datasets);
 
   return datasets;
+  console.log(datasets);
 }
 
 // ----------------------------
 // Chart init (STATIC)
 // ----------------------------
 function initChart() {
+
   const ctx = document.getElementById('chart1').getContext('2d');
-  chart = new Chart(ctx, {
+  chart1 = new Chart(ctx, {
     type: "line",
     data: {
       datasets: buildDatasets()
     },
     options: {
-      responsive: true,
-      animation: false,
-      maintainAspectRatio: false,
-      events: ['click'],   // only clicks
+       events: ['click'],   // only clicks
 
       interaction: {
         mode: 'index',
@@ -143,7 +152,6 @@ function initChart() {
         tooltip: { enabled: false },
         legend: { display: true }
       },
-
       scales: {
         x: {
           type: 'linear',
@@ -162,7 +170,7 @@ function initChart() {
     // ----------------------------
 	      if (rangeHours <= 48) {
 		return d.toLocaleString('de-DE', {
-		  //timeZone: "Europe/Berlin",
+                  //day: '2-digit',
 		  hour: '2-digit',
                  //minute: '2-digit'
 		});
@@ -196,7 +204,7 @@ function initChart() {
           stacked: true,
           title: {
             display: true,
-            text: "Power [GW]"
+            text: "Leistung [GW]"
           }
         }
       }
@@ -204,8 +212,9 @@ function initChart() {
   });
 
   setupClick();
-  console.log("leaving initChart(), chart=",chart);
-}
+  console.log("leaving initChart(), chart1=",chart1);
+}  // initChart
+
 
 // ----------------------------
 // Click popup
@@ -216,7 +225,7 @@ function setupClick() {
 
   document.getElementById("chart1").onclick = function(evt) {
 
-    const points = chart.getElementsAtEventForMode(
+    const points = chart1.getElementsAtEventForMode(
       evt, 'index', { intersect: false }, true
     );
 
@@ -236,10 +245,14 @@ function setupClick() {
       }
     }
 
+    let fontsize=(Math.round(1.5*vmin)).toString();
     box.innerHTML = html;
     box.style.left = evt.pageX + 10 + "px";
     box.style.top = evt.pageY + 10 + "px";
     box.style.display = "block";
+    //box.style.fontsize= fontsize; // DOS; set in .css
+    console.log("fontsize=",fontsize," box.style=",box.style);
+
   };
 }
 
@@ -247,4 +260,4 @@ function setupClick() {
 // main
 
 
-initChart();
+//initChart();

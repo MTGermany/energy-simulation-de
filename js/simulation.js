@@ -757,7 +757,7 @@ simulation.prototype.update=function(it){
 
 
 
-function displayResultsText(){
+function displayResultsMain(){
 
   let W_solar=0; let W_solar_data=0;
   let W_windOn=0; let W_windOn_data=0;
@@ -883,45 +883,81 @@ function displayResultsRegions(){
   }
 }
 
-
+function displayResultsStorage(){
+  console.log("to do");
+}
 
 // ##############################################################
 // top-level simulation
 // ##############################################################
 
+
+function runSimulation(nt){
+  energymix=[]; storage=[]; solarRegions=[]; windRegions=[];
+
+  var sim=new simulation(1);
+
+  var noBreakdown=true;
+  sim.init(); // set up storage to half full
+
+  console.log("=================================================\n");
+  for(let it=0; (it<nt)&& noBreakdown; it++){
+    noBreakdown=sim.update(it);
+  
+    energymix[it]=sim.hourlymix;
+    storage[it]=sim.cloneStorage();
+    solarRegions[it]=sim.hourlySolarRegions;
+    windRegions[it]=sim.hourlyWindRegions;
+  }
+
+  if(!noBreakdown){
+    console.log("Warning! Electricity system broke down during simulation!");
+  }
+}
+
+
+function displayText(){
+  console.log("\n\n");
+ // displayResultsRegions();
+ // console.log("\n\n");
+
+  displayResultsMain();
+  console.log("\n\n");
+
+  displayResultsStorage();
+  //console.log("\n\n");
+  
+}
+
+function displayGraphics(){
+  initChart();
+}
+
+function updateGraphics(chart){
+  chart.data.datasets=buildDatasets();
+  chart.update();
+}
+
+
+
+// #################################################################
+// main (debug, later started by buttons on the left panel)
+// #################################################################
+
 //let nt=2;
 //let nt=4000;
 //let nt=290;
+
 let nt=8760;
+runSimulation(nt);
+displayText();
+displayGraphics();
 
-var sim=new simulation(1);
+console.log("before update");
+runSimulation(500);
+updateGraphics(chart1); // (energymix,chart1)  (parameters (data,chart))
+console.log("after update");
 
-var noBreakdown=true;
-sim.init(); // set up storage to half full
-
-console.log("=================================================\n");
-for(let it=0; (it<nt)&& noBreakdown; it++){
-  noBreakdown=sim.update(it);
-  
-  energymix[it]=sim.hourlymix;
-  storage[it]=sim.cloneStorage();
-  solarRegions[it]=sim.hourlySolarRegions;
-  windRegions[it]=sim.hourlyWindRegions;
-}
-
-if(!noBreakdown){
-  console.log("Warning! Electricity system broke down during simulation!");
-}
-
-console.log("\n\n");
-displayResultsRegions();
-console.log("\n\n");
-
-displayResultsText();
-console.log("\n\n");
-
-
-  
 //console.log("storage=",storage,"\nenergymix=",energymix);
 //console.log("solarRegions=",solarRegions);
 //console.log("windRegions=",windRegions);

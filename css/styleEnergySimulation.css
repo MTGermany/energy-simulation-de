@@ -240,7 +240,7 @@ table.infoTable td {
       background: white;
       border: 1px solid #ccc;
       padding: 8px;
-      font-size: 12px;
+      font-size: 1.5vmin;
       display: none;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
