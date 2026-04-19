@@ -915,6 +915,78 @@ function runSimulation(nt){
   }
 }
 
+function calcClippedTimeseries(daymin, daymax){
+  let energymixClipped=[];
+  let storageClipped=[];
+  let itmin=Math.max(24*daymin,0);
+  let itmax=Math.min(24*daymax, energymix.length-1);
+  for(let it=itmin; it<itmax; it++){
+    energymixClipped.push(energymix[it]);
+    storageClipped.push(storage[it]);
+  }
+  return [energymixClipped, storageClipped];
+}
+
+
+			
+function calcDailyTimeseries(){
+  let energymixDaily=[];
+  let storageDaily=[];
+  let nt=energymix.length;
+  if(storage.length !=nt){
+    console.log("error: storage.length ",storage.length,
+		" should be equal to nt=",nt);
+    return [energymixDaily, storageDaily];
+  }
+
+  let keysMix=["load", "nuclear", "solar", "windOn", "windOff", "importHrly","batt", "pumpHydro", "H2", "biomass", "gas", "coal"];
+
+  let keysStorage=["batt", "pumpHydro", "H2"];
+  
+  for(let iday=0; iday<Math.floor(nt/24); iday++){
+
+    // js cannot "extend" objects simultaneously over 2 levels
+    energymixDaily[iday]={};
+    storageDaily[iday]={};
+    
+
+    for(let ikey=0; ikey<keysMix.length; ikey++){ // for..in does not work!
+      let key=keysMix[ikey];
+      energymixDaily[iday][key]=0;
+    }
+    for(let ikey=0; ikey<keysStorage.length; ikey++){ 
+      let key=keysStorage[ikey];
+      storageDaily[iday][key]=0;
+    }
+    
+    energymixDaily[iday].timeUTC_ms=energymix[24*iday].timeUTC_ms;
+    //console.log("iday=",iday," energymixDaily[iday]=",energymixDaily[iday]);
+    //console.log("iday=",iday," energymix[24*iday]=",energymix[24*iday]);
+    
+    for(let ihour=0; ihour<23; ihour++){
+      let it=24*iday+ihour;
+      if(it>=energymix.length){console.log("error: nt=",nt," ihour=",ihour," it>=itmax");}
+      for(let ikey=0; ikey<keysMix.length; ikey++){
+	let key=keysMix[ikey];
+	energymixDaily[iday][key]+=energymix[it][key]/24;
+      }
+      for(let ikey=0; ikey<keysStorage.length; ikey++){
+	let key=keysStorage[ikey];
+	storageDaily[iday][key]+=storage[it][key]/24;
+      }
+    }
+
+
+    //console.log("iday=",iday," energymixDaily[iday]=",energymixDaily[iday]);
+    //console.log("iday=",iday," storageDaily[iday]=",storageDaily[iday]);
+
+  }
+  return [energymixDaily, storageDaily];
+}
+
+
+
+
 
 function displayText(){
   console.log("\n\n");
@@ -929,15 +1001,46 @@ function displayText(){
   
 }
 
-function displayGraphics(){
-  initChart();
-}
 
-function updateGraphics(chart){
-  chart.data.datasets=buildDatasets();
+
+function updateChartEnergymix(chart,inputData){
+  console.log("chart=",chart);
+  chart.data.datasets=buildDatasetsEnergymix(inputData);
   chart.update();
 }
 
+
+function redoSimulation(){
+  console.log("before redoSimulation()");
+
+  // storageDaily=[]; // not needed
+  //energymixDaily=[];
+
+  runSimulation(winddata.length);
+  console.log("after redoSimulation(): energymix=",energymix);
+  dailyAvg=calcDailyTimeseries();
+  clippedData=calcClippedTimeseries(0,14);
+
+  // for some reason, these subarrays not updated by reference
+
+  energymixDaily=dailyAvg[0];
+  storageDaily=dailyAvg[1];
+  energymixClipped=clippedData[0];
+  storageClipped=clippedData[1];
+
+  //console.log("allCharts[1].scales.x.max=",allCharts[1].scales.x.max);
+  updateChartEnergymix(allCharts[0], energymixDaily); 
+  updateChartEnergymix(allCharts[1], energymixClipped);
+  console.log("after redoSimulation(): energymixDaily=",energymixDaily);
+  console.log("after redoSimulation(): energymixClipped=",energymixClipped);
+}
+
+function updateRange(daymin, daymax){
+  clippedData=calcClippedTimeseries(daymin, daymax);
+  energymixClipped=clippedData[0];
+  storageClipped=clippedData[1];
+  updateChartEnergymix(allCharts[1], energymixClipped);
+}
 
 
 // #################################################################
@@ -950,15 +1053,45 @@ function updateGraphics(chart){
 
 let nt=8760;
 runSimulation(nt);
-displayText();
-displayGraphics();
 
-console.log("before update");
-runSimulation(500);
-updateGraphics(chart1); // (energymix,chart1)  (parameters (data,chart))
-console.log("after update");
+let dailyAvg=calcDailyTimeseries();
+let clippedData=calcClippedTimeseries(0,14);
+
+let energymixDaily=dailyAvg[0];
+let storageDaily=dailyAvg[1];
+let energymixClipped=clippedData[0];
+let storageClipped=clippedData[1];
+console.log("energymixDaily=",energymixDaily);
+console.log("storageDaily=",storageDaily);
+
+
+displayText();
+
+
+//later displayGraphics();
+
+initChartEnergymix(true, energymixDaily); // initializes allCharts[0]
+initChartEnergymix(false, energymixClipped); // initializes allCharts[1]
+
+// test simulation rerun
+
+//redoSimulation();
+
+// test new clips
+
+//updateRange(150,166);
+
+
+
+
+
+//console.log("allCharts=",allCharts);
+//console.log("chart for chart1=",Chart.getChart(chart1)); 
+//console.log("chart for chart2=",Chart.getChart(chart2)); 
+
 
 //console.log("storage=",storage,"\nenergymix=",energymix);
 //console.log("solarRegions=",solarRegions);
 //console.log("windRegions=",windRegions);
 console.log("energymix=",energymix);
+

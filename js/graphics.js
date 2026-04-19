@@ -1,13 +1,13 @@
-Chart.defaults.font.size = Math.round(2*vmin);
-Chart.maintainAspectRatio= false;
-Chart.responsive=true;
-Chart.animation=false;
+Chart.defaults.font.size = Math.round(2*vmin); // OK
+Chart.maintainAspectRatio= false; // DOS; need to define in Chart.options
+Chart.responsive=true; // OK
+Chart.animation=false; // DOS, in options
 
-let chart1; // 1-year or custom display energymix
-let chart2; // 14-day moving window energymix
-let chart3; // 1-year or custom display storage 
-let chart4; // 14-day moving window storage
-
+//var chart1; // 1-year or custom display energymix
+//let chart2; // 14-day moving window energymix
+//let chart3; // 1-year or custom display storage 
+//let chart4; // 14-day moving window storage
+let allCharts=new Array(4);
 
 // ----------------------------
 // Example data
@@ -61,62 +61,76 @@ function ds(label, data, color, stack = "default", fill = true) {
     label,
     data,
     borderColor: color,
-    backgroundColor: fill ? color + "AA" : color,
+    //backgroundColor: fill ? color + "AA" : color,
+    backgroundColor: color,
     fill,
     tension: 0,
     pointRadius: 0,
+    borderWidth: 0,
     stack
   };
 }
 
 // ----------------------------
-// Build datasets
+// Build datasets for the charts
+// (can later generalize to only two: energymix and storage type with
+// completely diferent data; time scale handled automatically
 // ----------------------------
 
-function buildDatasets() {
+function buildDatasetsEnergymix(inputData) {
 
-  function mapData(key, fn = v => v) {
-    return obj.map(d => ({
+  // fn=function argument,
+  // v=>v is the default identity function in arrow style
+  function mapData(key, fn = v => v) { 
+    return inputData.map(d => ({
       x: d.timeUTC_ms,
       y: fn(d[key] || 0)
     }));
   }
 
+  // rgba colors DOS, shows only in key list
+  
   const datasets = [
-    ds("Coal", mapData("coal"), "#444"),
+    ds("Biomasse", mapData("biomass"), "rgba(0,127,0,1)"),
+    ds("Laufwasser", mapData("runningHydro"), "rgba(0,0,255,1)"),
+    ds("Kernkraft", mapData("nuclear"), "#aa00aa"),
+    ds("Kohle", mapData("coal"), "#444"),
     ds("Gas", mapData("gas"), "#ff7f50"),
-    ds("Biomass", mapData("biomass"), "#6b8e23"),
-    ds("Running Hydro", mapData("runningHydro"), "#1f77b4"),
+    ds("WindOn", mapData("windOn"), "rgba(0,127,255,1)"),
+    ds("WindOff", mapData("windOff"), "rgba(0,40,225,1)"),
+    ds("Solar", mapData("solar"), "rgba(255,200,0,1)"),
+    ds("Import", mapData("importHrly", clampPositive), "rgba(180,180,180,1"),
 
-    ds("Hydro Storage (+)", mapData("hydroStorage", clampPositive), "#17becf"),
-    ds("Battery Storage (+)", mapData("batteryStorage", clampPositive), "#9467bd"),
-    ds("H2 Storage (+)", mapData("H2storage", clampPositive), "#bcbd22"),
-
-    ds("Wind", mapData("wind"), "#2ca02c"),
-    ds("Solar", mapData("solar"), "#ffd700"),
-
-    ds("Hydro Storage (-)", mapData("hydroStorage", clampNegative), "#17becf", "neg"),
-    ds("Battery Storage (-)", mapData("batteryStorage", clampNegative), "#9467bd", "neg"),
-    ds("H2 Storage (-)", mapData("H2storage", clampNegative), "#bcbd22", "neg")
+    ds("Pumpspeicher (+)", mapData("pumpHydro", clampPositive), "#17becf"),
+    ds("Batterien (+)", mapData("batt", clampPositive), "#9467bd"),
+    ds("H2-Speicher (+)", mapData("H2", clampPositive), "#bcbd22"),
+    ds("Export", mapData("importHrly", clampNegative), "#888888", "neg"),
+    ds("Pumpspeicher (-)", mapData("pumpHydro", clampNegative), "#17becf", "neg"),
+    ds("Batteryien (-)", mapData("batt", clampNegative), "#9467bd", "neg"),
+    ds("H2-Speicher (-)", mapData("H2", clampNegative), "#bcbd22", "neg")
   ];
 
   // Total line //!! bugfix*=1.02, charts does not draw on top althhough last
-  const total = obj.map(d => ({
+  const total = inputData.map(d => ({
     x: d.timeUTC_ms,
     y:
-    1.02*(clampPositive(d.coal) +  
-      clampPositive(d.gas) +
-      clampPositive(d.biomass) +
-      clampPositive(d.runningHydro) +
-      clampPositive(d.wind) +
-      clampPositive(d.solar) +
-      clampPositive(d.hydroStorage) +
-      clampPositive(d.batteryStorage) +
-	  clampPositive(d.H2storage))
+    1.02*(
+        d.biomass +
+	d.runningHydro +
+	d.nuclear +  
+        d.coal +
+	d.gas +
+        d.windOn +
+        d.windOff +
+        d.solar +
+        clampPositive(d.importHrly) +
+	clampPositive(d.pumpHydro) +
+	clampPositive(d.batt) +
+	clampPositive(d.H2))
   }));
 
   datasets.push({
-    label: "Total",
+    label: "Nachfrage+Export+Laden",
     data: total,
     borderColor: "#000",
     borderWidth: 3,
@@ -131,18 +145,27 @@ function buildDatasets() {
 
 // ----------------------------
 // Chart init (STATIC)
+// (can later generalize to only two: energymix and storage type with
+// completely diferent data; time scale handled automatically
 // ----------------------------
-function initChart() {
 
-  const ctx = document.getElementById('chart1').getContext('2d');
-  chart1 = new Chart(ctx, {
+
+
+function initChartEnergymix(isDaily, inputData) {
+  let canvasID=(isDaily) ? "chart1" : "chart2";
+  const ctx = document.getElementById(canvasID).getContext('2d');
+  //let chart = new Chart(ctx, {
+  setupClick(canvasID, inputData);
+  let arrIndex=(isDaily) ? 0 : 1;
+  allCharts[arrIndex]=new Chart(ctx, {
     type: "line",
     data: {
-      datasets: buildDatasets()
+      datasets: buildDatasetsEnergymix(inputData)
     },
     options: {
-       events: ['click'],   // only clicks
-
+      events: ['click'],   // only clicks
+      maintainAspectRatio: false,
+      animation: false,
       interaction: {
         mode: 'index',
         intersect: false
@@ -155,13 +178,14 @@ function initChart() {
       scales: {
         x: {
           type: 'linear',
+	  bounds: 'data', // clip exactly at the data. Works by miracle
 	  ticks: {
 	    callback: function(value, index, ticks) {
 
 	      const d = new Date(value);
 
-              const start = new Date(obj[0].timeUTC_ms);
-	      const end = new Date(obj[obj.length - 1].timeUTC_ms);
+              const start = new Date(inputData[0].timeUTC_ms);
+	      const end = new Date(inputData[inputData.length - 1].timeUTC_ms);
 
 	      const rangeHours = (end - start) / (1000 * 60 * 60);
 
@@ -210,48 +234,51 @@ function initChart() {
       }
     }
   });
+  //console.log("leaving initChartEnergymix, chart1=",chart1);
 
-  setupClick();
-  console.log("leaving initChart(), chart1=",chart1);
-}  // initChart
+
+}  // initChartEnergymix
 
 
 // ----------------------------
 // Click popup
 // ----------------------------
-function setupClick() {
+function setupClick(canvasID, inputData) {
 
-  const box = document.getElementById("clickInfo");
+  const box = document.getElementById("clickInfo"); // generic for all charts
+  
+  document.getElementById(canvasID).onclick = function(evt) {
+    let chart=Chart.getChart(canvasID);
+     console.log("setupClick: canvasID=",canvasID," chart=",chart);
 
-  document.getElementById("chart1").onclick = function(evt) {
-
-    const points = chart1.getElementsAtEventForMode(
+    const points = chart.getElementsAtEventForMode(
       evt, 'index', { intersect: false }, true
     );
-
+    console.log("onclick: points=",points);
+    
     if (!points.length) {
       box.style.display = "none";
       return;
     }
 
-    const d = obj[points[0].index];
+    const d = inputData[points[0].index];
     const dt = new Date(d.timeUTC_ms);
-
+    console.log("d=",d);
     let html = `<b>${dt.toLocaleString('de-DE')}</b><br>`;
-
+    console.log("html=",html);
     for (let k in d) {
-      if (k !== "time" && k !== "timeUTC_ms") {
+      if (k !== "timeStr" && k !== "timeUTC_ms") {
         html += `${k}: ${d[k].toFixed(2)} GW<br>`;
       }
     }
 
-    let fontsize=(Math.round(1.5*vmin)).toString();
+    let fontsize=(Math.round(2.5*vmin)).toString();
     box.innerHTML = html;
-    box.style.left = evt.pageX + 10 + "px";
+    box.style.left = evt.pageX + 10 + "px"; //!!!
     box.style.top = evt.pageY + 10 + "px";
     box.style.display = "block";
     //box.style.fontsize= fontsize; // DOS; set in .css
-    console.log("fontsize=",fontsize," box.style=",box.style);
+    console.log("fontsize=",fontsize," box=",box);
 
   };
 }
@@ -260,4 +287,4 @@ function setupClick() {
 // main
 
 
-//initChart();
+//initChart;

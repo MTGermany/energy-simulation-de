@@ -215,7 +215,7 @@ table.infoTable td {
   height: 47vh;
   margin-right: 0vw;
   margin-left: 0vw;
-  background-color: rgb(230,255,255);
+  background-color: rgb(235,235,255);
   /*display: inline-block;
     position: relative;
     width: 100%;*/
@@ -230,8 +230,8 @@ table.infoTable td {
   height: 47vh;
   margin-right: 0vw;
   margin-left: 0vw;
-  background-color: rgb(255,225,225);
-  z-index: 1;
+  background-color: rgb(235,235,255);
+  z-index: 0;
 }
 
 

@@ -204,7 +204,7 @@ setSlider(slider_WindOff, slider_WindOffStr, pow0_WindOff, 0, " GW (100%)");
 
 // nuclear
 
-var pow0_Nuclear=0;
+var pow0_Nuclear=pow00_Nuclear;
 var slider_Nuclear = document.getElementById('slider_Nuclear');
 var slider_NuclearStr = document.getElementById("slider_NuclearStr");
 slider_Nuclear.oninput = function() {
