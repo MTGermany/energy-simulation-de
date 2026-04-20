@@ -3,21 +3,23 @@
 
 const winddata = JSON.parse(str_wind2025);
 console.log("winddata.length=",winddata.length);
-console.log("winddata[0]=",winddata[0]);
-console.log("winddata[0].w100_1=",winddata[0].w100_1);
-console.log("winddata[8759]=",winddata[8759]);
+//console.log("winddata[0]=",winddata[0]);
+//console.log("winddata[0].w100_1=",winddata[0].w100_1);
+//console.log("winddata[8759]=",winddata[8759]);
 
 const solardata = JSON.parse(str_solar2025);
 console.log("solardata.length=",solardata.length);
-console.log("solardata[0]=",solardata[0]);
-console.log("solardata[12].I1=",solardata[12].I1);
-console.log("solardata[4000]=",solardata[4000]);
+//console.log("solardata[0]=",solardata[0]);
+//console.log("solardata[12].I1=",solardata[12].I1);
+//console.log("solardata[4000]=",solardata[4000]);
 
 const supplydemanddata2025 = JSON.parse(str_supplyDemand2025);
 console.log("supplydemanddata2025.length=",supplydemanddata2025.length);
-console.log("supplydemanddata2025[0]=",supplydemanddata2025[0]);
-console.log("supplydemanddata2025[0].load=",supplydemanddata2025[0].load);
-console.log("supplydemanddata2025[8759]=",supplydemanddata2025[8759]);
+//console.log("supplydemanddata2025[0]=",supplydemanddata2025[0]);
+//console.log("supplydemanddata2025[0].load=",supplydemanddata2025[0].load);
+//console.log("supplydemanddata2025[8759]=",supplydemanddata2025[8759]);
+
+
 
 // consolidate timestamps (bring everything to UTC)
 // by adding an additional timeUTC_ms entry to be used in graphics
@@ -44,7 +46,7 @@ console.log("supplydemanddata2025[8759]=",supplydemanddata2025[8759]);
 
 for (let it=0; it<winddata.length; it++){
   winddata[it].timeUTC_ms=new Date(winddata[it].time).getTime();
-  if ((it>=0*24)&&(it<1*24)){
+  if (false){
     console.log("wind timeString=",winddata[it].time,
 		" MET/MEST time=",new Date(winddata[it].timeUTC_ms));
   }
@@ -62,9 +64,10 @@ for (let it=0; it<supplydemanddata2025.length; it++){
   let timeCET=new Date(supplydemanddata2025[it].time).getTime();
   let offset_ms=60000*(new Date(timeCET).getTimezoneOffset());
   supplydemanddata2025[it].timeUTC_ms=timeCET+offset_ms;
-  if(it<2){console.log("supplydemanddata2025 timeString=",
-		       supplydemanddata2025[it].time,
-		       " MET/MEST time=",
-		       new Date(supplydemanddata2025[it].timeUTC_ms));
+  if(false){
+    console.log("supplydemanddata2025 timeString=",
+		supplydemanddata2025[it].time,
+		" MET/MEST time=",
+		new Date(supplydemanddata2025[it].timeUTC_ms));
   }
 }

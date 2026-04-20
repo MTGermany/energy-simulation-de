@@ -19,37 +19,55 @@
 <body>
 
 <div id="header"> 
-  <h1><center>Energie-Simulation 2025</center></h1>
+  <h1><center>Energie-Simulation</center></h1>
 </div>
 
 
 <!-- ################################################# -->
-<!-- Toggle which control panel to show
+<!-- Top level controls which control panel and sim window to show
 <!-- ################################################# -->
 
   
 <div id="toggleControlDiv"><button id="toggleControlButton"
+				   width="10vw"
 				   onclick='toggleControl()'>
-    Gehe zu Speicher/Strategie</button>
+    Gehe zu Speicherattributen/ Strategie</button>
 </div>
+
+<div id="toggleGraphicsDiv"><button id="toggleGraphicsButton"
+				   onclick='toggleGraphics()'>
+    Gehe zur Speicheransicht</button>
+</div>
+
+<!--
+<div id="simDiv"><button id="simButton"
+			 onclick='updateSimulation(strategyIndex)'>
+    Simuliere!</button>
+</div>
+-->
 
 
 <!-- ################################################# -->
 <!-- Control panel 1: supply and demand
 <!-- ################################################# -->
 
-<div id="controlSupplyDemandDiv">
-<center>
+<div id="controlSupplyDemandDiv" onmousedown="handleMouseDown(event)">
+
 
   <br><br><br>
 
   
-  <h2>Nachfrage</h2>
+  <center>
+
+    <h2>Nachfrage</h2>
+
+<!-- all tables get an onmouseup event listener to update the --
+  -- simulation one the slider bars are released -->
+
+    <table id="mainTable" border="0" cellspacing="3vmin"
+	   cellpadding="1vmin" onmouseup="handleMouseUp(event)"  >
 
 
-<table id="mainTable" border="0" cellspacing="3vmin" cellpadding="1vmin" >
-
-  <!-- making table width wider DOS for slider -->
   
 <tr>
   <td>Allgemein</td>
@@ -75,8 +93,11 @@
 <h2>Kraftwerkspark</h2>
 (Biomasse 4 MW und 2 Wasserkraft 2 MW konstant wie bisher)
 <br><br>
-
-<table id="mainTable" border="0" cellspacing="3vmin" cellpadding="1vmin" >
+  </center>
+  
+<p align="right" margin-right="3vw">
+  <table id="mainTable" border="0" cellspacing="3vmin"
+	 cellpadding="1vmin"  onmouseup="handleMouseUp(event)" >
 
 <tr>
   <td>PV</td>
@@ -141,6 +162,7 @@
 </tr>
 
 </table>
+</p>
 
 
 <div id="merkelsmileys">
@@ -150,7 +172,7 @@
   <img src='figs/Merkelraute_Template.png' width="100%">
 </div>
 
-</center>
+
 </div>  <!--id="controlSupplyDemandDiv"-->
 
   
@@ -166,7 +188,9 @@
 <h2>Batterien (eta = 0.9 * 0.9 = 81%) &nbsp;
   <a href="./infoBatt.html">(Info)</a></h2>
   
-<table id="mainTable" border="0" cellspacing="3vmin" cellpadding="1vmin" >
+<table id="mainTable" border="0" cellspacing="3vmin"
+       cellpadding="1vmin"
+       onmouseup="handleMouseUp(event)" >
 
 <tr>
   <td>Lade-/Entladeleistung</td>
@@ -187,7 +211,9 @@
 <h2>Wasserstoff (eta = 0.6 * 0.4 = 24%) &nbsp;
   <a href="./infoH2.html">(Info)</a></h2>
 
-<table id="mainTable" border="0" cellspacing="3vmin" cellpadding="1vmin" >
+<table id="mainTable" border="0" cellspacing="3vmin"
+       cellpadding="1vmin"
+       onmouseup="handleMouseUp(event)" >
 
 <tr>
   <td>Ladeleistung</td>
@@ -216,7 +242,8 @@
 
 <h2>Maximale Import- und Exportleistung </h2>
 
-<table id="mainTable" border="0" cellspacing="3vmin" cellpadding="1vmin" >
+<table id="mainTable" border="0" cellspacing="3vmin" cellpadding="1vmin"
+       onmouseup="handleMouseUp(event)" >
 <tr>
   <td>allle Nachbarn</td>
   <td> <input id="slider_importPow" type="range" 
@@ -243,40 +270,39 @@
 </center>
 </div>
 
-<div id="areaGraphics1">
+<div id="areaGraphics1" style.display="block"
+     onmouseenter="handleMouseEnter(event)">
+  
+  <!-- for some unknown reason all event listeners inside canvas do
+  not work and outside tehy do not know the canvas => no x,y
+; delegated to inside function setupClick() in
+  graphics.js-->
+  
   <canvas id="chart1">
-          onmouseenter="handleMouseEnter(event)"
-          onmousemove="handleMouseMove(event)"
-          onmousedown="handleMouseDown(event)"
-          onmouseup="handleMouseUp(event)" 
-          <!--onclick="handleClick(event)"--> <!-- onclick in graphics.js-->
-          onmouseout="cancelActivities(event)"
-          style="border:1px solid #d3d3d3;">
+          onmousemove="handleMouseMove(event)" <!-- DOS -->
+           style="border:1px solid #d3d3d3;">
     Your browser does not support the HTML5 canvas tag.
   </canvas>
 </div>
 
 <div id="areaGraphics2">
   <canvas id="chart2">
-          onmouseenter="handleMouseEnter(event)"
-          onmousemove="handleMouseMove(event)"
-          onmousedown="handleMouseDown(event)"
-          onmouseup="handleMouseUp(event)" 
-          <!--onclick="handleClick(event)"--> <!-- onclick in graphics.js-->
-          onmouseout="cancelActivities(event)"
-          style="border:1px solid #d3d3d3;">
+           style="border:1px solid #d3d3d3;">
     Your browser does not support the HTML5 canvas tag.
   </canvas>
 </div>
 
-<div id="areaGraphics3">
+
+<div id="areaGraphics3" style="display: none">
   <canvas id="chart3">
-          onmouseenter="handleMouseEnter(event)"
-          onmousemove="handleMouseMove(event)"
-          onmousedown="handleMouseDown(event)"
-          onmouseup="handleMouseUp(event)" 
-          <!--onclick="handleClick(event)"--> <!-- onclick in graphics.js-->
-          onmouseout="cancelActivities(event)"
+         style="border:1px solid #d3d3d3;">
+    Your browser does not support the HTML5 canvas tag.
+  </canvas>
+</div>
+
+
+<div id="areaGraphics4" style="display: none">
+  <canvas id="chart4">
           style="border:1px solid #d3d3d3;">
     Your browser does not support the HTML5 canvas tag.
   </canvas>

@@ -33,13 +33,6 @@ supplydemanddata2025
 */
 
 
-
-
-let energymix=[]; // array of objects; fill with energymix.push(hourlymix)
-let storage=[]; // array of objects; fill with hourly_state
-let solarRegions=[];
-let windRegions=[];
-
 function simulation(strategy){
 
   // use also global constants defined in gui.js
@@ -52,6 +45,7 @@ function simulation(strategy){
   this.windRegions={}; // create new object => no cloning needed!
 
   this.storage={ // energy in GWh
+    "timeUTC_ms": winddata[0].timeUTC_ms,
     "batt": 0.5*battEnergy0,
     "pumpHydro": 0.5*hydroEnergy0,
     "H2": 0.5*H2Energy0
@@ -63,6 +57,7 @@ function simulation(strategy){
 simulation.prototype.cloneStorage=function(){ 
   
   var obj={
+    "timeUTC_ms": this.storage.timeUTC_ms,
     "batt": this.storage.batt,
     "pumpHydro": this.storage.pumpHydro,
     "H2": this.storage.H2
@@ -83,17 +78,27 @@ simulation.prototype.cloneStorage=function(){
 // Note 2: The roundtrip efficiency eta is applied completely in the
 // charging phase
 
-simulation.prototype.useHydroBattStorage=function(){
+simulation.prototype.useHydroBattStorage=function(it){
+
+  
   let loc_mismatch=this.mismatch();
 
   if(loc_mismatch>=0){// power left to load batteries and pumped hydro
 
-    var battChargeMax=Math.min((battEnergy0-this.storage.batt)/battEta,
-			       battCharge0);
+    var battChargeMax=Math.min((battEnergy-this.storage.batt)/battEta,
+			       battCharge);
     var hydroChargeMax=Math.min(
       (hydroEnergy0-this.storage.pumpHydro)/hydroEta,
-      hydroCharge0);
+      hydroCharge0); // index 0 since hydro constant
 
+    if(false){
+      console.log("sim.useHydroBattStorage: it=",it,
+		  " loc_mismatch=", loc_mismatch,
+		  " battEnergy=",battEnergy,
+		  " this.storage.batt=",this.storage.batt,
+		  " battCharge=",battCharge," battChargeMax=", battChargeMax);
+    }
+ 
     if(loc_mismatch<=battChargeMax){
       this.storage.batt += battEta*loc_mismatch;
       this.hourlymix.batt =- loc_mismatch;  // w/o roundturn eta!
@@ -156,12 +161,19 @@ simulation.prototype.useHydroBattStorage=function(){
 }
 
  
-simulation.prototype.useH2Storage=function(mismatch){
+simulation.prototype.useH2Storage=function(it){
   let loc_mismatch=this.mismatch();
   if(loc_mismatch>=0){// power left for electrolysis
 
-    var H2ChargeMax=Math.min((H2Energy0-this.storage.H2)/H2eta, H2Charge0);
-
+    var H2ChargeMax=Math.min((H2Energy-this.storage.H2)/H2eta, H2Charge);
+    if(false){
+      console.log("sim.useH2Storage: it=",it,
+		  " loc_mismatch=", loc_mismatch,
+		  " H2Energy=",H2Energy,
+		  " this.storage.H2=",this.storage.H2,
+		  " H2Charge=",H2Charge,"  H2ChargeMax=", H2ChargeMax);
+    }
+    
     if(loc_mismatch<=H2ChargeMax){
       this.storage.H2 +=H2eta*loc_mismatch; 
       this.hourlymix.H2 = -loc_mismatch; // w/o roundturn eta
@@ -196,15 +208,16 @@ simulation.prototype.importExport=function(it){
   let rel_mismatch=(loc_mismatch-mismatch_maxImport)
     /(mismatch_maxExport-mismatch_maxImport);
   let r=Math.max(-1., Math.min(1., -1+2*rel_mismatch));
-  this.hourlymix.importHrly=-r*importPow0;
+  this.hourlymix.importHrly=-r*importPow;
 
   let success=(Math.abs(this.mismatch())<1e-6);
   return success;
 }
 
  
-simulation.prototype.init=function(){
+simulation.prototype.init=function(strategy){
 
+  this.strategy=strategy;
 
   this.storage={ // this.hourlymix in update since history independent
     "batt": 0.5*battEnergy,
@@ -212,8 +225,6 @@ simulation.prototype.init=function(){
     "H2": 0.5*H2Energy
   };
 
-  console.log("in simulation.init:",
-	      " this.storage=",this.storage);
 }
 
 simulation.prototype.powFact_wind=function(v,vc1,vc2,vc3){
@@ -463,8 +474,9 @@ simulation.prototype.update=function(it){
 
    #################################################################*/
 
+  //if(it==0){console.log("\n\nrunSimulation: this.strategy=",this.strategy);}
   if(this.strategy!=1){
-    console.log("error: strategy ",this.strategy," not yet implemented");
+    alert("error: strategy ",this.strategy," not yet implemented");
     return false;
   }
   
@@ -495,7 +507,8 @@ simulation.prototype.update=function(it){
     // (3) charge/discharge batteries and pump hydro
     // changes this.storage and this.hourlymix
     
-    var result=this.useHydroBattStorage(); // changes this.storage
+    this.storage.timeUTC_ms=winddata[it].timeUTC_ms;
+    var result=this.useHydroBattStorage(it); // changes this.storage
     
     if(result){
       if(Math.abs(this.mismatch())>1e-6){
@@ -512,7 +525,7 @@ simulation.prototype.update=function(it){
 
     //if(this.mismatch()>0){ // if charge but do not discharge
     if(true){
-      result=this.useH2Storage(); // changes this.storage
+      result=this.useH2Storage(it); // changes this.storage
       if(result){
         if(Math.abs(this.mismatch())>1e-6){
 	  console.log("sim.update, it=",it,
@@ -669,7 +682,7 @@ simulation.prototype.update=function(it){
     //add H2 discharge (only if not charged/discharged in step 3)
 
     if(false){
-      result=this.useH2Storage(); // changes this.storage
+      result=this.useH2Storage(it); // changes this.storage
       if(result){
         if(Math.abs(this.mismatch())>1e-6){
 	  console.log("sim.update, it=",it,
@@ -759,6 +772,7 @@ simulation.prototype.update=function(it){
 
 function displayResultsMain(){
 
+  let nt=energymix.length;
   let W_solar=0; let W_solar_data=0;
   let W_windOn=0; let W_windOn_data=0;
   let W_windOff=0; let W_windOff_data=0;
@@ -847,7 +861,7 @@ function displayResultsMain(){
 	      "\n windOn_av=",windOn_av," windOn_av_data=",windOn_av_data,
 	      "\n windOff_av=",windOff_av," windOff_av_data=",windOff_av_data);
 
-  console.log("\n\nCO2:",
+  console.log("\nCO2:",
 	      "\n Total CO2 emissions [Mio t]: ",
 	      (1e-6*emissionCO2).toFixed(0),
 	      "\n Carbon footprint [g/kWh]:",emissionFactor.toFixed(0));
@@ -892,15 +906,17 @@ function displayResultsStorage(){
 // ##############################################################
 
 
-function runSimulation(nt){
+function runSimulation(strategy){
+  //console.log("in runSimulation: strategy=",strategy);
+  let nt=winddata.length;
   energymix=[]; storage=[]; solarRegions=[]; windRegions=[];
 
   var sim=new simulation(1);
 
   var noBreakdown=true;
-  sim.init(); // set up storage to half full
+  sim.init(strategy); // set up storage to half full
 
-  console.log("=================================================\n");
+  //console.log("=================================================\n");
   for(let it=0; (it<nt)&& noBreakdown; it++){
     noBreakdown=sim.update(it);
   
@@ -911,24 +927,57 @@ function runSimulation(nt){
   }
 
   if(!noBreakdown){
-    console.log("Warning! Electricity system broke down during simulation!");
+    let itmax=energymix.length-1;
+    console.log("itmax=",itmax);
+    alert("Warning! Electricity system broke down during simulation"+
+	  "at time "+energymix[itmax].timeStr);
   }
 }
 
-function calcClippedTimeseries(daymin, daymax){
+function updateCharts(){
+  updateChartsDaily();
+  updateChartsClipped();
+}
+
+function updateChartsDaily(){
+  updateChartEnergymix(allCharts[0], energymixDaily); 
+  updateChartStorage(allCharts[2], storageDaily);
+}
+
+function updateChartsClipped(){
+  updateChartEnergymix(allCharts[1], energymixClipped); 
+  updateChartStorage(allCharts[3], storageClipped);
+}
+
+
+function updateSimulation(strategy){
+  console.log("\n\n\nbefore updateSimulation, strategy=",strategy);
+
+  // storageDaily=[]; // not needed
+  //energymixDaily=[];
+
+  runSimulation(strategy);
+  calcChartInput(itmin, itmax); // fills the *Daily and *Clipped variables
+  updateCharts();
+  displayText();
+ 
+  //console.log("allCharts[1].scales.x.max=",allCharts[1].scales.x.max);
+  //console.log("after redoSimulation(): energymixDaily=",energymixDaily);
+  //console.log("after redoSimulation(): energymixClipped=",energymixClipped);
+}
+
+function calcClippedTimeseries(itmin,itmax){
   let energymixClipped=[];
   let storageClipped=[];
-  let itmin=Math.max(24*daymin,0);
-  let itmax=Math.min(24*daymax, energymix.length-1);
-  for(let it=itmin; it<itmax; it++){
+  for(let it=Math.max(itmin,0); it<Math.min(itmax,energymix.length); it++){
     energymixClipped.push(energymix[it]);
     storageClipped.push(storage[it]);
   }
+     
   return [energymixClipped, storageClipped];
 }
 
-
-			
+		
 function calcDailyTimeseries(){
   let energymixDaily=[];
   let storageDaily=[];
@@ -960,6 +1009,7 @@ function calcDailyTimeseries(){
     }
     
     energymixDaily[iday].timeUTC_ms=energymix[24*iday].timeUTC_ms;
+    storageDaily[iday].timeUTC_ms=storage[24*iday].timeUTC_ms;
     //console.log("iday=",iday," energymixDaily[iday]=",energymixDaily[iday]);
     //console.log("iday=",iday," energymix[24*iday]=",energymix[24*iday]);
     
@@ -984,94 +1034,92 @@ function calcDailyTimeseries(){
   return [energymixDaily, storageDaily];
 }
 
+function calcChartInput(itmin,itmax){
+  let dailyAvg=calcDailyTimeseries();
+  let clippedData=calcClippedTimeseries(itmin,itmax);
+  energymixDaily=dailyAvg[0];
+  storageDaily=dailyAvg[1];
+  energymixClipped=clippedData[0];
+  storageClipped=clippedData[1];
+  //console.log("energymixDaily=",energymixDaily);
+  //console.log("storageDaily=",storageDaily);
+}
 
 
 
 
 function displayText(){
-  console.log("\n\n");
+  console.log("\n");
  // displayResultsRegions();
  // console.log("\n\n");
 
   displayResultsMain();
-  console.log("\n\n");
+  console.log("\n");
 
-  displayResultsStorage();
-  //console.log("\n\n");
+  //displayResultsStorage();
+  //console.log("\n");
   
 }
 
-
+  
 
 function updateChartEnergymix(chart,inputData){
-  console.log("chart=",chart);
+  //console.log("chart=",chart);
   chart.data.datasets=buildDatasetsEnergymix(inputData);
   chart.update();
 }
 
-
-function redoSimulation(){
-  console.log("before redoSimulation()");
-
-  // storageDaily=[]; // not needed
-  //energymixDaily=[];
-
-  runSimulation(winddata.length);
-  console.log("after redoSimulation(): energymix=",energymix);
-  dailyAvg=calcDailyTimeseries();
-  clippedData=calcClippedTimeseries(0,14);
-
-  // for some reason, these subarrays not updated by reference
-
-  energymixDaily=dailyAvg[0];
-  storageDaily=dailyAvg[1];
-  energymixClipped=clippedData[0];
-  storageClipped=clippedData[1];
-
-  //console.log("allCharts[1].scales.x.max=",allCharts[1].scales.x.max);
-  updateChartEnergymix(allCharts[0], energymixDaily); 
-  updateChartEnergymix(allCharts[1], energymixClipped);
-  console.log("after redoSimulation(): energymixDaily=",energymixDaily);
-  console.log("after redoSimulation(): energymixClipped=",energymixClipped);
-}
-
-function updateRange(daymin, daymax){
-  clippedData=calcClippedTimeseries(daymin, daymax);
-  energymixClipped=clippedData[0];
-  storageClipped=clippedData[1];
-  updateChartEnergymix(allCharts[1], energymixClipped);
+function updateChartStorage(chart,inputData){
+  //console.log("chart=",chart);
+  chart.data.datasets=buildDatasetsStorage(inputData);
+  chart.update();
 }
 
 
+
+function updateRange(itmin,itmax){
+  let clippedData=calcClippedTimeseries(itmin,itmax);
+  energymixClipped=clippedData[0];
+  storageClipped=clippedData[1];
+  updateChartsClipped();
+}
+ 
+
+
 // #################################################################
-// main (debug, later started by buttons on the left panel)
+// Main sim and graphics initialisation directly after loading
 // #################################################################
 
-//let nt=2;
-//let nt=4000;
-//let nt=290;
-
-let nt=8760;
-runSimulation(nt);
-
-let dailyAvg=calcDailyTimeseries();
-let clippedData=calcClippedTimeseries(0,14);
-
-let energymixDaily=dailyAvg[0];
-let storageDaily=dailyAvg[1];
-let energymixClipped=clippedData[0];
-let storageClipped=clippedData[1];
-console.log("energymixDaily=",energymixDaily);
-console.log("storageDaily=",storageDaily);
+let itHalfInterval=4*24;
+let itmin=0;  // initial clippings for lower charts
+let itmax=2*itHalfInterval;
 
 
+let energymix=[]; // array of objects; fill with energymix.push(hourlymix)
+let storage=[]; // array of objects; fill with hourly_state
+let solarRegions=[];
+let windRegions=[];
+
+let energymixDaily=[];
+let storageDaily=[];
+let energymixClipped=[];
+let storageClipped=[];
+
+runSimulation(strategyIndex); // fills energymix, storage, solar/windRegions
+//console.log("storage=",storage);
+
+calcChartInput(itmin, itmax); // fills the *Daily and *Clipped variables
 displayText();
 
+// initChart(isEnergymix, isDaily, inputData) fills allCharts[0] ... [3]
+// assign allCharts[i] with respective return does not work
 
-//later displayGraphics();
+initChart(true, true, energymixDaily); // initializes allCharts[0]
+initChart(true, false, energymixClipped); // initializes allCharts[1]
 
-initChartEnergymix(true, energymixDaily); // initializes allCharts[0]
-initChartEnergymix(false, energymixClipped); // initializes allCharts[1]
+initChart(false, true, storageDaily); // initializes allCharts[2]
+initChart(false, false, storageClipped); // initializes allCharts[3]
+
 
 // test simulation rerun
 
@@ -1093,5 +1141,5 @@ initChartEnergymix(false, energymixClipped); // initializes allCharts[1]
 //console.log("storage=",storage,"\nenergymix=",energymix);
 //console.log("solarRegions=",solarRegions);
 //console.log("windRegions=",windRegions);
-console.log("energymix=",energymix);
+//console.log("energymix=",energymix);
 

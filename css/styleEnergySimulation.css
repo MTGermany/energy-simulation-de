@@ -22,7 +22,7 @@ body{
   /*overflow-x: hidden;*/ /* remove horizontal scrollbar */
   font-family: 'helvetica', sans-serif;
                  /*font-size: 14px;*/
-  font-size: 2.5vmin;
+  font-size: 2.2vmin;
   /*text-align: center;*/
   color: #404050;   /* text color */
   background-color: #FFFFFF;
@@ -30,8 +30,8 @@ body{
 
 button,select{    /* see also toggle control */
     font-size: 2.4vmin;
-    width: 15vw;
-    height: 7vh;
+    width: 17vw;
+    height: 9vh;
 }
 
 
@@ -138,7 +138,7 @@ table.infoTable td {
  
 #header{
   position: absolute;
-  top: -3vh;
+  top: 0vh;
   left: 10vw;
   /*width:  60vw; */
   height: 6vmin;
@@ -158,31 +158,41 @@ table.infoTable td {
 
 #toggleControlDiv{
   position: absolute;
-  top: 6vmin;
+  top: 11vmin;
+  left: 2vw;
+  /* width, height DOS, control at button button,select{ */
+  z-index: 4; /* the higher the integer, the more on top */
+}
+
+#toggleGraphicsDiv{
+  position: absolute;
+  top: 11vh;
   left: 20vw;
   /*width: 14vmin;*/ /* width DOS, control at button */
   /*height: 8vmin;*/
   z-index: 4; /* the higher the integer, the more on top */
 }
 
+
+
 #controlSupplyDemandDiv{ 
   position: absolute;
-  top: 5vmin;
+  top: 15vmin;
   height: 88vmin;
   left: 2vmin;
   width: 38.5vw;
-  background-color: rgb(230,230,255);
+  /*background-color: rgb(230,230,255);*/
   display: block;
   z-index: 1; /* the higher the integer, the more on top */
 }
 
 #controlStrategyDiv{ /* Also contains info text for non-BaWue simulations!*/
   position: absolute;
-  top: 5vmin;
+  top: 15vmin;
   height: 88vmin;
   left: 2vmin;
   width: 38.5vw;
-  background-color: rgb(230,230,255);
+  /* background-color: rgb(230,230,255);*/
   display: none;  z-index: 3; /* the higher the integer, the more on top */
 }
 
@@ -190,22 +200,22 @@ table.infoTable td {
 
 #merkelsmileys{
   position: absolute;
-  top: 72vmin;
-  left: 16vw;
+  top: 53vmin;
+  left: 1vw;
   /* DOS here; width controlled by image in javascript: */
   z-index: 4; /* the higher the integer, the more on top */
 }
 #raute{
   position: absolute;
-  top: 82vmin;
-  left: 16vw;
+  top: 60vmin;
+  left: 1vw;
   width: 8vmin; /* works with "%" size in <img ...> in html */
   height: 6vmin;
   z-index: 4; /* the higher the integer, the more on top */
 }
 
 
-/* (3) landscape: the simulation canvas */
+/* (3) landscape: the container of the charts canvas */
 
 #areaGraphics1{
   position: absolute;
@@ -216,13 +226,34 @@ table.infoTable td {
   margin-right: 0vw;
   margin-left: 0vw;
   background-color: rgb(235,235,255);
-  /*display: inline-block;
-    position: relative;
-    width: 100%;*/
-    z-index: 0;
+  z-index: 0;
 }
 
 #areaGraphics2{
+  position: absolute;
+  left:   40vw;
+  top:   50vh;
+  width:  60vw; 
+  height: 47vh;
+  margin-right: 0vw;
+  margin-left: 0vw;
+  background-color: rgb(235,235,255);
+  z-index: 0;
+}
+
+#areaGraphics3{
+  position: absolute;
+  left:   40vw;
+  top:   0vh;
+  width:  60vw; 
+  height: 47vh;
+  margin-right: 0vw;
+  margin-left: 0vw;
+  background-color: rgb(235,235,255);
+  z-index: 0;
+}
+
+#areaGraphics4{
   position: absolute;
   left:   40vw;
   top:   50vh;

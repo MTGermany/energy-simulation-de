@@ -9,44 +9,6 @@ Chart.animation=false; // DOS, in options
 //let chart4; // 14-day moving window storage
 let allCharts=new Array(4);
 
-// ----------------------------
-// Example data
-// ----------------------------
-let obj = [
-  {
-    timeUTC_ms: 1735689600000,
-    biomass: 5,
-    gas: 10,
-    coal: 8,
-    runningHydro: 3,
-    hydroStorage: -2,
-    batteryStorage: -1,
-    wind: 12, solar: 0,
-    H2storage: -0.5
-  },
-  {
-    timeUTC_ms:1735693200000,
-    biomass: 6,
-    gas: 9,
-    coal: 7,
-    runningHydro: 3,
-    hydroStorage: 2,
-    batteryStorage: -2,
-    wind: 14, solar: 0,
-    H2storage: 0.3
-  },
-  {
-    timeUTC_ms:1735696800000,
-    biomass: 5,
-    gas: 8,
-    coal: 6,
-    runningHydro: 2,
-    hydroStorage: -1,
-    batteryStorage: 1,
-    wind: 10, solar: 1,
-    H2storage: -0.2
-  }
-];
 
 
 
@@ -72,9 +34,7 @@ function ds(label, data, color, stack = "default", fill = true) {
 }
 
 // ----------------------------
-// Build datasets for the charts
-// (can later generalize to only two: energymix and storage type with
-// completely diferent data; time scale handled automatically
+// Build datasets for the energymix daily and clipped charts
 // ----------------------------
 
 function buildDatasetsEnergymix(inputData) {
@@ -137,30 +97,82 @@ function buildDatasetsEnergymix(inputData) {
     fill: false,
     pointRadius: 0
   });
-  console.log("datsets=",datasets);
+  //console.log("datsets=",datasets);
 
   return datasets;
-  console.log(datasets);
 }
 
+
 // ----------------------------
-// Chart init (STATIC)
-// (can later generalize to only two: energymix and storage type with
-// completely diferent data; time scale handled automatically
+// Build datasets for the storage daily and clipped charts
 // ----------------------------
 
+function buildDatasetsStorage(inputData) {
+
+  // fn=function argument,
+  // v=>v is the default identity function in arrow style
+  function mapData(key, fn = v => v) { 
+    return inputData.map(d => ({
+      x: d.timeUTC_ms,
+      y: fn(d[key] || 0)
+    }));
+  }
+
+  // rgba colors DOS, shows only in key list
+  
+  const datasets = [
+    ds("Batteriespeicher", mapData("batt"), "rgba(127,127,127,1)"),
+    ds("Pumpspeicher", mapData("pumpHydro"), "rgba(0,40,210,1)"),
+    ds("H2-Speicher", mapData("H2"), "#ff4400")
+  ];
+
+  // Total line //!! bugfix*=1.02, charts does not draw on top althhough last
+  const total = inputData.map(d => ({
+    x: d.timeUTC_ms,
+    y:
+    1.02*(
+        d.batt +
+	d.pumpHydro +
+	d.H2)
+  }));
+
+  datasets.push({
+    label: "Gespeicherte Gesamtenergie",
+    data: total,
+    borderColor: "#000",
+    borderWidth: 3,
+    fill: false,
+    pointRadius: 0
+  });
+  //console.log("datsets=",datasets);
+
+  return datasets;
+  //console.log(datasets);
+}
 
 
-function initChartEnergymix(isDaily, inputData) {
-  let canvasID=(isDaily) ? "chart1" : "chart2";
+
+
+// ######################################################
+// init energymix charts (STATIC)
+// time scales for daily and clipped timeseries handled automatically
+// ######################################################
+
+function initChart(isEnergymix, isDaily, inputData) {
+
+  let canvasID=(isEnergymix) ? ((isDaily) ? "chart1" : "chart2")
+      : ((isDaily) ? "chart3" : "chart4");
+  //console.log("initChart: canvasID=",canvasID);
   const ctx = document.getElementById(canvasID).getContext('2d');
   //let chart = new Chart(ctx, {
   setupClick(canvasID, inputData);
-  let arrIndex=(isDaily) ? 0 : 1;
+  let arrIndex=2*((isEnergymix) ? 0 : 1) + ((isDaily) ? 0 : 1);
+
   allCharts[arrIndex]=new Chart(ctx, {
     type: "line",
     data: {
-      datasets: buildDatasetsEnergymix(inputData)
+      datasets: (isEnergymix) ? buildDatasetsEnergymix(inputData)
+	: buildDatasetsStorage(inputData)
     },
     options: {
       events: ['click'],   // only clicks
@@ -228,16 +240,18 @@ function initChartEnergymix(isDaily, inputData) {
           stacked: true,
           title: {
             display: true,
-            text: "Leistung [GW]"
+            text: ((isEnergymix) ? "Leistung [GW]" : "Energy [GWh]")
           }
         }
       }
     }
   });
-  //console.log("leaving initChartEnergymix, chart1=",chart1);
+  //console.log("leaving initChartEnergymix);
 
 
-}  // initChartEnergymix
+}  // initChart
+
+
 
 
 // ----------------------------
@@ -246,15 +260,52 @@ function initChartEnergymix(isDaily, inputData) {
 function setupClick(canvasID, inputData) {
 
   const box = document.getElementById("clickInfo"); // generic for all charts
+  let canvas=document.getElementById(canvasID);
+  // canvas.onmousemove = handleMouseMove(event,this); // does not work
+
+  canvas.onmousedown = function(event){
+    mousedown=true;
+  }
+
+  canvas.onmouseup = function(event){
+    mousedown=false; xPixDragStart=0;
+  }
+
+  // separate named function does not work;
+  // DOS both inside and outside setupClick
   
-  document.getElementById(canvasID).onclick = function(evt) {
+  canvas.onmousemove = function(event){
+    //console.log("canvas.onmousemove: canvasID=",canvasID,
+//		" mousedown=",mousedown);
+
+    // dragging over top charts to shift range of bottom charts
+    
+    if(mousedown &&((canvasID=="chart1") || (canvasID=="chart3"))){ 
+      getMouseCoordinates(event,this);  //=> xPixUser, yPixUser
+
+      // do moving lower chart ranges
+
+      let xrel=1.08*xPixUser/this.width-0.06;
+      let itcenter=Math.round(xrel*winddata.length);
+      let itmin=itcenter-itHalfInterval;
+      let itmax=itcenter+itHalfInterval;
+      if(Math.abs(xRelDragStart-xrel)>0.02){
+	xRelDragStart=xrel;
+        updateRange(itmin,itmax);
+      }
+    }
+    else{mousedown=false; xPixDragStart=0;}
+  }
+  
+  canvas.onclick = function(evt) {
     let chart=Chart.getChart(canvasID);
-     console.log("setupClick: canvasID=",canvasID," chart=",chart);
+    //console.log("in canvas.onclick: function setupClick: canvasID=",
+//		canvasID," chart=",chart);
 
     const points = chart.getElementsAtEventForMode(
       evt, 'index', { intersect: false }, true
     );
-    console.log("onclick: points=",points);
+    //console.log("onclick: points=",points);
     
     if (!points.length) {
       box.style.display = "none";
@@ -263,9 +314,9 @@ function setupClick(canvasID, inputData) {
 
     const d = inputData[points[0].index];
     const dt = new Date(d.timeUTC_ms);
-    console.log("d=",d);
+    //console.log("d=",d);
     let html = `<b>${dt.toLocaleString('de-DE')}</b><br>`;
-    console.log("html=",html);
+    //console.log("html=",html);
     for (let k in d) {
       if (k !== "timeStr" && k !== "timeUTC_ms") {
         html += `${k}: ${d[k].toFixed(2)} GW<br>`;
@@ -278,8 +329,26 @@ function setupClick(canvasID, inputData) {
     box.style.top = evt.pageY + 10 + "px";
     box.style.display = "block";
     //box.style.fontsize= fontsize; // DOS; set in .css
-    console.log("fontsize=",fontsize," box=",box);
+    //console.log("fontsize=",fontsize," box=",box);
 
+    // move lower charts also at click; because no named functions possible,
+    // code duplication (without the mousedown "if" and w/o min drag condition)
+
+    if((canvasID=="chart1") || (canvasID=="chart3")){
+      getMouseCoordinates(event,this);  //=> xPixUser, yPixUser
+
+      // do moving lower chart ranges
+
+      let xrel=1.08*xPixUser/this.width-0.06;
+      let itcenter=Math.round(xrel*winddata.length);
+      let itmin=itcenter-itHalfInterval;
+      let itmax=itcenter+itHalfInterval;
+      //console.log("itmin=",itmin," itmax=",itmax);
+      xRelDragStart=xrel;
+      updateRange(itmin,itmax);
+      
+    }
+    mousedown=false; xPixDragStart=0;
   };
 }
 
