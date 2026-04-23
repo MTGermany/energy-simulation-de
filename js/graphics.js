@@ -8,6 +8,7 @@ Chart.animation=false; // DOS, in options
 //let chart3; // 1-year or custom display storage 
 //let chart4; // 14-day moving window storage
 let allCharts=new Array(4);
+const canvasIDs=["chart1", "chart2","chart3", "chart4"];
 
 
 
@@ -97,8 +98,13 @@ function buildDatasetsEnergymix(inputData) {
     fill: false,
     pointRadius: 0
   });
-  //console.log("datsets=",datasets);
-
+  if(false){console.log("builddatsetsEnergymix:",
+	      " datasets[1].data[0]=",datasets[1].data[0],
+	      " datasets[16].data[0]=",datasets[16].data[0],
+	      " inputData[0]=",inputData[0].runningHydro,
+	      " inputData[0].runningHydro=",inputData[0].runningHydro,
+	      "");
+	   }
   return datasets;
 }
 
@@ -160,8 +166,8 @@ function buildDatasetsStorage(inputData) {
 
 function initChart(isEnergymix, isDaily, inputData) {
 
-  let canvasID=(isEnergymix) ? ((isDaily) ? "chart1" : "chart2")
-      : ((isDaily) ? "chart3" : "chart4");
+  let canvasID=(isEnergymix) ? ((isDaily) ? canvasIDs[0] : canvasIDs[1])
+      : ((isDaily) ? canvasIDs[2] : canvasIDs[3]);
   //console.log("initChart: canvasID=",canvasID);
   const ctx = document.getElementById(canvasID).getContext('2d');
   //let chart = new Chart(ctx, {
@@ -246,7 +252,7 @@ function initChart(isEnergymix, isDaily, inputData) {
       }
     }
   });
-  //console.log("leaving initChartEnergymix);
+//  console.log("leaving initChartEnergymix, allCharts[arrIndex]=",allCharts[arrIndex]);
 
 
 }  // initChart
@@ -278,9 +284,9 @@ function setupClick(canvasID, inputData) {
     //console.log("canvas.onmousemove: canvasID=",canvasID,
 //		" mousedown=",mousedown);
 
-    // dragging over top charts to shift range of bottom charts
+    // dragging over top charts 0,2 to shift range of bottom charts
     
-    if(mousedown &&((canvasID=="chart1") || (canvasID=="chart3"))){ 
+    if(mousedown &&((canvasID==canvasIDs[0]) || (canvasID==canvasIDs[2]))){ 
       getMouseCoordinates(event,this);  //=> xPixUser, yPixUser
 
       // do moving lower chart ranges
@@ -334,7 +340,7 @@ function setupClick(canvasID, inputData) {
     // move lower charts also at click; because no named functions possible,
     // code duplication (without the mousedown "if" and w/o min drag condition)
 
-    if((canvasID=="chart1") || (canvasID=="chart3")){
+    if((canvasID==canvasIDs[0]) || (canvasID==canvasIDs[2])){
       getMouseCoordinates(event,this);  //=> xPixUser, yPixUser
 
       // do moving lower chart ranges

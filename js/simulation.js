@@ -940,15 +940,32 @@ function updateCharts(){
 }
 
 function updateChartsDaily(){
-  updateChartEnergymix(allCharts[0], energymixDaily); 
-  updateChartStorage(allCharts[2], storageDaily);
+  updateChartEnergymix(allCharts[0], canvasIDs[0], energymixDaily);
+  //console.log("updateChartsDaily(): energymixDaily[0]=",energymixDaily[0]);
+  updateChartStorage(allCharts[2], canvasIDs[2], storageDaily);
 }
 
 function updateChartsClipped(){
-  updateChartEnergymix(allCharts[1], energymixClipped); 
-  updateChartStorage(allCharts[3], storageClipped);
+  updateChartEnergymix(allCharts[1], canvasIDs[1], energymixClipped); 
+  updateChartStorage(allCharts[3], canvasIDs[3], storageClipped);
 }
 
+function updateChartEnergymix(chart, canvasID, inputData){
+  //console.log("chart=",chart);
+  chart.data.datasets=buildDatasetsEnergymix(inputData);
+  chart.update();
+  setupClick(canvasID, inputData); // otherwise box outdated
+
+}
+
+// storage: other chart structure
+
+function updateChartStorage(chart, canvasID, inputData){ 
+  //console.log("chart=",chart);
+  chart.data.datasets=buildDatasetsStorage(inputData);
+  chart.update();
+  setupClick(canvasID, inputData); // otherwise box outdated
+}
 
 function updateSimulation(strategy){
   console.log("\n\n\nbefore updateSimulation, strategy=",strategy);
@@ -988,7 +1005,7 @@ function calcDailyTimeseries(){
     return [energymixDaily, storageDaily];
   }
 
-  let keysMix=["load", "nuclear", "solar", "windOn", "windOff", "importHrly","batt", "pumpHydro", "H2", "biomass", "gas", "coal"];
+  let keysMix=["load", "nuclear", "solar", "windOn", "windOff", "importHrly","batt", "runningHydro", "pumpHydro", "H2", "biomass", "gas", "coal"];
 
   let keysStorage=["batt", "pumpHydro", "H2"];
   
@@ -1063,17 +1080,6 @@ function displayText(){
 
   
 
-function updateChartEnergymix(chart,inputData){
-  //console.log("chart=",chart);
-  chart.data.datasets=buildDatasetsEnergymix(inputData);
-  chart.update();
-}
-
-function updateChartStorage(chart,inputData){
-  //console.log("chart=",chart);
-  chart.data.datasets=buildDatasetsStorage(inputData);
-  chart.update();
-}
 
 
 
