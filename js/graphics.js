@@ -30,6 +30,7 @@ function ds(label, data, color, stack = "default", fill = true) {
     tension: 0,
     pointRadius: 0,
     borderWidth: 0,
+    order: 1,
     stack
   };
 }
@@ -60,7 +61,7 @@ function buildDatasetsEnergymix(inputData) {
     ds("WindOn", mapData("windOn"), "rgba(0,127,255,1)"),
     ds("WindOff", mapData("windOff"), "rgba(0,40,225,1)"),
     ds("Solar", mapData("solar"), "rgba(255,200,0,1)"),
-    ds("Import", mapData("importHrly", clampPositive), "rgba(180,180,180,1"),
+    ds("Import", mapData("importHrly", clampPositive), "rgba(180,180,180,1)"),
 
     ds("Pumpspeicher (+)", mapData("pumpHydro", clampPositive), "#17becf"),
     ds("Batterien (+)", mapData("batt", clampPositive), "#9467bd"),
@@ -75,7 +76,7 @@ function buildDatasetsEnergymix(inputData) {
   const total = inputData.map(d => ({
     x: d.timeUTC_ms,
     y:
-    1.02*(
+    0.92*(
         d.biomass +
 	d.runningHydro +
 	d.nuclear +  
@@ -96,6 +97,8 @@ function buildDatasetsEnergymix(inputData) {
     borderColor: "#000",
     borderWidth: 3,
     fill: false,
+    stack: 'independent',
+    order: 0,
     pointRadius: 0
   });
   if(false){console.log("builddatsetsEnergymix:",
@@ -105,6 +108,7 @@ function buildDatasetsEnergymix(inputData) {
 	      " inputData[0].runningHydro=",inputData[0].runningHydro,
 	      "");
 	   }
+  console.log("datasets=",datasets);
   return datasets;
 }
 
