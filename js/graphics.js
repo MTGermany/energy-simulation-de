@@ -1,3 +1,23 @@
+
+const colBiomass="rgba(0,127,0,1)";
+const colRunningHydro="rgb(0,0,255)";
+const colPumpHydro="rgb(0,0,155)";
+const colNuclear="rgb(200,0,200)";
+const colCoal="rgb(50,50,50)";
+const colGas="rgb(255,120,60)";
+const colH2="rgb(255,0,0)";
+const colWindOn="rgb(0,200,255)";
+const colWindOff="rgb(0,127,255)";
+const colSolar="rgb(255,200,0)";
+const colImport="rgb(180,180,180)";
+const colBatt="rgb(150,0,200)";
+
+
+
+
+
+
+
 Chart.defaults.font.size = Math.round(2*vmin); // OK
 Chart.maintainAspectRatio= false; // DOS; need to define in Chart.options
 Chart.responsive=true; // OK
@@ -50,49 +70,52 @@ function buildDatasetsEnergymix(inputData) {
     }));
   }
 
-  // rgba colors DOS, shows only in key list
+  // rgba or rgb colors possible
   
   const datasets = [
-    ds("Biomasse", mapData("biomass"), "rgba(0,127,0,1)"),
-    ds("Laufwasser", mapData("runningHydro"), "rgba(0,0,255,1)"),
-    ds("Kernkraft", mapData("nuclear"), "#aa00aa"),
-    ds("Kohle", mapData("coal"), "#444"),
-    ds("Gas", mapData("gas"), "#ff7f50"),
-    ds("WindOn", mapData("windOn"), "rgba(0,127,255,1)"),
-    ds("WindOff", mapData("windOff"), "rgba(0,40,225,1)"),
-    ds("Solar", mapData("solar"), "rgba(255,200,0,1)"),
-    ds("Import", mapData("importHrly", clampPositive), "rgba(180,180,180,1)"),
-
-    ds("Pumpspeicher (+)", mapData("pumpHydro", clampPositive), "#17becf"),
-    ds("Batterien (+)", mapData("batt", clampPositive), "#9467bd"),
-    ds("H2-Speicher (+)", mapData("H2", clampPositive), "#bcbd22"),
-    ds("Export", mapData("importHrly", clampNegative), "#888888", "neg"),
-    ds("Pumpspeicher (-)", mapData("pumpHydro", clampNegative), "#17becf", "neg"),
-    ds("Batteryien (-)", mapData("batt", clampNegative), "#9467bd", "neg"),
-    ds("H2-Speicher (-)", mapData("H2", clampNegative), "#bcbd22", "neg")
+    ds("Biomasse", mapData("biomass"), colBiomass),
+    ds("Laufwasser", mapData("runningHydro"), colRunningHydro),
+    ds("Kernkraft", mapData("nuclear"), colNuclear),
+    ds("Kohle", mapData("coal"), colCoal),
+    ds("Gas", mapData("gas"), colGas),
+    ds("WindOn", mapData("windOn"), colWindOn),
+    ds("WindOff", mapData("windOff"), colWindOff),
+    ds("Solar", mapData("solar"), colSolar),
+    ds("Import", mapData("importHrly", clampPositive), colImport),
+    ds("Pumpspeicher (+)", mapData("pumpHydro", clampPositive),colPumpHydro),
+    ds("Batterien (+)", mapData("batt", clampPositive), colBatt),
+    ds("H2-Speicher (+)", mapData("H2", clampPositive), colH2),
+    ds("Export", mapData("importHrly", clampNegative), colImport, "neg"),
+    ds("Pumpspeicher (-)",mapData("pumpHydro", clampNegative),
+       colPumpHydro, "neg"),
+    ds("Batteryien (-)",mapData("batt",clampNegative),colBatt,"neg"),
+    ds("H2-Speicher (-)", mapData("H2", clampNegative), colH2, "neg")
   ];
 
-  // Total line //!! bugfix*=1.02, charts does not draw on top althhough last
+
   const total = inputData.map(d => ({
     x: d.timeUTC_ms,
     y:
-    0.92*(
-        d.biomass +
-	d.runningHydro +
-	d.nuclear +  
-        d.coal +
-	d.gas +
-        d.windOn +
-        d.windOff +
-        d.solar +
-        clampPositive(d.importHrly) +
-	clampPositive(d.pumpHydro) +
-	clampPositive(d.batt) +
-	clampPositive(d.H2))
+    1.00*(
+      d.biomass
+	+ d.runningHydro
+	+ d.nuclear 
+        + d.coal 
+	+ d.gas
+        + d.windOn
+        + d.windOff
+        + d.solar
+        + d.importHrly
+        //+ clampPositive(d.importHrly) 
+	//+ clampPositive(d.pumpHydro) 
+	//+ clampPositive(d.batt) 
+      //+ clampPositive(d.H2)
+    )
   }));
 
   datasets.push({
-    label: "Nachfrage+Export+Laden",
+    //label: "Nachfrage+Export+Laden",
+    label: "Nachfrage",
     data: total,
     borderColor: "#000",
     borderWidth: 3,
@@ -128,19 +151,18 @@ function buildDatasetsStorage(inputData) {
     }));
   }
 
-  // rgba colors DOS, shows only in key list
   
   const datasets = [
-    ds("Batteriespeicher", mapData("batt"), "rgba(127,127,127,1)"),
-    ds("Pumpspeicher", mapData("pumpHydro"), "rgba(0,40,210,1)"),
-    ds("H2-Speicher", mapData("H2"), "#ff4400")
+    ds("Batteriespeicher", mapData("batt"), colBatt),
+    ds("Pumpspeicher", mapData("pumpHydro"), colPumpHydro),
+    ds("H2-Speicher", mapData("H2"), colH2)
   ];
 
   // Total line //!! bugfix*=1.02, charts does not draw on top althhough last
   const total = inputData.map(d => ({
     x: d.timeUTC_ms,
     y:
-    1.02*(
+    1.00*(
         d.batt +
 	d.pumpHydro +
 	d.H2)
@@ -170,6 +192,11 @@ function buildDatasetsStorage(inputData) {
 
 function initChart(isEnergymix, isDaily, inputData) {
 
+  // y axis max=max(suggestedMaxVal, dataMax)
+  
+  const suggestedMaxVal=(!isEnergymix && (!isDaily))
+	? H2Energy0+hydroEnergy0+battEnergy0 : 0;
+
   let canvasID=(isEnergymix) ? ((isDaily) ? canvasIDs[0] : canvasIDs[1])
       : ((isDaily) ? canvasIDs[2] : canvasIDs[3]);
   //console.log("initChart: canvasID=",canvasID);
@@ -188,6 +215,8 @@ function initChart(isEnergymix, isDaily, inputData) {
       events: ['click'],   // only clicks
       maintainAspectRatio: false,
       animation: false,
+      parsing: false,  // speedup-hint by ChatGPT
+      normalized: true,  // speedup-hint by ChatGPT
       interaction: {
         mode: 'index',
         intersect: false
@@ -248,6 +277,7 @@ function initChart(isEnergymix, isDaily, inputData) {
 	
 	y: {
           stacked: true,
+	  suggestedMax: suggestedMaxVal,
           title: {
             display: true,
             text: ((isEnergymix) ? "Leistung [GW]" : "Energy [GWh]")
@@ -270,15 +300,24 @@ function initChart(isEnergymix, isDaily, inputData) {
 function setupClick(canvasID, inputData) {
 
   const box = document.getElementById("clickInfo"); // generic for all charts
-  let canvas=document.getElementById(canvasID);
+  const canvas=document.getElementById(canvasID);
+  const ctx = canvas.getContext('2d');
+  
+  // only rect, not canvas has width unless explicitly assigned from rect!!
+  const rect = canvas.getBoundingClientRect(); 
+  
+  const xPixOffset=-0.01*rect.width; // distance between pointer and zoombar
+
+  
   // canvas.onmousemove = handleMouseMove(event,this); // does not work
+  // treat it here directly inside function 
 
   canvas.onmousedown = function(event){
     mousedown=true;
   }
 
   canvas.onmouseup = function(event){
-    mousedown=false; xPixDragStart=0;
+    mousedown=false;
   }
 
   // separate named function does not work;
@@ -291,20 +330,33 @@ function setupClick(canvasID, inputData) {
     // dragging over top charts 0,2 to shift range of bottom charts
     
     if(mousedown &&((canvasID==canvasIDs[0]) || (canvasID==canvasIDs[2]))){ 
-      getMouseCoordinates(event,this);  //=> xPixUser, yPixUser
 
-      // do moving lower chart ranges
+      //getMouseCoordinates(event,canvas);  //=> xPixUser, yPixUser
+      
+      let xPixLeft=rect.left; // left-upper corner of the canvas 
+      let yPixTop=rect.top;  // in browser reference system
+      xPixUser= event.clientX-xPixLeft; //pixel coords in canvas reference
+      yPixUser= event.clientY-yPixTop;
+      
+      // draw zoomed=in region on this canvas
 
-      let xrel=1.08*xPixUser/this.width-0.06;
+      translateX_val="translateX("+(0.978*(xPixUser-xPixOffset))+"px";
+      console.log("translateX_val=",translateX_val);
+      document.getElementById("zoomInRegion").style.transform=translateX_val;
+
+
+      // move lower chart ranges
+
+      let xrel=1.08*xPixUser/canvas.width-0.06;
       let itcenter=Math.round(xrel*winddata.length);
       let itmin=itcenter-itHalfInterval;
       let itmax=itcenter+itHalfInterval;
-      if(Math.abs(xRelDragStart-xrel)>0.02){
+      if(Math.abs(xRelDragStart-xrel)>0.002){ // rhs=mouse drag delay
 	xRelDragStart=xrel;
         updateRange(itmin,itmax);
       }
     }
-    else{mousedown=false; xPixDragStart=0;}
+    else{mousedown=false;}
   }
   
   canvas.onclick = function(evt) {
@@ -335,7 +387,7 @@ function setupClick(canvasID, inputData) {
 
     let fontsize=(Math.round(2.5*vmin)).toString();
     box.innerHTML = html;
-    box.style.left = evt.pageX + 10 + "px"; //!!!
+    box.style.left = evt.pageX + 10 + "px"; //!!
     box.style.top = evt.pageY + 10 + "px";
     box.style.display = "block";
     //box.style.fontsize= fontsize; // DOS; set in .css
@@ -345,9 +397,12 @@ function setupClick(canvasID, inputData) {
     // code duplication (without the mousedown "if" and w/o min drag condition)
 
     if((canvasID==canvasIDs[0]) || (canvasID==canvasIDs[2])){
-      getMouseCoordinates(event,this);  //=> xPixUser, yPixUser
+      getMouseCoordinates(event,canvas);  //=> xPixUser, yPixUser
 
-      // do moving lower chart ranges
+     // draw zoomed=in region on this canvas
+
+
+      // do move lower chart ranges
 
       let xrel=1.08*xPixUser/this.width-0.06;
       let itcenter=Math.round(xrel*winddata.length);
@@ -358,7 +413,7 @@ function setupClick(canvasID, inputData) {
       updateRange(itmin,itmax);
       
     }
-    mousedown=false; xPixDragStart=0;
+    mousedown=false; 
   };
 }
 

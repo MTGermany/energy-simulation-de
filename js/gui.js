@@ -415,7 +415,7 @@ function handleMouseDown(event){
   //console.log("handleMouseDown from div");
 }
 
-// does not work -> in graphics
+// does not work -> in graphics canvas.onmousemove = function(event){
 
 function handleMouseMove(event,canvas){
   //console.log("handleMouseMove: mouse moved"); 

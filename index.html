@@ -270,12 +270,22 @@
 </center>
 </div>
 
+
+
+
+<!-- The display/graphics side of the simulation -->
+
+
+
+<div id="zoomInRegion" style.display="block">
+</div>
+
 <div id="areaGraphics1" style.display="block"
      onmouseenter="handleMouseEnter(event)">
   
   <!-- for some unknown reason all event listeners inside canvas do
-  not work and outside tehy do not know the canvas => no x,y
-; delegated to inside function setupClick() in
+  not work and outside they do not know the canvas => no x,y
+  => delegated to inside function setupClick() in
   graphics.js-->
   
   <canvas id="chart1">

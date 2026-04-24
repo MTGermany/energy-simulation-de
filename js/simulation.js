@@ -953,7 +953,7 @@ function updateChartsClipped(){
 function updateChartEnergymix(chart, canvasID, inputData){
   //console.log("chart=",chart);
   chart.data.datasets=buildDatasetsEnergymix(inputData);
-  chart.update();
+  chart.update('none');  // speedup w/respect to update() if no new structure
   setupClick(canvasID, inputData); // otherwise box outdated
 
 }
@@ -963,7 +963,7 @@ function updateChartEnergymix(chart, canvasID, inputData){
 function updateChartStorage(chart, canvasID, inputData){ 
   //console.log("chart=",chart);
   chart.data.datasets=buildDatasetsStorage(inputData);
-  chart.update();
+  chart.update('none'); // suggestion by ChatGPT
   setupClick(canvasID, inputData); // otherwise box outdated
 }
 

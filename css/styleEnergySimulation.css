@@ -196,7 +196,7 @@ table.infoTable td {
   display: none;  z-index: 3; /* the higher the integer, the more on top */
 }
 
-/* (2) Merkelsmileys */
+/* (2) landscape: Merkelsmileys */
 
 #merkelsmileys{
   position: absolute;
@@ -212,6 +212,21 @@ table.infoTable td {
   width: 8vmin; /* works with "%" size in <img ...> in html */
   height: 6vmin;
   z-index: 4; /* the higher the integer, the more on top */
+}
+
+
+/* (3) landscape: the semi-transparent zoon region over areaGraphics1 */
+
+#zoomInRegion{
+  position: absolute;
+  left:   40vw;     /* same as#areaGraphics1 */
+  top:   30vh;
+  width:  1vw; 
+  height: 17vh;
+  margin-right: 0vw;
+  margin-left: 0vw;
+  background-color: rgba(0,0,0,0.2);
+  z-index: 1;
 }
 
 
@@ -274,6 +289,7 @@ table.infoTable td {
       font-size: 1.5vmin;
       display: none;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      z-index: 2;
 }
 
 
