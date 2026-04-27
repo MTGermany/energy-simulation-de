@@ -81,16 +81,18 @@ function buildDatasetsEnergymix(inputData) {
     ds("WindOn", mapData("windOn"), colWindOn),
     ds("WindOff", mapData("windOff"), colWindOff),
     ds("Solar", mapData("solar"), colSolar),
-    ds("Import", mapData("importHrly", clampPositive), colImport),
-    ds("Pumpspeicher (+)", mapData("pumpHydro", clampPositive),colPumpHydro),
-    ds("Batterien (+)", mapData("batt", clampPositive), colBatt),
-    ds("H2-Speicher (+)", mapData("H2", clampPositive), colH2),
-    ds("Export", mapData("importHrly", clampNegative), colImport, "neg"),
-    ds("Pumpspeicher (-)",mapData("pumpHydro", clampNegative),
+    ds("Import/Export", mapData("importHrly", clampPositive), colImport),
+    ds("Pumpspeicher", mapData("pumpHydro", clampPositive),colPumpHydro),
+    ds("Batterien", mapData("batt", clampPositive), colBatt),
+    ds("H2-Speicher", mapData("H2", clampPositive), colH2),
+    ds("", mapData("importHrly", clampNegative), colImport, "neg"),
+    ds("",mapData("pumpHydro", clampNegative),
        colPumpHydro, "neg"),
-    ds("Batteryien (-)",mapData("batt",clampNegative),colBatt,"neg"),
-    ds("H2-Speicher (-)", mapData("H2", clampNegative), colH2, "neg")
+    ds("",mapData("batt",clampNegative),colBatt,"neg"),
+    ds("", mapData("H2", clampNegative), colH2, "neg")
   ];
+
+  //console.log("datasets=",datasets);
 
 
   const total = inputData.map(d => ({
@@ -224,7 +226,15 @@ function initChart(isEnergymix, isDaily, inputData) {
 
       plugins: {
         tooltip: { enabled: false },
-        legend: { display: true }
+        legend: {
+	  display: true,
+	  labels: { // don't draw legend for legend text ''
+            filter: function(legendItem, data) {
+	      //console.log("legendItem=",legendItem);
+	      return (legendItem.text!=='');
+            }
+	  }
+	}
       },
       scales: {
         x: {
@@ -271,7 +281,9 @@ function initChart(isEnergymix, isDaily, inputData) {
 	    },
 
 	    maxRotation: 0,
-	    autoSkip: true
+	    autoSkip: false,
+	    align: 'inner',
+	    maxTicksLimit: 10
 	  }
 	},
 	
@@ -423,8 +435,8 @@ function setupClick(canvasID, inputData) {
   
   canvas.onclick = function(event) {
     let chart=Chart.getChart(canvasID);
-    //console.log("in canvas.onclick: function setupClick: canvasID=",
-//		canvasID," chart=",chart);
+    const isTopChart=((canvasID==canvasIDs[0])||(canvasID==canvasIDs[2]));
+    const isEnergyChart=((canvasID==canvasIDs[0])||(canvasID==canvasIDs[1]));
 
     const points = chart.getElementsAtEventForMode(
       event, 'index', { intersect: false }, true
@@ -437,15 +449,15 @@ function setupClick(canvasID, inputData) {
     }
 
     const d = inputData[points[0].index];
-    //console.log("d=",d);
-    const dt = new Date(d.timeUTC_ms).toDateString();
-    //const dt = getDate(d.timeUTC_ms);
+    const dt = (isTopChart)
+	  ? new Date(d.timeUTC_ms).toDateString()
+	  : new Date(d.timeUTC_ms);
 
     let html = `<b>${dt.toLocaleString('de-DE')}</b><br>`;
 
     // selected data for energy view
 
-    if((canvasID==canvasIDs[0])||(canvasID==canvasIDs[1])){
+    if(isEnergyChart){
       html += "Nachfrage: "+d.load.toFixed(1)+" GW<br>";
       html += "Solar: "+d.solar.toFixed(1)+" GW<br>";
       html += "Wind: "+(d.windOn+d.windOff).toFixed(1)+" GW<br>";
@@ -460,18 +472,18 @@ function setupClick(canvasID, inputData) {
     }
 
 
-    let fontsize=(Math.round(2.5*vmin)).toString();
+    let fontsize=(Math.round(2.0*vmin)).toString();
     box.innerHTML = html;
     box.style.left = event.pageX + 10 + "px"; //!!
-    box.style.top = 1*vh; //event.pageY + 10 + "px";
+    box.style.top = (isTopChart) ? 1*vh : 51*vh;
     box.style.display = "block";
-    box.style.fontSize=fontsize;//fontsize; // DOS; set in .css
+    box.style.fontSize=fontsize;
     console.log(" box.style=",box.style);
 
     // move lower charts also at click; because no named functions possible,
     // code duplication (without the mousedown "if" and w/o min drag condition)
 
-    if((canvasID==canvasIDs[0]) || (canvasID==canvasIDs[2])){
+    if(isTopChart){
       getMouseCoordinates(event,canvas);  //=> xPixUser, yPixUser
 
       let otherChart=(canvasID==canvasIDs[0])

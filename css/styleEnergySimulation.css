@@ -17,19 +17,21 @@ INFO: full HD =1080p (1920×1080 px), aspect ratio 5/3;
 
 
 body{
-  margin: 10;
-  padding: 10;
+  overflow: hidden; /* Hide scrollbars */
+
+  margin: 0;
+  padding: 0;
   /*overflow-x: hidden;*/ /* remove horizontal scrollbar */
   font-family: 'helvetica', sans-serif;
                  /*font-size: 14px;*/
   font-size: 2.2vmin;
   /*text-align: center;*/
-  color: #404050;   /* text color */
+  color: #000000;   /* text color */
   background-color: #FFFFFF;
 }
 
 button,select{    /* see also toggle control */
-    font-size: 2.4vmin;
+    font-size: 2.2vmin;
     width: 17vw;
     height: 9vh;
 }
@@ -41,21 +43,39 @@ button,select{    /* see also toggle control */
 
 th{                    /* only used in infotext */
   font-size: 2.4vmin;
-  font-weight: bold; 
-  color: #404060;      /* text color */
+  /*font-weight: bold; */
 
 }
 
 td{
-  font-size:2.0vmin; 
-  font-weight: bold; 
-  color: #404060;   /* only WITHOUT quotes here, not "#404060" etc */
+  font-size:2.2vmin; 
+  /*font-weight: bold; */
 }
 
 td.important{
   font-size:2.0vmin; 
   font-weight: bold; 
   color: #dd0033;
+}
+
+
+table.infoTable {
+   border-collapse: collapse;
+   color: rgb(205,0,0);
+   background-color: rgba(255,255,255,0.7);
+}
+table.infoTable td {
+   border: 1px ridge rgb(0,0,0);
+   color: rgb(205,0,0);
+}
+
+table.impressumTable {
+   border-collapse: collapse;
+   background-color: rgba(255,255,255,0.7);
+}
+table.impressumTable td {
+   border: 1px ridge rgb(0,0,0);
+   font-size:1.8vmin; 
 }
 
 
@@ -73,7 +93,7 @@ td.important{
 
  h2{
      font-family: helvetica, sans-serif;
-     font-size: 3.0vmin;
+     font-size: 2.7vmin;
      font-weight: bold;
      color: #446;
      padding-top:0px;
@@ -113,15 +133,6 @@ a:active {
 a:hover {
 	text-decoration: underline;
 	color: #07A;
-}
-
-table.infoTable {
-   border: 0px ridge rgb(130,130,130); /* spacing, padding DOS with border-collapse */
-   border-collapse: collapse; 
-   background-color: rgba(255,255,255,0.7);
-}
-table.infoTable td {
-   border: 2px ridge rgb(130,130,130);
 }
 
 
@@ -200,40 +211,30 @@ table.infoTable td {
 
 #merkelsmileys{
   position: absolute;
-  top: 53vmin;
-  left: 1vw;
+  top: 63vmin;
+  left: 3vw;
   /* DOS here; width controlled by image in javascript: */
-  z-index: 4; /* the higher the integer, the more on top */
+  z-index: 0; /* the higher the integer, the more on top */
 }
 #raute{
   position: absolute;
-  top: 60vmin;
-  left: 1vw;
+  top: 70vmin;
+  left: 3vw;
   width: 8vmin; /* works with "%" size in <img ...> in html */
   height: 6vmin;
-  z-index: 4; /* the higher the integer, the more on top */
+  z-index: 0; /* the higher the integer, the more on top */
 }
 
 
 /* (3) landscape: the semi-transparent zoon region over areaGraphics1 */
 
-#zoomInGray{
-  position: absolute;
-  left:   40vw;     /* same as#areaGraphics1 */
-  top:   0vh;
-  width:  1vw; 
-  height: 42.5vh;     /* reaches down to #areaGraphics2 */
-  margin-right: 0vw;
-  margin-left: 0vw;
-  background-color: rgba(0,0,0,0.2);
-  z-index: 0;
-}
+
 
 #zoomInRegion{
   position: absolute;
   left:   40vw;     /* same as#areaGraphics1 */
   top:   0vh;
-  width:  60vw; 
+  width:  59vw; 
   height: 47vh;     /* reaches down to #areaGraphics2 */
   margin-right: 0vw;
   margin-left: 0vw;
@@ -247,8 +248,8 @@ table.infoTable td {
 #areaGraphics1{
   position: absolute;
   left:   40vw;
-  top:   0vh;
-  width:  60vw; /* canvas inside area no drawing limit but define pixel */
+  top:   3vh;
+  width:  59vw; /* canvas inside area no drawing limit but define pixel */
   height: 47vh; /* range by embedding graphics region zoomInRegion */
   margin-right: 0vw;
   margin-left: 0vw;
@@ -260,7 +261,7 @@ table.infoTable td {
   position: absolute;
   left:   40vw;
   top:   50vh;
-  width:  60vw; 
+  width:  59vw; 
   height: 47vh;
   margin-right: 0vw;
   margin-left: 0vw;
@@ -271,8 +272,8 @@ table.infoTable td {
 #areaGraphics3{
   position: absolute;
   left:   40vw;
-  top:   0vh;
-  width:  60vw; 
+  top:   3vh;
+  width:  59vw; 
   height: 47vh;
   margin-right: 0vw;
   margin-left: 0vw;
@@ -284,7 +285,7 @@ table.infoTable td {
   position: absolute;
   left:   40vw;
   top:   50vh;
-  width:  60vw; 
+  width:  59vw; 
   height: 47vh;
   margin-right: 0vw;
   margin-left: 0vw;
@@ -300,6 +301,33 @@ table.infoTable td {
       display: none;
       background: white;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      z-index: 0;
+}
+
+#generalInfo {
+      position: absolute;
+      border: 0px solid #ccc;
+      padding: 8px;
+      display: block;
+      left: 5vw;
+      top: 81vh;
+      font-size: 2.0vmin;
+      /*width:  15vw; 
+      height: 12vh;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);*/
+      z-index: 0;
+}
+
+#CO2Info {
+      position: absolute;
+      border: 0px solid #ccc;
+      padding: 8px;
+      display: block;
+      left: 25vw;
+      top: 87vh;
+      color: rgb(200,0,0);
+      font-size: 3vmin;
+      font-weight: bold;
       z-index: 0;
 }
 
@@ -326,10 +354,9 @@ table.infoTable td {
 
 #impressum{ 
   position: absolute;
-  top: 96%;  /* % takes care of scrollbars, vmin/vh not*/
-  left: 0.5vw;
-  /*background-color: rgba(255,255,255,0.7);*/
-  font-size: 1.5vmin;
+  top: 90%;  /* % takes care of scrollbars, vmin/vh not*/
+  left: 60vw;
+  width: 24vw;
   z-index: 1; /* the higher the integer, the more on top landscape */
 }
 

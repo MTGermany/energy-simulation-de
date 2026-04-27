@@ -17,7 +17,6 @@
 
 
 <body>
-
 <div id="header"> 
   <h1><center>Energie-Simulation</center></h1>
 </div>
@@ -46,6 +45,10 @@
 </div>
 -->
 
+<div id="merkelsmileys"></div>
+<div id="raute">
+  <img src='figs/Merkelraute_Template.png' width="100%">
+</div>
 
 <!-- ################################################# -->
 <!-- Control panel 1: supply and demand
@@ -90,9 +93,10 @@
 </table>
 
 
+
 <h2>Kraftwerkspark</h2>
 (Biomasse 4 MW und 2 Wasserkraft 2 MW konstant wie bisher)
-<br><br>
+<br>
   </center>
   
 <p align="right" margin-right="3vw">
@@ -165,13 +169,6 @@
 </p>
 
 
-<div id="merkelsmileys">
-</div>
-
-<div id="raute">
-  <img src='figs/Merkelraute_Template.png' width="100%">
-</div>
-
 
 </div>  <!--id="controlSupplyDemandDiv"-->
 
@@ -185,7 +182,7 @@
 
   <br><br><br>
   
-<h2>Batterien (eta = 0.9 * 0.9 = 81%) &nbsp;
+<h2>Batterien (&eta; = 0.9 * 0.9 = 81%) &nbsp;
   <a href="./infoBatt.html">(Info)</a></h2>
   
 <table id="mainTable" border="0" cellspacing="3vmin"
@@ -208,7 +205,7 @@
 </table>
 
 
-<h2>Wasserstoff (eta = 0.6 * 0.4 = 24%) &nbsp;
+<h2>Wasserstoff (&eta; = 0.6 * 0.4 = 24%) &nbsp;
   <a href="./infoH2.html">(Info)</a></h2>
 
 <table id="mainTable" border="0" cellspacing="3vmin"
@@ -278,16 +275,16 @@
 
 <!-- canvas just for the two zoom-in lines 
 pointing from top to bottom chart
-(note that canvas always need a container) -->
+(note that canvas always need a container for correct positioning) -->
+
+<!--  ATTENTION!!! Only works if this zoomInRegion is ABOVE -->
+<!-- the other canvas. Do not know why. Also, regardless of -->
+<!-- z index etc this canvas ALWAYS at bottom -->
 
 <div id="zoomInRegion" style.display="block">
-  <canvas id="zoomInCanvas" style="z-index: 2;">  <!-- DOS z index -->
+  <canvas id="zoomInCanvas" style="z-index: 0;">  <!-- DOS z index -->
   </canvas>
 </div>
-
-<!-- moving semi-transparent time window over top chart -->
-<!--<div id="zoomInGray" style.display="block">
-</div>-->
 
 
 <div id="areaGraphics1" style.display="block"
@@ -304,6 +301,9 @@ pointing from top to bottom chart
     Your browser does not support the HTML5 canvas tag.
   </canvas>
 </div>
+
+
+
 
 <div id="areaGraphics2">
   <canvas id="chart2">
@@ -329,7 +329,10 @@ pointing from top to bottom chart
 </div>
 
 
+<div id="generalInfo"></div>
 <div id="clickInfo"></div>
+
+<div id="CO2Info"></div>
 
 
 <!-- ################################################# -->
@@ -337,7 +340,8 @@ pointing from top to bottom chart
 <!-- ################################################# -->
 
 <div id="impressum">
-  <table class="infoTable"> <TR>
+
+  <table class="impressumTable"> <tr>
     <td> <a href="impressum.html"> &copy; Martin Treiber</a></td>
     <TD> <a href="https://github.com/movsim/traffic-simulation-de">
           Offline: sources at GitHub</a></TD>

@@ -319,6 +319,15 @@ simulation.prototype.update=function(it){
     "H2": 0
   };
 
+  this.hourlyCurtailment={ // in kWh  per hour
+    "solar": 0,
+    "windOn": 0,
+    "windOff": 0,
+    "nuclear": maxNuclear-minNuclear,
+    "coal": maxCoal-minCoal,
+    "gas": maxGas-minGas
+  }
+
   this.hourlySolarRegions={
     "region0":0,
     "region1":0,
@@ -475,12 +484,12 @@ simulation.prototype.update=function(it){
    #################################################################*/
 
   //if(it==0){console.log("\n\nrunSimulation: this.strategy=",this.strategy);}
-  if(this.strategy!=1){
+  if(this.strategy!=0){
     alert("error: strategy ",this.strategy," not yet implemented");
     return false;
   }
   
-  if(this.strategy==1){ //"Klimaschoner"
+  if(this.strategy==0){ //"Klimaschoner"
 
     // (1) add max sun, wind, and nuclear to preexisting minimum supply
 
@@ -573,12 +582,16 @@ simulation.prototype.update=function(it){
     // curtail windOff due to lacking demand (grid bottlenecks at maxWindOff)
     
     if(this.mismatch()>0){
-   
-      if(this.mismatch()>maxWindOff){
+      const loc_mismatch=this.mismatch();
+
+      if(loc_mismatch>maxWindOff){
+	this.hourlyCurtailment.windOff=maxWindOff;
         this.hourlymix.windOff=0;
       }
       else{
-        this.hourlymix.windOff -= this.mismatch();
+	this.hourlyCurtailment.windOff=loc_mismatch;
+        this.hourlymix.windOff -= loc_mismatch;
+	
 	if(Math.abs(this.mismatch())>1e-6){
 	  console.log("sim.update, it=",it,
 		      " exiting in (5) after curtailing wind offshore",
@@ -592,12 +605,14 @@ simulation.prototype.update=function(it){
     // curtail windOn
     
     if(this.mismatch()>0){
-   
-      if(this.mismatch()>maxWindOn){
+      const loc_mismatch=this.mismatch();
+      if(loc_mismatch>maxWindOn){
         this.hourlymix.windOn=0;
+	this.hourlyCurtailment.windOn=maxWindOn;
       }
       else{
-        this.hourlymix.windOn -= this.mismatch();
+	this.hourlyCurtailment.windOn=loc_mismatch;
+        this.hourlymix.windOn -= loc_mismatch;
 	if(Math.abs(this.mismatch())>1e-6){
 	  console.log("sim.update, it=",it,
 		      " exiting in (5) after curtailing wind onshore",
@@ -611,12 +626,15 @@ simulation.prototype.update=function(it){
     // curtail solar
     
     if(this.mismatch()>0){
+      const loc_mismatch=this.mismatch();
    
-      if(this.mismatch()>maxSolar){
+      if(loc_mismatch>maxSolar){
+	this.hourlyCurtailment.solar=maxSolar;
         this.hourlymix.solar=0;
       }
       else{
-        this.hourlymix.solar -= this.mismatch();
+	this.hourlyCurtailment.solar=loc_mismatch;
+        this.hourlymix.solar -= loc_mismatch;
 	if(Math.abs(this.mismatch())>1e-6){
 	  console.log("sim.update, it=",it,
 		      " exiting in (5) after curtailing sun",
@@ -630,11 +648,14 @@ simulation.prototype.update=function(it){
     // curtail nuclear
     
     if(this.mismatch()>0){
-      if(this.mismatch()>maxNuclear-minNuclear){
+      const loc_mismatch=this.mismatch();
+      if(loc_mismatch>maxNuclear-minNuclear){
+	this.hourlyCurtailment.nuclear=maxNuclear-minNuclear;
         this.hourlymix.nuclear=minNuclear;
       }
       else{
-        this.hourlymix.nuclear -=this.mismatch();
+	this.hourlyCurtailment.nuclear=loc_mismatch;
+        this.hourlymix.nuclear -=loc_mismatch;
 	if(Math.abs(this.mismatch())>1e-6){
 	  console.log("sim.update, it=",it,
 		      " exiting in (5) after curtailing nuclear",
@@ -645,7 +666,7 @@ simulation.prototype.update=function(it){
     }
     
 
-    // (6) emergency "Hellbrise"
+    // (6) emergency "Hellbrise" //!!! proper handling still missing
 
     if(this.mismatch()>0){
       console.log("Hellbrise! Too little demand or too much supply",
@@ -729,16 +750,19 @@ simulation.prototype.update=function(it){
 
     // (7-8) add gas and coal in availability ratio 2:1 (Germany 2025)
     
-    if(-this.mismatch()>(maxGas-minGas+maxCoal-minCoal)){
-      this.hourlymix.gas=maxGas;
-      this.hourlymix.coal=maxCoal;
+    const r=-this.mismatch()/(maxGas-minGas+maxCoal-minCoal);
+    if(r>1){
+    //if(-this.mismatch()>(maxGas-minGas+maxCoal-minCoal)){
+      this.hourlymix.gas=maxGas; this.hourlyCurtailment.gas=0;
+      this.hourlymix.coal=maxCoal; this.hourlyCurtailment.coal=0;
     }
     else{
-      let r=-this.mismatch()/(maxGas-minGas+maxCoal-minCoal);
       this.hourlymix.gas=(1-r)*minGas+r*maxGas;
+      this.hourlyCurtailment.gas=(1-r)*(maxGas-minGas);
       this.hourlymix.coal=(1-r)*minCoal+r*maxCoal;
+      this.hourlyCurtailment.coal=(1-r)*(maxCoal-minCoal);
       
-      this.hourlymix.gas -= this.mismatch();
+     // this.hourlymix.gas -= this.mismatch(); // error!!!
       if(Math.abs(this.mismatch())>1e-6){
 	console.log("sim.update, it=",it,
 		    " exiting in (7-8) after adding gas,coal simultaneously",
@@ -750,6 +774,7 @@ simulation.prototype.update=function(it){
     
 
     // (9) prevent dunkelflaute blackout or raise dunkelflaute event
+    // !!! not yet properly handled!
 
     if (this.mismatch()<-loadSheddingFactor*this.hourlymix.load){
       this.hourlymix.loadShedding=-this.mismatch();   
@@ -773,15 +798,15 @@ simulation.prototype.update=function(it){
 function displayResultsMain(){
 
   let nt=energymix.length;
-  let W_solar=0; let W_solar_data=0;
-  let W_windOn=0; let W_windOn_data=0;
-  let W_windOff=0; let W_windOff_data=0;
+  let W_solar=0; let W_solar_data=0; let W_solar_curtailment=0;
+  let W_windOn=0; let W_windOn_data=0; let W_windOn_curtailment=0;
+  let W_windOff=0; let W_windOff_data=0; let W_windOff_curtailment=0;
+  let W_gas=0; let W_gas_data=0; let W_gas_curtailment=0;
+  let W_coal=0; let W_coal_data=0; let W_coal_curtailment=0;
+  let W_nuclear=0; let W_nuclear_curtailment=0;
   let W_import=0; let W_import_data=0;
   let W_export=0; let W_export_data=0;
-  let W_gas=0; let W_gas_data=0;
-  let W_coal=0; let W_coal_data=0;
   let W_load=0;
-  let W_nuclear=0;
 
   
   let W_biomass=8760*pow_biomass;
@@ -791,11 +816,15 @@ function displayResultsMain(){
     let itSMARD=Math.max(0,it-1);
     W_load += energymix[it].load;
     W_nuclear += energymix[it].nuclear;
+    W_nuclear_curtailment += curtailment[it].nuclear;
     W_solar += energymix[it].solar;
+    W_solar_curtailment += curtailment[it].solar;
     W_solar_data += 0.001*supplydemanddata2025[itSMARD].PV;
     W_windOn += energymix[it].windOn;
+    W_windOn_curtailment += curtailment[it].windOn;
     W_windOn_data += 0.001*supplydemanddata2025[itSMARD].w_on;
     W_windOff += energymix[it].windOff;
+    W_windOff_curtailment += curtailment[it].windOff;
     W_windOff_data += 0.001*supplydemanddata2025[itSMARD].w_off;
     W_import += Math.max(0,+energymix[it].importHrly);
     W_export += Math.max(0,-energymix[it].importHrly);
@@ -803,8 +832,10 @@ function displayResultsMain(){
     W_import_data += Math.max(0,-0.001*supplydemanddata2025[itSMARD].export);
     W_export_data += Math.max(0,+0.001*supplydemanddata2025[itSMARD].export);
     W_gas += energymix[it].gas;
+    W_gas_curtailment += curtailment[it].gas;
     W_gas_data += 0.001*supplydemanddata2025[itSMARD].gas;
     W_coal += energymix[it].coal;
+    W_coal_curtailment += curtailment[it].coal;
 //    if(isNaN(W_coal)){console.log("it=",it," W_coal is NaN!");}
     W_coal_data +=
       0.001*(supplydemanddata2025[itSMARD].bk
@@ -831,6 +862,16 @@ function displayResultsMain(){
   let windOff_av=W_windOff/(nt*pow0_WindOff);
   let windOff_av_data=W_windOff_data/(nt*pow0_WindOff);
 
+  // curtailment (in % of max availability)
+
+  let solar_fracCurtail=W_solar_curtailment/(W_solar+W_solar_curtailment);
+  let windOn_fracCurtail=W_windOn_curtailment/(W_windOn+W_windOn_curtailment);
+  let windOff_fracCurtail
+      =W_windOff_curtailment/(W_windOff+W_windOff_curtailment);
+  let nuclear_fracCurtail
+      =W_nuclear_curtailment/(W_nuclear+W_nuclear_curtailment);
+  let gas_fracCurtail=W_gas_curtailment/(W_gas+W_gas_curtailment);
+  let coal_fracCurtail=W_coal_curtailment/(W_coal+W_coal_curtailment);
 
   // emission factors w/o additional emissions of H2 technology
   // CO2 in 
@@ -841,10 +882,14 @@ function displayResultsMain(){
   
   let emissionFactor=emissionCO2/W_total;
 
-
-  console.log("Energies from ",nt," days since 2025-01-01");
-  console.log("W_solar=",W_solar," W_solar_data=",W_solar_data);
-  console.log("W_windOn=",W_windOn," W_windOn_data=",W_windOn_data);
+  if(true){
+    console.log("Energies from ",nt," days since 2025-01-01");
+    console.log("W_solar=",W_solar," W_solar_data=",W_solar_data);
+    console.log("  W_solar_curtailment=",W_solar_curtailment);
+    console.log("W_windOn=",W_windOn," W_windOn_data=",W_windOn_data);
+    console.log("  W_windOn_curtailment=",W_windOn_curtailment);
+  }
+  if(false){
   console.log("W_windOff=",W_windOff," W_windOff_data=",W_windOff_data);
   console.log("W_import=",W_import," W_import_data=",W_import_data);
   console.log("W_export=",W_export," W_export_data=",W_export_data);
@@ -855,8 +900,34 @@ function displayResultsMain(){
   console.log("total w/o import/export:",W_total);
   console.log("total with import-export:",W_total+W_import-W_export,
 	      " W_load (demand+losses+internal)=",W_load);
+  }
 
-  console.log("\n\nAvailabiities:",
+  const box = document.getElementById("generalInfo");
+  console.log("box=",box);
+  //const fontsize=(Math.round(2.5*vmin)).toString();
+  let html = '<table class="infoTable"><tr> <th>C-Faktor</th> <th>Curtail</th></th>\n';
+  html += '<tr>\n'
+  html += '<td class="important"> Solar: '+(100*solar_av).toFixed(1)+'%</td>'
+  html += '<td>'+(100*solar_fracCurtail).toFixed(1)+'%</td>'
+  html += '\n</tr>\n<tr>'
+  html += '<td> WindOn: '+(100*windOn_av).toFixed(1)+'%</td>'
+  html += '<td>'+(100*windOn_fracCurtail).toFixed(1)+'% </td>'
+  html += '\n</tr>\n<tr>'
+  html += '<td> WindOff: '+(100*windOff_av).toFixed(1)+'%</td>'
+  html += '<td>'+(100*windOff_fracCurtail).toFixed(1)+'% </td>'
+  html += '\n</tr>\n</table></span>'
+  box.innerHTML=html;
+  //box.style.fontSize=fontsize;
+
+
+  const boxCO2 = document.getElementById("CO2Info");
+  console.log("boxCO2=",boxCO2);
+  html="";
+  html +=emissionFactor.toFixed(0)+' [g/kWh]';
+  boxCO2.innerHTML=html;
+  console.log("boxCO2.innerHTML=",boxCO2.innerHTML);
+  
+  console.log("\nAvailabiities:",
 	      "\n solar_av=",solar_av," solar_av_data=",solar_av_data,
 	      "\n windOn_av=",windOn_av," windOn_av_data=",windOn_av_data,
 	      "\n windOff_av=",windOff_av," windOff_av_data=",windOff_av_data);
@@ -910,6 +981,7 @@ function runSimulation(strategy){
   //console.log("in runSimulation: strategy=",strategy);
   let nt=winddata.length;
   energymix=[]; storage=[]; solarRegions=[]; windRegions=[];
+  curtailment=[];
 
   var sim=new simulation(1);
 
@@ -924,6 +996,7 @@ function runSimulation(strategy){
     storage[it]=sim.cloneStorage();
     solarRegions[it]=sim.hourlySolarRegions;
     windRegions[it]=sim.hourlyWindRegions;
+    curtailment[it]=sim.hourlyCurtailment;
   }
 
   if(!noBreakdown){
@@ -1066,12 +1139,12 @@ function calcChartInput(itmin,itmax){
 
 
 function displayText(){
-  console.log("\n");
+  //console.log("\n");
  // displayResultsRegions();
  // console.log("\n\n");
 
   displayResultsMain();
-  console.log("\n");
+  //console.log("\n");
 
   //displayResultsStorage();
   //console.log("\n");
@@ -1096,7 +1169,7 @@ function updateRange(itmin,itmax){
 // Main sim and graphics initialisation directly after loading
 // #################################################################
 
-let itHalfInterval=4*24;
+let itHalfInterval=3*24;
 let itmin=0;  // initial clippings for lower charts
 let itmax=2*itHalfInterval;
 
@@ -1110,6 +1183,7 @@ let energymixDaily=[];
 let storageDaily=[];
 let energymixClipped=[];
 let storageClipped=[];
+let curtailment=[];
 
 runSimulation(strategyIndex); // fills energymix, storage, solar/windRegions
 //console.log("storage=",storage);
@@ -1126,26 +1200,4 @@ initChart(true, false, energymixClipped); // initializes allCharts[1]
 initChart(false, true, storageDaily); // initializes allCharts[2]
 initChart(false, false, storageClipped); // initializes allCharts[3]
 
-
-// test simulation rerun
-
-//redoSimulation();
-
-// test new clips
-
-//updateRange(150,166);
-
-
-
-
-
-//console.log("allCharts=",allCharts);
-//console.log("chart for chart1=",Chart.getChart(chart1)); 
-//console.log("chart for chart2=",Chart.getChart(chart2)); 
-
-
-//console.log("storage=",storage,"\nenergymix=",energymix);
-//console.log("solarRegions=",solarRegions);
-//console.log("windRegions=",windRegions);
-//console.log("energymix=",energymix);
 

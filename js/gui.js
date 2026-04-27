@@ -34,7 +34,7 @@ function handleWindowResize() {
   console.log("in handleWindowResize(): vw=",vw," vh=",vh);
 }
 
-let strategyIndex=1;
+let strategyIndex=0; //!!
 function implementStrategy(selectedIndex) {
   strategyIndex=selectedIndex;
   console.log("implementStrategy: strategieIndex=",strategyIndex);
