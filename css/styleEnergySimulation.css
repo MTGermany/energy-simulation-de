@@ -217,16 +217,28 @@ table.infoTable td {
 
 /* (3) landscape: the semi-transparent zoon region over areaGraphics1 */
 
-#zoomInRegion{
+#zoomInGray{
   position: absolute;
   left:   40vw;     /* same as#areaGraphics1 */
-  top:   30vh;
+  top:   0vh;
   width:  1vw; 
-  height: 17vh;
+  height: 42.5vh;     /* reaches down to #areaGraphics2 */
   margin-right: 0vw;
   margin-left: 0vw;
   background-color: rgba(0,0,0,0.2);
-  z-index: 1;
+  z-index: 0;
+}
+
+#zoomInRegion{
+  position: absolute;
+  left:   40vw;     /* same as#areaGraphics1 */
+  top:   0vh;
+  width:  60vw; 
+  height: 47vh;     /* reaches down to #areaGraphics2 */
+  margin-right: 0vw;
+  margin-left: 0vw;
+  /*z-index: 0; */  /* DOS  falls andere Werte als =0 gesetzt! */
+  
 }
 
 
@@ -236,11 +248,11 @@ table.infoTable td {
   position: absolute;
   left:   40vw;
   top:   0vh;
-  width:  60vw; 
-  height: 47vh;
+  width:  60vw; /* canvas inside area no drawing limit but define pixel */
+  height: 47vh; /* range by embedding graphics region zoomInRegion */
   margin-right: 0vw;
   margin-left: 0vw;
-  background-color: rgb(235,235,255);
+  /*background-color: rgb(235,235,255);*/
   z-index: 0;
 }
 
@@ -252,7 +264,7 @@ table.infoTable td {
   height: 47vh;
   margin-right: 0vw;
   margin-left: 0vw;
-  background-color: rgb(235,235,255);
+  /*background-color: rgb(235,235,255);*/
   z-index: 0;
 }
 
@@ -264,7 +276,7 @@ table.infoTable td {
   height: 47vh;
   margin-right: 0vw;
   margin-left: 0vw;
-  background-color: rgb(235,235,255);
+  /*background-color: rgb(235,235,255);*/
   z-index: 0;
 }
 
@@ -276,20 +288,19 @@ table.infoTable td {
   height: 47vh;
   margin-right: 0vw;
   margin-left: 0vw;
-  background-color: rgb(235,235,255);
+  /*background-color: rgb(235,235,255);*/
   z-index: 0;
 }
 
 
 #clickInfo {
       position: absolute;
-      background: white;
       border: 1px solid #ccc;
       padding: 8px;
-      font-size: 1.5vmin;
       display: none;
+      background: white;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      z-index: 2;
+      z-index: 0;
 }
 
 

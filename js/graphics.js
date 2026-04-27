@@ -50,7 +50,7 @@ function ds(label, data, color, stack = "default", fill = true) {
     tension: 0,
     pointRadius: 0,
     borderWidth: 0,
-    order: 1,
+    order: 3, // lower is more on top, reverse of z index!
     stack
   };
 }
@@ -121,7 +121,7 @@ function buildDatasetsEnergymix(inputData) {
     borderWidth: 3,
     fill: false,
     stack: 'independent',
-    order: 0,
+    order: 2, // lower order is higher on top!
     pointRadius: 0
   });
   if(false){console.log("builddatsetsEnergymix:",
@@ -131,7 +131,7 @@ function buildDatasetsEnergymix(inputData) {
 	      " inputData[0].runningHydro=",inputData[0].runningHydro,
 	      "");
 	   }
-  console.log("datasets=",datasets);
+ // console.log("datasets=",datasets);
   return datasets;
 }
 
@@ -294,6 +294,86 @@ function initChart(isEnergymix, isDaily, inputData) {
 
 
 
+function updateZoom(chart, otherChart, chartData, redrawBottom){
+  const points = chart.getElementsAtEventForMode(
+    event, 'index', { intersect: false }, true );
+      
+  if(points.length){
+        const it_day=points[0].index;  // points[0] ... [16] all the same
+	const it_h=24*it_day;
+        const itmin_h=Math.max(Math.min(
+	  it_h-itHalfInterval,24*(chartData.length-1)-2*itHalfInterval),0); 
+        const itmax_h=itmin_h+2*itHalfInterval;
+	const itmin_day=itmin_h/24;
+	const itmax_day=itmax_h/24;
+    console.log("updateZoom: it_h=",it_h," itmin_h=",itmin_h," itmax_h=",itmax_h);
+
+    // move lower chart ranges 
+
+    if(redrawBottom){updateRange(itmin_h,itmax_h);}
+
+      // draw zoomed lines on zoomInCanvas
+      // need separate transparently overlain canvas because
+      // chart's redraw overrides zoon-in lines
+
+
+    const xAxis = chart.scales.x;
+    const yAxis = chart.scales.y;
+    const xmin = xAxis.min;   // Get the minimum X value
+    const xmax = xAxis.max;  
+    const ymin = yAxis.min; 
+    const other_xAxis = otherChart.scales.x;
+    const other_yAxis = otherChart.scales.y;
+    const other_xmin = other_xAxis.min;   // Get the minimum X value
+    const other_xmax = other_xAxis.max;  
+    const other_ymin = other_yAxis.min; 
+
+
+    // otherChart at same x but +50*vw y value (css)
+
+    const xPixMin=xAxis.getPixelForValue(xmin);
+    const xPixLow=xAxis.getPixelForValue(chartData[itmin_day].timeUTC_ms);
+    const xPixHi=xAxis.getPixelForValue(chartData[itmax_day].timeUTC_ms);
+    const xPixMax = xAxis.getPixelForValue(xmax);
+
+    const yPixMin = yAxis.getPixelForValue(ymin);
+
+    const other_xPixMin = other_xAxis.getPixelForValue(other_xmin);
+    const other_xPixMax = other_xAxis.getPixelForValue(other_xmax);
+
+    const other_yPixMin = other_yAxis.getPixelForValue(other_ymin)+50*vh;
+
+      
+    //const zoomInRegion=document.getElementById("zoomInRegion");
+    //zoomInRegion.zIndex="2";
+    const zoomInCanvas=document.getElementById("zoomInCanvas");
+    zoomInCanvas.width=60*vw;                 // as css zoomInRegion
+    zoomInCanvas.height=100*vh;
+    //zoomInCanvas.zIndex="2"; // DOS
+    //zoomInCanvas.bringToFront; // DOS
+    console.log("zoomInCanvas=",zoomInCanvas);
+    const ctx = zoomInCanvas.getContext('2d');
+
+    ctx.strokeStyle="rgb(0,0,0)";
+    ctx.beginPath();
+    ctx.moveTo(xPixLow, yPixMin);
+    ctx.lineTo(other_xPixMin, other_yPixMin);
+
+    ctx.moveTo(xPixHi, yPixMin);
+    ctx.lineTo(other_xPixMax, other_yPixMin);
+
+    // draw the Path
+	
+    ctx.stroke();
+
+    // draw semitransparent rectangle denoting the range in top chart
+
+    ctx.fillStyle="rgba(0,0,50,0.1)";
+    ctx.fillRect(xPixLow,0,xPixHi-xPixLow,yPixMin);
+  }
+}
+
+
 // ----------------------------
 // Click popup
 // ----------------------------
@@ -303,10 +383,7 @@ function setupClick(canvasID, inputData) {
   const canvas=document.getElementById(canvasID);
   const ctx = canvas.getContext('2d');
   
-  // only rect, not canvas has width unless explicitly assigned from rect!!
-  const rect = canvas.getBoundingClientRect(); 
-  
-  const xPixOffset=-0.01*rect.width; // distance between pointer and zoombar
+ 
 
   
   // canvas.onmousemove = handleMouseMove(event,this); // does not work
@@ -333,41 +410,26 @@ function setupClick(canvasID, inputData) {
 
       //getMouseCoordinates(event,canvas);  //=> xPixUser, yPixUser
       
-      let xPixLeft=rect.left; // left-upper corner of the canvas 
-      let yPixTop=rect.top;  // in browser reference system
-      xPixUser= event.clientX-xPixLeft; //pixel coords in canvas reference
-      yPixUser= event.clientY-yPixTop;
-      
-      // draw zoomed=in region on this canvas
+      let chart=Chart.getChart(canvasID);
+      let otherChart=(canvasID==canvasIDs[0])
+	  ? Chart.getChart(canvasIDs[1]) : Chart.getChart(canvasIDs[3]);
 
-      translateX_val="translateX("+(0.978*(xPixUser-xPixOffset))+"px";
-      console.log("translateX_val=",translateX_val);
-      document.getElementById("zoomInRegion").style.transform=translateX_val;
+      updateZoom(chart, otherChart, inputData, false); //last arg redrawBottom
 
-
-      // move lower chart ranges
-
-      let xrel=1.08*xPixUser/canvas.width-0.06;
-      let itcenter=Math.round(xrel*winddata.length);
-      let itmin=itcenter-itHalfInterval;
-      let itmax=itcenter+itHalfInterval;
-      if(Math.abs(xRelDragStart-xrel)>0.002){ // rhs=mouse drag delay
-	xRelDragStart=xrel;
-        updateRange(itmin,itmax);
-      }
+  
     }
     else{mousedown=false;}
   }
   
-  canvas.onclick = function(evt) {
+  canvas.onclick = function(event) {
     let chart=Chart.getChart(canvasID);
     //console.log("in canvas.onclick: function setupClick: canvasID=",
 //		canvasID," chart=",chart);
 
     const points = chart.getElementsAtEventForMode(
-      evt, 'index', { intersect: false }, true
+      event, 'index', { intersect: false }, true
     );
-    //console.log("onclick: points=",points);
+    console.log("onclick: points=",points);
     
     if (!points.length) {
       box.style.display = "none";
@@ -375,23 +437,36 @@ function setupClick(canvasID, inputData) {
     }
 
     const d = inputData[points[0].index];
-    const dt = new Date(d.timeUTC_ms);
     //console.log("d=",d);
+    const dt = new Date(d.timeUTC_ms).toDateString();
+    //const dt = getDate(d.timeUTC_ms);
+
     let html = `<b>${dt.toLocaleString('de-DE')}</b><br>`;
-    //console.log("html=",html);
-    for (let k in d) {
-      if (k !== "timeStr" && k !== "timeUTC_ms") {
-        html += `${k}: ${d[k].toFixed(2)} GW<br>`;
+
+    // selected data for energy view
+
+    if((canvasID==canvasIDs[0])||(canvasID==canvasIDs[1])){
+      html += "Nachfrage: "+d.load.toFixed(1)+" GW<br>";
+      html += "Solar: "+d.solar.toFixed(1)+" GW<br>";
+      html += "Wind: "+(d.windOn+d.windOff).toFixed(1)+" GW<br>";
+    }
+
+    else{
+      for (let k in d) {
+        if (k !== "timeStr" && k !== "timeUTC_ms") {
+          html += `${k}: ${d[k].toFixed(2)} GW<br>`;
+        }
       }
     }
 
+
     let fontsize=(Math.round(2.5*vmin)).toString();
     box.innerHTML = html;
-    box.style.left = evt.pageX + 10 + "px"; //!!
-    box.style.top = evt.pageY + 10 + "px";
+    box.style.left = event.pageX + 10 + "px"; //!!
+    box.style.top = 1*vh; //event.pageY + 10 + "px";
     box.style.display = "block";
-    //box.style.fontsize= fontsize; // DOS; set in .css
-    //console.log("fontsize=",fontsize," box=",box);
+    box.style.fontSize=fontsize;//fontsize; // DOS; set in .css
+    console.log(" box.style=",box.style);
 
     // move lower charts also at click; because no named functions possible,
     // code duplication (without the mousedown "if" and w/o min drag condition)
@@ -399,18 +474,10 @@ function setupClick(canvasID, inputData) {
     if((canvasID==canvasIDs[0]) || (canvasID==canvasIDs[2])){
       getMouseCoordinates(event,canvas);  //=> xPixUser, yPixUser
 
-     // draw zoomed=in region on this canvas
+      let otherChart=(canvasID==canvasIDs[0])
+	  ? Chart.getChart(canvasIDs[1]) : Chart.getChart(canvasIDs[3]);
 
-
-      // do move lower chart ranges
-
-      let xrel=1.08*xPixUser/this.width-0.06;
-      let itcenter=Math.round(xrel*winddata.length);
-      let itmin=itcenter-itHalfInterval;
-      let itmax=itcenter+itHalfInterval;
-      //console.log("itmin=",itmin," itmax=",itmax);
-      xRelDragStart=xrel;
-      updateRange(itmin,itmax);
+      updateZoom(chart, otherChart,inputData,true); //last arg redrawBottom);
       
     }
     mousedown=false; 

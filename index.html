@@ -272,13 +272,23 @@
 
 
 
+<!-- ################################################# -->
+<!-- The display/graphics side of the simulation       -->
+<!-- ################################################# -->
 
-<!-- The display/graphics side of the simulation -->
-
-
+<!-- canvas just for the two zoom-in lines 
+pointing from top to bottom chart
+(note that canvas always need a container) -->
 
 <div id="zoomInRegion" style.display="block">
+  <canvas id="zoomInCanvas" style="z-index: 2;">  <!-- DOS z index -->
+  </canvas>
 </div>
+
+<!-- moving semi-transparent time window over top chart -->
+<!--<div id="zoomInGray" style.display="block">
+</div>-->
+
 
 <div id="areaGraphics1" style.display="block"
      onmouseenter="handleMouseEnter(event)">
@@ -288,7 +298,7 @@
   => delegated to inside function setupClick() in
   graphics.js-->
   
-  <canvas id="chart1">
+  <canvas id="chart1" style="z-index: 0;">
           onmousemove="handleMouseMove(event)" <!-- DOS -->
            style="border:1px solid #d3d3d3;">
     Your browser does not support the HTML5 canvas tag.

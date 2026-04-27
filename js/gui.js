@@ -99,7 +99,8 @@ function toggleGraphics(){
     chart1Window.style.display = 'block';  
     chart2Window.style.display = 'block';  
     chart3Window.style.display = 'none';  
-    chart4Window.style.display = 'none';  
+    chart4Window.style.display = 'none';
+    document.getElementById("clickInfo").style.display = "none";
     toggleButton.innerHTML="Gehe zur Speicheransicht";
   }
   else{
@@ -107,6 +108,7 @@ function toggleGraphics(){
     chart2Window.style.display = 'none';  
     chart3Window.style.display = 'block';  
     chart4Window.style.display = 'block';  
+    document.getElementById("clickInfo").style.display = "none";
     toggleButton.innerHTML="Gehe zur Energiemix-Ansicht";
 
   }
