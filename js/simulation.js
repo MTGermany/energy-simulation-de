@@ -278,7 +278,7 @@ simulation.prototype.mismatch=function(){
 
 // #################################################################
 // central update
-// strategy: 0=Klimaschoner, 1=Sparfuchs, 2=safety first, 3=Gruen
+// strategy: 0=aktuell 1=Klimaschoner, 2=safety first, 3=Sparfuchs,  4=Gruen
 // #################################################################
 
 simulation.prototype.update=function(it){
@@ -449,8 +449,6 @@ simulation.prototype.update=function(it){
   /* ###########################################################
   Strategy 0: "2025"
 
-  smoothed trategy 1
-
    Strategy 1: maximum climate friendly
   (1) add max sun, wind, and nuclear to minimum supply
   (2) charge/discharge batteries and pump hydro => exit 1
@@ -485,7 +483,7 @@ simulation.prototype.update=function(it){
 
   //if(it==0){console.log("\n\nrunSimulation: this.strategy=",this.strategy);}
   if(this.strategy!=0){
-    alert("error: strategy ",this.strategy," not yet implemented");
+    console.log("error: strategy ",this.strategy," not yet implemented");
     return false;
   }
   
@@ -676,8 +674,8 @@ simulation.prototype.update=function(it){
 	  /pow_rotatingMass;
       if (shutoffFactor>stabreserveFactor){
 	console.log("(6) Hellbrise! need to emergency shut off",
-		    " too much baseload rotating mass => blackout");
-	return false;
+		    " too little baseload rotating mass => blackout");
+	return false; // alert Hellbrise
       }
       let reduceFact=1-shutoffFactor;
       this.hourlymix.gas *=reduceFact;
@@ -780,7 +778,9 @@ simulation.prototype.update=function(it){
       this.hourlymix.loadShedding=-this.mismatch();   
       console.log("(9) it=",it," blackout due to load shedding > maximum factor ",
 		  loadSheddingFactor);
-      return false;
+      console.log("r=",r," this.hourlymix.gas=",this.hourlymix.gas," this.hourlymix.coal=",this.hourlymix.coal," maxCoal=",maxCoal);
+
+      return false; // alert Dunkelflaute
     }
     this.hourlymix.loadShedding=-this.mismatch();   
     console.log("imposed load shedding of ",-this.mismatch(),
@@ -793,7 +793,28 @@ simulation.prototype.update=function(it){
 
 }
 
+function displayHourlyResults(sim,it){
+  console.log(
+    " W_load=",  energymix[it].load,
+    " W_supply=",  sim.supply(),
+    "\n W_nuclear=",  energymix[it].nuclear,
+    "\n W_nuclear_curtailment=",  curtailment[it].nuclear,
+    "\n W_solar=",  energymix[it].solar,
+    "\n W_solar_curtailment=",  curtailment[it].solar,
+    "\n W_windOn=",  energymix[it].windOn,
+    "\n W_windOn_curtailment=",  curtailment[it].windOn,
+    "\n W_windOff=",  energymix[it].windOff,
+    "\n W_windOff_curtailment=",  curtailment[it].windOff,
+    "\n W_import=",  Math.max(0,+energymix[it].importHrly),
+    "\n W_export=",  Math.max(0,-energymix[it].importHrly),
+    "\n W_gas=",  energymix[it].gas,
+    "\n W_gas_curtailment=",  curtailment[it].gas,
+    "\n W_coal=",  energymix[it].coal,
+    "\n W_coal_curtailment=",  curtailment[it].coal
+  );
+}
 
+//
 
 function displayResultsMain(){
 
@@ -882,7 +903,7 @@ function displayResultsMain(){
   
   let emissionFactor=emissionCO2/W_total;
 
-  if(true){
+  if(false){
     console.log("Energies from ",nt," days since 2025-01-01");
     console.log("W_solar=",W_solar," W_solar_data=",W_solar_data);
     console.log("  W_solar_curtailment=",W_solar_curtailment);
@@ -903,7 +924,7 @@ function displayResultsMain(){
   }
 
   const box = document.getElementById("generalInfo");
-  console.log("box=",box);
+  //console.log("box=",box);
   //const fontsize=(Math.round(2.5*vmin)).toString();
   let html = '<table class="infoTable"><tr> <th>C-Faktor</th> <th>Curtail</th></th>\n';
   html += '<tr>\n'
@@ -921,23 +942,26 @@ function displayResultsMain(){
 
 
   const boxCO2 = document.getElementById("CO2Info");
-  console.log("boxCO2=",boxCO2);
+  //console.log("boxCO2=",boxCO2);
   html="";
   html +=emissionFactor.toFixed(0)+' [g/kWh]';
   boxCO2.innerHTML=html;
-  console.log("boxCO2.innerHTML=",boxCO2.innerHTML);
-  
-  console.log("\nAvailabiities:",
+  //console.log("boxCO2.innerHTML=",boxCO2.innerHTML);
+
+  if(false){
+    console.log("\nAvailabiities:",
 	      "\n solar_av=",solar_av," solar_av_data=",solar_av_data,
 	      "\n windOn_av=",windOn_av," windOn_av_data=",windOn_av_data,
-	      "\n windOff_av=",windOff_av," windOff_av_data=",windOff_av_data);
+		"\n windOff_av=",windOff_av," windOff_av_data=",windOff_av_data);
+  }
 
-  console.log("\nCO2:",
+  if(false){console.log("\nCO2:",
 	      "\n Total CO2 emissions [Mio t]: ",
 	      (1e-6*emissionCO2).toFixed(0),
 	      "\n Carbon footprint [g/kWh]:",emissionFactor.toFixed(0));
+	   }
 
-} // displayResultsText
+} // displayResultsmain
 
 
 function displayResultsRegions(){
@@ -1002,8 +1026,9 @@ function runSimulation(strategy){
   if(!noBreakdown){
     let itmax=energymix.length-1;
     console.log("itmax=",itmax);
-    alert("Warning! Electricity system broke down during simulation"+
-	  "at time "+energymix[itmax].timeStr);
+    console.log("Warning! Electricity system broke down during simulation"+
+		"at time "+energymix[itmax].timeStr);
+    displayHourlyResults(sim,itmax);
   }
 }
 
