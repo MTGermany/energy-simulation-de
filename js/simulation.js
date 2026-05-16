@@ -45,7 +45,7 @@ function simulation(strategy){
   this.windRegions={}; // create new object => no cloning needed!
 
   this.storage={ // energy in GWh
-    "timeUTC_ms": winddata[0].timeUTC_ms,
+    "timeUTC_ms": winddata[0].timeUTC_ms, // initialisation
     "batt": 0.5*battEnergy0,
     "pumpHydro": 0.5*hydroEnergy0,
     "H2": 0.5*H2Energy0
@@ -54,10 +54,10 @@ function simulation(strategy){
 
 //!!! need clone for copying it to outer storage[]
 
-simulation.prototype.cloneStorage=function(){ 
+simulation.prototype.cloneStorageWithTime=function(it){ 
   
   var obj={
-    "timeUTC_ms": this.storage.timeUTC_ms,
+    "timeUTC_ms": winddata[it].timeUTC_ms, //!! should alsways same es mixdate
     "batt": this.storage.batt,
     "pumpHydro": this.storage.pumpHydro,
     "H2": this.storage.H2
@@ -274,22 +274,100 @@ simulation.prototype.mismatch=function(){
   return this.supply()-this.load();
 }
 
+simulation.prototype.curtail=function(energyName,it){
+  //console.log("this.rangesMax=",this.rangesMax);
+  let loadBalanced=false;
+  const loc_mismatch=this.mismatch();
+
+  if(this.mismatch()>0){
+
+    if(loc_mismatch>this.rangesMax[energyName]-this.rangesMin[energyName]){
+      this.hourlyCurtailment[energyName]
+	=this.rangesMax[energyName]-this.rangesMin[energyName];
+      this.hourlymix[energyName]=this.rangesMin[energyName];
+	loadBalanced=false;
+    }
+    else{
+      this.hourlyCurtailment[energyName]=loc_mismatch;
+      this.hourlymix[energyName] -= loc_mismatch;
+      loadBalanced=true;
+	
+      if(Math.abs(this.mismatch())>1e-6){
+	  console.log("sim.update -> sim.curtail, it=",it,
+		      " exiting in (5) after curtailing ",energyName,
+		      "this.mismatch()=",this.mismatch());
+      }
+    }
+  }
+  if(it<10){
+    console.log("sim.curtail: energyName=",energyName," this.rangesMax[energyName]=", this.rangesMax[energyName]," loc_mismatch=",loc_mismatch)
+  }
+
+  return loadBalanced;
+}
+
+simulation.prototype.curtailTest=function(energyName,it){
+  if(this.mismatch()>0){
+      const loc_mismatch=this.mismatch();
+
+      if(loc_mismatch>this.rangesMax.windOff){
+	this.hourlyCurtailment.windOff=this.rangesMax.windOff;
+        this.hourlymix.windOff=0;
+	return false;
+      }
+      else{
+	this.hourlyCurtailment.windOff=loc_mismatch;
+        this.hourlymix.windOff -= loc_mismatch;
+	
+	if(Math.abs(this.mismatch())>1e-6){
+	  console.log("sim.update, it=",it,
+		      " exiting in (5) after curtailing wind offshore",
+		      "this.mismatch()=",this.mismatch());
+	}
+
+        return true;
+      }
+  }
+}
+
+
 
 
 // #################################################################
-// central update
-// strategy: 0=aktuell 1=Klimaschoner, 2=safety first, 3=Sparfuchs,  4=Gruen
+// central update depends on variable simulation.strategy
+// 0=aktuell 1=Klimaschoner, 2=safety first, 3=Sparfuchs,  4=Gruen
 // #################################################################
 
 simulation.prototype.update=function(it){
 
+  this.rangesMax={
+    nuclear: nuclear_av*pow0_Nuclear,
+    solar: 0,
+    windOn: 0,
+    windOff: 0,
+    gas: gas_av*pow0_Gas,
+    coal: coal_av*pow0_Coal
+  };
+
+  this.rangesMin={
+    nuclear: nuclear_minRelPow*nuclear_av*pow0_Nuclear,
+    solar: 0,
+    windOn: 0,
+    windOff: 0,
+    gas: gas_minRelPow*gas_av*pow0_Gas,
+    coal: coal_minRelPow*coal_av*pow0_Coal
+  };
+  
+
+  /*
   let minNuclear=nuclear_minRelPow*nuclear_av*pow0_Nuclear;
   let maxNuclear=nuclear_av*pow0_Nuclear;
   let minGas= gas_av*gas_minRelPow*pow0_Gas;
   let maxGas= gas_av*pow0_Gas;
   let minCoal= coal_av*coal_minRelPow*pow0_Coal;
   let maxCoal= coal_av*pow0_Coal;
-
+  */
+  
   // SMARD uses CET/CEST but no summertime jumps in data, just the strings
   
   let itSMARD=Math.max(0,it-1); 
@@ -310,9 +388,9 @@ simulation.prototype.update=function(it){
     "windOff": 0,
     "runningHydro": pow_runningHydro,
     "biomass": pow_biomass,
-    "nuclear": minNuclear,
-    "coal": minCoal,
-    "gas": minGas,
+    "nuclear": this.rangesMin.nuclear,
+    "coal": this.rangesMin.coal,
+    "gas": this.rangesMin.gas,
     "importHrly": 0,
     "pumpHydro": 0, // >0 if energy from pump hydro
     "batt": 0,
@@ -323,9 +401,9 @@ simulation.prototype.update=function(it){
     "solar": 0,
     "windOn": 0,
     "windOff": 0,
-    "nuclear": maxNuclear-minNuclear,
-    "coal": maxCoal-minCoal,
-    "gas": maxGas-minGas
+    "nuclear": this.rangesMax.nuclear-this.rangesMin.nuclear,
+    "coal": this.rangesMax.coal-this.rangesMin.coal,
+    "gas": this.rangesMax.gas-this.rangesMin.gas
   }
 
   this.hourlySolarRegions={
@@ -349,7 +427,8 @@ simulation.prototype.update=function(it){
  
   // for the inertia reserve, the nominal power is relevant
   
-  var pow_rotatingMass=maxGas+maxCoal+maxNuclear+pow_biomass+pow_runningHydro;
+  var pow_rotatingMass=this.rangesMax.gas+this.rangesMax.coal+this.rangesMax.uclear
+      +pow_biomass+pow_runningHydro;
 
   if(pow_rotatingMass<minPow_rotatingMass){
     console.log("warning: power configuration unstable!");
@@ -413,6 +492,7 @@ simulation.prototype.update=function(it){
 	*intensity[i]/solar_Iref*this.factorSolar(it)*solar_av;
     this.hourlySolarRegions["region"+i]=regionalContrib;
     maxSolar+=regionalContrib;
+    this.rangesMax.solar+=regionalContrib;
   }
 
 
@@ -428,6 +508,7 @@ simulation.prototype.update=function(it){
       * this.powFact_wind(v,vc1_onshore, vc2_onshore, vc3_onshore)*windOn_av;
     this.hourlyWindRegions["region"+i]=regionalContrib;
     maxWindOn += regionalContrib;
+    this.rangesMax.windOn+=regionalContrib;
   }
 
 
@@ -440,6 +521,7 @@ simulation.prototype.update=function(it){
 	* windOff_av;
     this.hourlyWindRegions["region"+(i+4)]=regionalContrib;
     maxWindOff += regionalContrib;
+    this.rangesMax.windOff+=regionalContrib;
   }
 
   //console.log("pow0_WindOff=",pow0_WindOff," maxWindOff=",maxWindOff);
@@ -491,10 +573,10 @@ simulation.prototype.update=function(it){
 
     // (1) add max sun, wind, and nuclear to preexisting minimum supply
 
-    this.hourlymix.nuclear=maxNuclear;
-    this.hourlymix.solar=maxSolar;
-    this.hourlymix.windOn=maxWindOn;
-    this.hourlymix.windOff=maxWindOff;
+    this.hourlymix.nuclear=this.rangesMax.nuclear;
+    this.hourlymix.solar=this.rangesMax.solar;
+    this.hourlymix.windOn=this.rangesMax.windOn;
+    this.hourlymix.windOff=this.rangesMax.windOff;
     //console.log("(1): mismatch=",this.mismatch());
 
 
@@ -514,7 +596,6 @@ simulation.prototype.update=function(it){
     // (3) charge/discharge batteries and pump hydro
     // changes this.storage and this.hourlymix
     
-    this.storage.timeUTC_ms=winddata[it].timeUTC_ms;
     var result=this.useHydroBattStorage(it); // changes this.storage
     
     if(result){
@@ -552,38 +633,20 @@ simulation.prototype.update=function(it){
     // ############################################################
 
     
-    // (5) curtail supply power windOff, windOn, solar, nuclear
+    // (5) curtail supply power windOff, windOn, solar, nuclear  
 
-    /*
-    // windOff and windOn simultaneously
-    
-    if(this.mismatch()>0){
-      if(this.mismatch()>maxWindOn+maxWindOff){
-        this.hourlymix.windOn=0;
-        this.hourlymix.windOff=0;
-      }
-      else{
-        let fracWind=1-this.mismatch()/(maxWindOn+maxWindOff);
-        this.hourlymix.windOn=fracWind*maxWindOn;
-        this.hourlymix.windOff=fracWind*maxWindOff;
-	if(Math.abs(this.mismatch())>1e-6){
-	  console.log("sim.update, it=",it,
-		      " exiting in (5) after curtailing wind",
-		      "this.mismatch()=",this.mismatch());
-	}
-        //console.log("fracWind=",fracWind," this.hourlymix.windOff=",this.hourlymix.windOff);
-        return true;
-      }
-    }
-    */
+    let testFun=0; let balanced=false; //xxx write strategies compact
+    if(testFun==0){
+      balanced=this.curtail("windOff",it);}
+    else if(testFun==1){
+      balanced=this.curtailTest("windOff",it);}
+    else{
 
-    // curtail windOff due to lacking demand (grid bottlenecks at maxWindOff)
-    
     if(this.mismatch()>0){
       const loc_mismatch=this.mismatch();
 
-      if(loc_mismatch>maxWindOff){
-	this.hourlyCurtailment.windOff=maxWindOff;
+      if(loc_mismatch>this.rangesMax.windOff){
+	this.hourlyCurtailment.windOff=this.rangesMax.windOff;
         this.hourlymix.windOff=0;
       }
       else{
@@ -599,14 +662,15 @@ simulation.prototype.update=function(it){
         return true;
       }
     }
+    }
 
     // curtail windOn
     
     if(this.mismatch()>0){
       const loc_mismatch=this.mismatch();
-      if(loc_mismatch>maxWindOn){
+      if(loc_mismatch>this.rangesMax.windOn){
         this.hourlymix.windOn=0;
-	this.hourlyCurtailment.windOn=maxWindOn;
+	this.hourlyCurtailment.windOn=this.rangesMax.windOn;
       }
       else{
 	this.hourlyCurtailment.windOn=loc_mismatch;
@@ -626,8 +690,8 @@ simulation.prototype.update=function(it){
     if(this.mismatch()>0){
       const loc_mismatch=this.mismatch();
    
-      if(loc_mismatch>maxSolar){
-	this.hourlyCurtailment.solar=maxSolar;
+      if(loc_mismatch>this.rangesMax.solar){
+	this.hourlyCurtailment.solar=this.rangesMax.solar;
         this.hourlymix.solar=0;
       }
       else{
@@ -647,9 +711,9 @@ simulation.prototype.update=function(it){
     
     if(this.mismatch()>0){
       const loc_mismatch=this.mismatch();
-      if(loc_mismatch>maxNuclear-minNuclear){
-	this.hourlyCurtailment.nuclear=maxNuclear-minNuclear;
-        this.hourlymix.nuclear=minNuclear;
+      if(loc_mismatch>this.rangesMax.nuclear-this.rangesMin.nuclear){
+	this.hourlyCurtailment.nuclear=this.rangesMax.nuclear-this.rangesMin.nuclear;
+        this.hourlymix.nuclear=this.rangesMin.nuclear;
       }
       else{
 	this.hourlyCurtailment.nuclear=loc_mismatch;
@@ -717,8 +781,8 @@ simulation.prototype.update=function(it){
 
     // add gas before coal (ecofriendly)
     
-    if(this.mismatch()<-(maxGas-minGas)){
-      this.hourlymix.gas=maxGas;
+    if(this.mismatch()<-(this.rangesMax.gas-this.rangesMin.gas)){
+      this.hourlymix.gas=this.rangesMax.gas;
     }
     else{
       this.hourlymix.gas -= this.mismatch();
@@ -733,8 +797,8 @@ simulation.prototype.update=function(it){
     // add coal
 
 
-    if(this.mismatch()<-(maxCoal-minCoal)){
-      this.hourlymix.coal=maxCoal;
+    if(this.mismatch()<-(this.rangesMax.coal-this.rangesMin.coal)){
+      this.hourlymix.coal=this.rangesMax.coal;
     }
     else{
       this.hourlymix.coal -= this.mismatch();
@@ -748,17 +812,17 @@ simulation.prototype.update=function(it){
 
     // (7-8) add gas and coal in availability ratio 2:1 (Germany 2025)
     
-    const r=-this.mismatch()/(maxGas-minGas+maxCoal-minCoal);
+    const r=-this.mismatch()/(this.rangesMax.gas-this.rangesMin.gas
+			      +this.rangesMax.coal-this.rangesMin.coal);
     if(r>1){
-    //if(-this.mismatch()>(maxGas-minGas+maxCoal-minCoal)){
-      this.hourlymix.gas=maxGas; this.hourlyCurtailment.gas=0;
-      this.hourlymix.coal=maxCoal; this.hourlyCurtailment.coal=0;
+      this.hourlymix.gas=this.rangesMax.gas; this.hourlyCurtailment.gas=0;
+      this.hourlymix.coal=this.rangesMax.coal; this.hourlyCurtailment.coal=0;
     }
     else{
-      this.hourlymix.gas=(1-r)*minGas+r*maxGas;
-      this.hourlyCurtailment.gas=(1-r)*(maxGas-minGas);
-      this.hourlymix.coal=(1-r)*minCoal+r*maxCoal;
-      this.hourlyCurtailment.coal=(1-r)*(maxCoal-minCoal);
+      this.hourlymix.gas=(1-r)*this.rangesMin.gas+r*this.rangesMax.gas;
+      this.hourlyCurtailment.gas=(1-r)*(this.rangesMax.gas-this.rangesMin.gas);
+      this.hourlymix.coal=(1-r)*this.rangesMin.coal+r*this.rangesMax.coal;
+      this.hourlyCurtailment.coal=(1-r)*(this.rangesMax.coal-this.rangesMin.coal);
       
      // this.hourlymix.gas -= this.mismatch(); // error!!!
       if(Math.abs(this.mismatch())>1e-6){
@@ -778,7 +842,7 @@ simulation.prototype.update=function(it){
       this.hourlymix.loadShedding=-this.mismatch();   
       console.log("(9) it=",it," blackout due to load shedding > maximum factor ",
 		  loadSheddingFactor);
-      console.log("r=",r," this.hourlymix.gas=",this.hourlymix.gas," this.hourlymix.coal=",this.hourlymix.coal," maxCoal=",maxCoal);
+      console.log("r=",r," this.hourlymix.gas=",this.hourlymix.gas," this.hourlymix.coal=",this.hourlymix.coal," this.rangesMax.coal=",this.rangesMax.coal);
 
       return false; // alert Dunkelflaute
     }
@@ -1017,10 +1081,14 @@ function runSimulation(strategy){
     noBreakdown=sim.update(it);
   
     energymix[it]=sim.hourlymix;
-    storage[it]=sim.cloneStorage();
+    storage[it]=sim.cloneStorageWithTime(it);
     solarRegions[it]=sim.hourlySolarRegions;
     windRegions[it]=sim.hourlyWindRegions;
     curtailment[it]=sim.hourlyCurtailment;
+    if(false){
+      console.log("it=",it," energymix[it]=",energymix[it],
+		  " storage[it]=",storage[it]);
+    }
   }
 
   if(!noBreakdown){
@@ -1124,7 +1192,7 @@ function calcDailyTimeseries(){
     }
     
     energymixDaily[iday].timeUTC_ms=energymix[24*iday].timeUTC_ms;
-    storageDaily[iday].timeUTC_ms=storage[24*iday].timeUTC_ms;
+    storageDaily[iday].timeUTC_ms=energymix[24*iday].timeUTC_ms;
     //console.log("iday=",iday," energymixDaily[iday]=",energymixDaily[iday]);
     //console.log("iday=",iday," energymix[24*iday]=",energymix[24*iday]);
     
