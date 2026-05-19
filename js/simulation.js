@@ -299,35 +299,127 @@ simulation.prototype.curtail=function(energyName,it){
       }
     }
   }
-  if(it<10){
+  if(false){
     console.log("sim.curtail: energyName=",energyName," this.rangesMax[energyName]=", this.rangesMax[energyName]," loc_mismatch=",loc_mismatch)
   }
 
   return loadBalanced;
 }
 
-simulation.prototype.curtailTest=function(energyName,it){
-  if(this.mismatch()>0){
-      const loc_mismatch=this.mismatch();
-
-      if(loc_mismatch>this.rangesMax.windOff){
-	this.hourlyCurtailment.windOff=this.rangesMax.windOff;
-        this.hourlymix.windOff=0;
-	return false;
-      }
-      else{
-	this.hourlyCurtailment.windOff=loc_mismatch;
-        this.hourlymix.windOff -= loc_mismatch;
-	
-	if(Math.abs(this.mismatch())>1e-6){
-	  console.log("sim.update, it=",it,
-		      " exiting in (5) after curtailing wind offshore",
-		      "this.mismatch()=",this.mismatch());
-	}
-
-        return true;
-      }
+simulation.prototype.handleHellbrise=function(it){
+  console.log("Hellbrise! Too little demand or too much supply",
+	      " shut off baseload power");
+  let shutoffFactor=this.mismatch()/supplymin;
+  let stabreserveFactor=(pow_rotatingMass-minPow_rotatingMass)
+      /pow_rotatingMass;
+  if (shutoffFactor>stabreserveFactor){
+    console.log("(6) Hellbrise! need to emergency shut off",
+		" too little baseload rotating mass => blackout");
+    return false; // alert Hellbrise
   }
+  let reduceFact=1-shutoffFactor;
+  this.hourlymix.gas *=reduceFact;
+  this.hourlymix.coal *=reduceFact;
+  this.hourlymix.nuclear *=reduceFact;
+  this.hourlymix.runningHydro *=reduceFact;
+  this.hourlymix.biomass *=reduceFact;
+  console.log("sim.update: exiting in (6) after reducing minimum supply",
+	      "this.mismatch()=",this.mismatch());
+  return true;
+}
+
+simulation.prototype.add=function(energyName,it){
+  let loadBalanced=false;
+  const loc_mismatch=this.mismatch();
+  
+  if(loc_mismatch<-(this.rangesMax[energyName]-this.rangesMin[energyName])){
+    this.hourlymix[energyName]=this.rangesMax[energyName]; 
+  }
+     
+  else{
+    this.hourlymix[energyName] -= loc_mismatch;
+    balanced=true;
+  }
+  return loadBalanced;
+}
+
+simulation.prototype.handleDunkelflaute=function(it){
+  if (this.mismatch()<-loadSheddingFactor*this.hourlymix.load){
+    this.hourlymix.loadShedding=-this.mismatch();
+    console.log("handleDunkelflaute: it=",it,
+		" blackout due to load shedding > maximum factor ",
+		loadSheddingFactor);
+    return false; // alert Dunkelflaute
+  }
+  this.hourlymix.loadShedding=-this.mismatch();  
+  console.log("imposed load shedding of ",-this.mismatch(),
+		" GW to prevent blackout");
+  return true;
+
+}
+
+
+  
+
+/*###############################################################
+ if r<1 (not added to max)
+ preference energy1:energy2=lambda:1 weighted with potential A1,A2
+ A1,A2=max addtl power sources 1,2 can deliver
+ a1,a2=realized addtl power (<=A1,A2) is solution of the conditions 
+
+ (I)  a1+a2=neededPow
+ (II) a1/(A1-a1)=lambda*a2/(A2-a2)
+ 
+#################################################################*/
+
+
+simulation.prototype.addTwo=function(energyName1, energyName2, lambda, it){
+  let loadBalanced=false;
+  //console.log("this.rangesMax=",this.rangesMax);
+  //console.log("this.hourlymix=",this.hourlymix);
+  const neededPow=-this.mismatch();
+  const A1=this.rangesMax[energyName1]-this.hourlymix[energyName1];
+  const A2=this.rangesMax[energyName2]-this.hourlymix[energyName2];
+  const r=neededPow/(A1+A2)
+  if(r>=1){
+    this.hourlymix[energyName1]=this.rangesMax[energyName1];
+    this.hourlyCurtailment[energyName1]=0;
+    this.hourlymix[energyName2]=this.rangesMax[energyName2];
+    this.hourlyCurtailment[energyName2]=0; // loadBalanced remains false
+  }
+  else{
+    loadBalanced=true;
+    let a1=0;
+    let a2=0;
+    if(Math.abs(lambda-1)<1e-4){
+      a1=neededPow/(1+A2/A1);
+      a2=neededPow-a1;
+    }
+    else{
+      const p=0.5*(A2-neededPow+lambda*(A1+neededPow))/(1-lambda);
+      const sqrt_term=Math.sqrt(p*p+lambda*neededPow*A1/(1-lambda));
+      const a1_1=-p+sqrt_term;
+      const a1_2=-p-sqrt_term;
+      a1=((a1_1>=0)&&(a1_1<=neededPow)) ? a1_1 : a1_2;
+      a2=neededPow-a1;
+    }
+    this.hourlymix[energyName1]+=a1;
+    this.hourlymix[energyName2]+=a2;
+    this.hourlyCurtailment[energyName1]=A1-a1;
+    this.hourlyCurtailment[energyName2]=A2-a2;
+    if(false){
+	console.log("it=",it," lambda=",lambda.toFixed(1),
+		    " a1=",a1.toFixed(1)," a2=",a2.toFixed(1),
+		    " A1=",A1.toFixed(1)," A2=",A2.toFixed(1),
+		    " neededPow=",neededPow.toFixed(1));
+    }
+    
+    if((a1<0)||(a1>neededPow)){
+      console.log("Error: addtl power a1 not in [0,",neededPow,"]");
+    }
+  }
+
+  return loadBalanced;
 }
 
 
@@ -569,7 +661,7 @@ simulation.prototype.update=function(it){
     return false;
   }
   
-  if(this.strategy==0){ //"Klimaschoner"
+  if(this.strategy==0){ //"2025"
 
     // (1) add max sun, wind, and nuclear to preexisting minimum supply
 
@@ -577,283 +669,50 @@ simulation.prototype.update=function(it){
     this.hourlymix.solar=this.rangesMax.solar;
     this.hourlymix.windOn=this.rangesMax.windOn;
     this.hourlymix.windOff=this.rangesMax.windOff;
-    //console.log("(1): mismatch=",this.mismatch());
 
 
-    // (2) import/export
+    // (2) import/export (updates this.hourlymix.importHrly)
 
-    result=this.importExport(it); // updates this.hourlymix.importHrly
-    if(result){
-      if(Math.abs(this.mismatch())>1e-6){
-	console.log("sim.update, it=",it,
-		    " sim.update: exiting in (4) after import/export",
-		    "this.mismatch()=",this.mismatch());
-      }
-      return true;
-    }
-    //console.log("(2): mismatch=",this.mismatch());
+    if(this.importExport(it)){return true;}
+ 
 
-    // (3) charge/discharge batteries and pump hydro
-    // changes this.storage and this.hourlymix
+    // (3) charge/discharge storages (updates this.storage, this.hourlymix)
     
-    var result=this.useHydroBattStorage(it); // changes this.storage
+    if(this.useHydroBattStorage(it)){return true;} // changes this.storage
+    if(this.useH2Storage(it)){return true;} // changes this.storage
+        
+
+    // Strategy 2025, (4-5): Path if still too much supply
+ 
     
-    if(result){
-      if(Math.abs(this.mismatch())>1e-6){
-	console.log("sim.update, it=",it,
-		    " exiting in (2) after batteries/pumphydro",
-		    " this.mismatch()=",this.mismatch() );
-      }
-      return true;
-    }
-    
-    //console.log("(3): mismatch=",this.mismatch());
+    // (4) curtail supply power windOff, windOn, solar, nuclear  
 
-    // (4) charge/discharge  H2
-
-    //if(this.mismatch()>0){ // if charge but do not discharge
-    if(true){
-      result=this.useH2Storage(it); // changes this.storage
-      if(result){
-        if(Math.abs(this.mismatch())>1e-6){
-	  console.log("sim.update, it=",it,
-		      " exiting in (3) after charging H2 system",
-		      "this.mismatch()=",this.mismatch());
-	}
-        return true;
-      }
-    }
-    //console.log("(4): mismatch=",this.mismatch());
-
-
-
-
-    // ############################################################
-    // (5) -(6) path if still too much energy
-    // ############################################################
+    if(this.curtail("windOff",it)){return true;}
+    if(this.curtail("windOn",it)){return true;}
+    if(this.curtail("solar",it)){return true;}
+    if(this.curtail("nuclear",it)){return true;}
 
     
-    // (5) curtail supply power windOff, windOn, solar, nuclear  
-
-    let testFun=0; let balanced=false; //xxx write strategies compact
-    if(testFun==0){
-      balanced=this.curtail("windOff",it);}
-    else if(testFun==1){
-      balanced=this.curtailTest("windOff",it);}
-    else{
+    // (5) emergency "Hellbrise" //!!! proper handling still missing
 
     if(this.mismatch()>0){
-      const loc_mismatch=this.mismatch();
-
-      if(loc_mismatch>this.rangesMax.windOff){
-	this.hourlyCurtailment.windOff=this.rangesMax.windOff;
-        this.hourlymix.windOff=0;
-      }
-      else{
-	this.hourlyCurtailment.windOff=loc_mismatch;
-        this.hourlymix.windOff -= loc_mismatch;
-	
-	if(Math.abs(this.mismatch())>1e-6){
-	  console.log("sim.update, it=",it,
-		      " exiting in (5) after curtailing wind offshore",
-		      "this.mismatch()=",this.mismatch());
-	}
-
-        return true;
-      }
-    }
+      return this.handleHellbrise(it);
     }
 
-    // curtail windOn
-    
+
+    // Strategy 2025: path for too little supply
+    // !!! this.handleDunkelflaute(it) not yet properly implemeted;
+ 
     if(this.mismatch()>0){
-      const loc_mismatch=this.mismatch();
-      if(loc_mismatch>this.rangesMax.windOn){
-        this.hourlymix.windOn=0;
-	this.hourlyCurtailment.windOn=this.rangesMax.windOn;
-      }
-      else{
-	this.hourlyCurtailment.windOn=loc_mismatch;
-        this.hourlymix.windOn -= loc_mismatch;
-	if(Math.abs(this.mismatch())>1e-6){
-	  console.log("sim.update, it=",it,
-		      " exiting in (5) after curtailing wind onshore",
-		      "this.mismatch()=",this.mismatch());
-	}
-
-        return true;
-      }
-    }
-
-    // curtail solar
-    
-    if(this.mismatch()>0){
-      const loc_mismatch=this.mismatch();
-   
-      if(loc_mismatch>this.rangesMax.solar){
-	this.hourlyCurtailment.solar=this.rangesMax.solar;
-        this.hourlymix.solar=0;
-      }
-      else{
-	this.hourlyCurtailment.solar=loc_mismatch;
-        this.hourlymix.solar -= loc_mismatch;
-	if(Math.abs(this.mismatch())>1e-6){
-	  console.log("sim.update, it=",it,
-		      " exiting in (5) after curtailing sun",
-		      "this.mismatch()=",this.mismatch());
-	}
-
-        return true;
-      }
-    }
-    
-    // curtail nuclear
-    
-    if(this.mismatch()>0){
-      const loc_mismatch=this.mismatch();
-      if(loc_mismatch>this.rangesMax.nuclear-this.rangesMin.nuclear){
-	this.hourlyCurtailment.nuclear=this.rangesMax.nuclear-this.rangesMin.nuclear;
-        this.hourlymix.nuclear=this.rangesMin.nuclear;
-      }
-      else{
-	this.hourlyCurtailment.nuclear=loc_mismatch;
-        this.hourlymix.nuclear -=loc_mismatch;
-	if(Math.abs(this.mismatch())>1e-6){
-	  console.log("sim.update, it=",it,
-		      " exiting in (5) after curtailing nuclear",
-		      "this.mismatch()=",this.mismatch());
-	}
-        return true;
-      }
-    }
-    
-
-    // (6) emergency "Hellbrise" //!!! proper handling still missing
-
-    if(this.mismatch()>0){
-      console.log("Hellbrise! Too little demand or too much supply",
-		  " shut off baseload power");
-      let shutoffFactor=this.mismatch()/supplymin;
-      let stabreserveFactor=(pow_rotatingMass-minPow_rotatingMass)
-	  /pow_rotatingMass;
-      if (shutoffFactor>stabreserveFactor){
-	console.log("(6) Hellbrise! need to emergency shut off",
-		    " too little baseload rotating mass => blackout");
-	return false; // alert Hellbrise
-      }
-      let reduceFact=1-shutoffFactor;
-      this.hourlymix.gas *=reduceFact;
-      this.hourlymix.coal *=reduceFact;
-      this.hourlymix.nuclear *=reduceFact;
-      this.hourlymix.runningHydro *=reduceFact;
-      this.hourlymix.biomass *=reduceFact;
-      console.log("sim.update: exiting in (6) after reducing minimum supply",
-		  "this.mismatch()=",this.mismatch());
-      return true;
-    }
-
-    // ############################################################
-    // (7-9): path for too little supply (mismatch should be <0)
-    // ############################################################
-
-    if(this.mismatch()>0){
-      console.log("it=",it," path (7-9): error: mismatch ",this.mismatch(),
+      console.log("it=",it," error: mismatch ",this.mismatch(),
 		  " should be <0 at this point!");
     }
 
+    if(this.addTwo("gas","coal",1.01,it)){return true;}
     
-    //add H2 discharge (only if not charged/discharged in step 3)
-
-    if(false){
-      result=this.useH2Storage(it); // changes this.storage
-      if(result){
-        if(Math.abs(this.mismatch())>1e-6){
-	  console.log("sim.update, it=",it,
-		      " exiting in (7) after adding H2",
-		      "this.mismatch()=",this.mismatch());
-        }
-        return true;
-      }
-    }
-
-
-   /*
-
-    // add gas before coal (ecofriendly)
+    return this.handleDunkelflaute(it);
     
-    if(this.mismatch()<-(this.rangesMax.gas-this.rangesMin.gas)){
-      this.hourlymix.gas=this.rangesMax.gas;
-    }
-    else{
-      this.hourlymix.gas -= this.mismatch();
-      if(Math.abs(this.mismatch())>1e-6){
-	console.log("sim.update, it=",it,
-		    " exiting in (7) after adding gas",
-		    "this.mismatch()=",this.mismatch());
-      }
-      return true;
-    }
-
-    // add coal
-
-
-    if(this.mismatch()<-(this.rangesMax.coal-this.rangesMin.coal)){
-      this.hourlymix.coal=this.rangesMax.coal;
-    }
-    else{
-      this.hourlymix.coal -= this.mismatch();
-      if(Math.abs(this.mismatch())>1e-6){
-	console.log("sim.update, it=",it,
-		    " exiting in (8) after adding coal",
-		    "this.mismatch()=",this.mismatch());
-      return true;
-    }
-   */
-
-    // (7-8) add gas and coal in availability ratio 2:1 (Germany 2025)
-    
-    const r=-this.mismatch()/(this.rangesMax.gas-this.rangesMin.gas
-			      +this.rangesMax.coal-this.rangesMin.coal);
-    if(r>1){
-      this.hourlymix.gas=this.rangesMax.gas; this.hourlyCurtailment.gas=0;
-      this.hourlymix.coal=this.rangesMax.coal; this.hourlyCurtailment.coal=0;
-    }
-    else{
-      this.hourlymix.gas=(1-r)*this.rangesMin.gas+r*this.rangesMax.gas;
-      this.hourlyCurtailment.gas=(1-r)*(this.rangesMax.gas-this.rangesMin.gas);
-      this.hourlymix.coal=(1-r)*this.rangesMin.coal+r*this.rangesMax.coal;
-      this.hourlyCurtailment.coal=(1-r)*(this.rangesMax.coal-this.rangesMin.coal);
-      
-     // this.hourlymix.gas -= this.mismatch(); // error!!!
-      if(Math.abs(this.mismatch())>1e-6){
-	console.log("sim.update, it=",it,
-		    " exiting in (7-8) after adding gas,coal simultaneously",
-		    "this.mismatch()=",this.mismatch());
-      }
-      return true;
-    }
-
-    
-
-    // (9) prevent dunkelflaute blackout or raise dunkelflaute event
-    // !!! not yet properly handled!
-
-    if (this.mismatch()<-loadSheddingFactor*this.hourlymix.load){
-      this.hourlymix.loadShedding=-this.mismatch();   
-      console.log("(9) it=",it," blackout due to load shedding > maximum factor ",
-		  loadSheddingFactor);
-      console.log("r=",r," this.hourlymix.gas=",this.hourlymix.gas," this.hourlymix.coal=",this.hourlymix.coal," this.rangesMax.coal=",this.rangesMax.coal);
-
-      return false; // alert Dunkelflaute
-    }
-    this.hourlymix.loadShedding=-this.mismatch();   
-    console.log("imposed load shedding of ",-this.mismatch(),
-		" GW to prevent blackout");
-    console.log("sim.update: it=",it," exiting in (9) after load shedding",
-		"this.mismatch()=",this.mismatch());
-    return true;
-  }
-
+  } // strategy 0: 2025
 
 }
 
