@@ -72,11 +72,55 @@ simulation.prototype.cloneStorageWithTime=function(it){
 // two separate load management functions
 // each returns [matched=true or false, updated mismatch]
 
-// Note 1: since energy in [GWh] and powere in [GW] and update time 1h,
+// Note 1: since energy in [GWh] and power in [GW] and update time 1h,
 // can have power and energy in one expression
 
 // Note 2: The roundtrip efficiency eta is applied completely in the
 // charging phase
+
+
+// only charge but do not discharge for safety
+
+simulation.prototype.chargeHydroBattStorage=function(it){
+  let loc_mismatch=this.mismatch();
+
+  if(loc_mismatch<0){// nothing to do because only charging if allowed
+    return false; // load not balanced
+  }
+
+  else{// supply left to charge batteries and hydro
+    let battChargeMax=Math.min((battEnergy-this.storage.batt)/battEta,
+			       battCharge);
+    let hydroChargeMax=Math.min(
+      (hydroEnergy0-this.storage.pumpHydro)/hydroEta,
+      hydroCharge0); // index 0 since hydro constant
+
+    if(loc_mismatch<=battChargeMax){
+      this.storage.batt += battEta*loc_mismatch;
+      this.hourlymix.batt =- loc_mismatch;  // w/o roundturn eta!
+      return true;
+    }
+    else{
+      this.storage.batt +=battEta*battChargeMax;
+      this.hourlymix.batt =- battChargeMax;
+    }
+    
+    loc_mismatch=this.mismatch();
+    if(loc_mismatch<=hydroChargeMax){
+      this.storage.pumpHydro +=hydroEta*loc_mismatch;
+      this.hourlymix.pumpHydro =- loc_mismatch; // w/o roundturn eta!
+      return true;
+    }
+    else{
+      this.storage.pumpHydro +=hydroEta*hydroChargeMax;
+      this.hourlymix.pumpHydro =-hydroChargeMax; // w/o roundturn eta!
+      return false;
+    }
+  } // charging branch
+}  // chargeHydroBattStorage
+
+
+// charge and discharge to match demand
 
 simulation.prototype.useHydroBattStorage=function(it){
 
@@ -85,9 +129,9 @@ simulation.prototype.useHydroBattStorage=function(it){
 
   if(loc_mismatch>=0){// power left to load batteries and pumped hydro
 
-    var battChargeMax=Math.min((battEnergy-this.storage.batt)/battEta,
+    let battChargeMax=Math.min((battEnergy-this.storage.batt)/battEta,
 			       battCharge);
-    var hydroChargeMax=Math.min(
+    let hydroChargeMax=Math.min(
       (hydroEnergy0-this.storage.pumpHydro)/hydroEta,
       hydroCharge0); // index 0 since hydro constant
 
@@ -160,7 +204,32 @@ simulation.prototype.useHydroBattStorage=function(it){
   return false;
 }
 
- 
+
+// only charge hydro
+
+simulation.prototype.chargeH2Storage=function(it){
+  let loc_mismatch=this.mismatch();
+
+  if(loc_mismatch<0){ return false;} // nothing to do
+
+  else {// power left for electrolysis
+
+    var H2ChargeMax=Math.min((H2Energy-this.storage.H2)/H2eta, H2Charge);
+  
+    if(loc_mismatch<=H2ChargeMax){
+      this.storage.H2 +=H2eta*loc_mismatch; 
+      this.hourlymix.H2 = -loc_mismatch; // w/o roundturn eta
+      return true;
+    }
+    else{
+      this.storage.H2 +=H2eta*H2ChargeMax;
+      this.hourlymix.H2 =- H2ChargeMax;
+      return false;
+    }
+  }
+} // chargeH2Storage
+
+
 simulation.prototype.useH2Storage=function(it){
   let loc_mismatch=this.mismatch();
   if(loc_mismatch>=0){// power left for electrolysis
@@ -338,7 +407,7 @@ simulation.prototype.add=function(energyName,it){
      
   else{
     this.hourlymix[energyName] -= loc_mismatch;
-    balanced=true;
+    loadBalanced=true;
   }
   return loadBalanced;
 }
@@ -432,6 +501,9 @@ simulation.prototype.addTwo=function(energyName1, energyName2, lambda, it){
 
 simulation.prototype.update=function(it){
 
+  //this.debug=(it==33);
+  this.debug=false;
+  
   this.rangesMax={
     nuclear: nuclear_av*pow0_Nuclear,
     solar: 0,
@@ -617,14 +689,14 @@ simulation.prototype.update=function(it){
   }
 
   //console.log("pow0_WindOff=",pow0_WindOff," maxWindOff=",maxWindOff);
-  var supplymin=this.supply(); // init. with min supply w/o import,storage
+  let supplymin=this.supply(); // init. with min supply w/o import,storage
 
 
   /* ###########################################################
   Strategy 0: "2025"
 
-   Strategy 1: maximum climate friendly
-  (1) add max sun, wind, and nuclear to minimum supply
+   Strategy 1: maximum climate friendly "Klimaschoner"
+  (1) add max sun, wind, and nuclear to maximum
   (2) charge/discharge batteries and pump hydro => exit 1
   (3) if mismatch>0 charge H2 => exit 2
   (4) add import/export => exit 3
@@ -656,25 +728,29 @@ simulation.prototype.update=function(it){
    #################################################################*/
 
   //if(it==0){console.log("\n\nrunSimulation: this.strategy=",this.strategy);}
-  if(this.strategy!=0){
+  if(this.strategy>=4){
     console.log("error: strategy ",this.strategy," not yet implemented");
     return false;
   }
   
   if(this.strategy==0){ //"2025"
 
-    // (1) add max sun, wind, and nuclear to preexisting minimum supply
+   // (1) add max sun, wind, and nuclear to max
 
     this.hourlymix.nuclear=this.rangesMax.nuclear;
     this.hourlymix.solar=this.rangesMax.solar;
     this.hourlymix.windOn=this.rangesMax.windOn;
     this.hourlymix.windOff=this.rangesMax.windOff;
 
-
+    if(this.debug){
+      console.log("it=",it," strategy 0 after (1): this.mismatch()=",
+		  this.mismatch()," this.load()=",this.load());
+    }
+ 
     // (2) import/export (updates this.hourlymix.importHrly)
 
     if(this.importExport(it)){return true;}
- 
+
 
     // (3) charge/discharge storages (updates this.storage, this.hourlymix)
     
@@ -707,12 +783,128 @@ simulation.prototype.update=function(it){
       console.log("it=",it," error: mismatch ",this.mismatch(),
 		  " should be <0 at this point!");
     }
-
+  
     if(this.addTwo("gas","coal",1.01,it)){return true;}
     
     return this.handleDunkelflaute(it);
     
   } // strategy 0: 2025
+
+  if(this.strategy==1){// climate friendly / Klimaschoner
+
+    // (1) add max sun, wind, and nuclear to max
+
+    this.hourlymix.nuclear=this.rangesMax.nuclear;
+    this.hourlymix.solar=this.rangesMax.solar;
+    this.hourlymix.windOn=this.rangesMax.windOn;
+    this.hourlymix.windOff=this.rangesMax.windOff;
+
+    // (2) charge/discharge storages (updates this.storage, this.hourlymix)
+    
+    if(this.useHydroBattStorage(it)){return true;} // changes this.storage
+    if(this.useH2Storage(it)){return true;} // changes this.storage
+
+    // (3) import/export (updates this.hourlymix.importHrly)
+
+    if(this.importExport(it)){return true;}
+
+
+    // (4-5) high supply branch as in Strategy 2025
+
+    if(this.curtail("windOff",it)){return true;}
+    if(this.curtail("windOn",it)){return true;}
+    if(this.curtail("solar",it)){return true;}
+    if(this.curtail("nuclear",it)){return true;}
+    if(this.mismatch()>0){return this.handleHellbrise(it);}
+
+    // (6-7) low supply branch start adding gas first
+    
+    if(this.add("gas",it)){return true;}
+    if(this.add("coal",it)){return true;}
+    return this.handleDunkelflaute(it);
+  }
+
+  
+  if(this.strategy==2){// safety first
+
+    // (1) add everything to max
+
+    this.hourlymix.nuclear=this.rangesMax.nuclear;
+    this.hourlymix.solar=this.rangesMax.solar;
+    this.hourlymix.windOn=this.rangesMax.windOn;
+    this.hourlymix.windOff=this.rangesMax.windOff;
+    this.hourlymix.gas=this.rangesMax.gas;
+    this.hourlymix.coal=this.rangesMax.coal;
+
+
+    // (2) only charge but do not discharge storages
+    
+    if(this.chargeHydroBattStorage(it)){return true;}
+    if(this.chargeH2Storage(it)){return true;} // changes this.storage
+
+    // (3) import/export (last chance to get energy into system;
+    // only exports if still supply surplus after charging everything
+
+    if(this.importExport(it)){return true;}
+
+    // (4) get energy from storage: last chance to match demand in
+    //     case of a low-supply situation
+
+    if(this.mismatch()<0){
+      if(this.useHydroBattStorage(it)){return true;}
+      if(this.useH2Storage(it)){return true;}
+    }
+
+    // (5) Dunkelflaute
+
+    if(this.mismatch()<0){return this.handleDunkelflaute(it);}
+
+    // (6) High-supply path; successively reduce energy sources to minimum
+    //     keeping as climate-friendly as possible (coal first)
+    //     (this.mismatch()>=0 at this point)
+
+    if(this.curtail("coal",it)){return true;}
+    if(this.curtail("gas",it)){return true;}
+    if(this.curtail("windOff",it)){return true;}
+    if(this.curtail("windOn",it)){return true;}
+    if(this.curtail("solar",it)){return true;}
+    if(this.curtail("nuclear",it)){return true;}
+
+    // (7) high-supply emergency
+ 
+    return this.handleHellbrise(it);
+  }
+
+  if(this.strategy==3){ //"Gruen" (!= Klimaschoner!)
+
+    // (1) add only renewables to max
+
+    this.hourlymix.solar=this.rangesMax.solar;
+    this.hourlymix.windOn=this.rangesMax.windOn;
+    this.hourlymix.windOff=this.rangesMax.windOff;
+
+    // (2-3) import/export and charge/discharge as in "2025"
+
+    if(this.importExport(it)){return true;}
+    if(this.useHydroBattStorage(it)){return true;}
+    if(this.useH2Storage(it)){return true;}
+
+    // (3-4) high-supply branch as in "2025"
+
+    if(this.curtail("windOff",it)){return true;}
+    if(this.curtail("windOn",it)){return true;}
+    if(this.curtail("solar",it)){return true;}
+    if(this.mismatch()>0){ return this.handleHellbrise(it);}
+
+    // (5-6) low-supply branch: nuclear is added last
+
+    if(this.add("gas",it)){return true;}
+    if(this.add("coal",it)){return true;}
+    if(this.add("nuclear",it)){return true;}
+    return this.handleDunkelflaute(it);
+  }
+
+    
 
 }
 

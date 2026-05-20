@@ -108,10 +108,13 @@ function buildDatasetsEnergymix(inputData) {
         + d.windOff
         + d.solar
         + d.importHrly
+	+ d.pumpHydro
+	+ d.batt
+        + d.H2
         //+ clampPositive(d.importHrly) 
 	//+ clampPositive(d.pumpHydro) 
 	//+ clampPositive(d.batt) 
-      //+ clampPositive(d.H2)
+        //+ clampPositive(d.H2)
     )
   }));
 
@@ -441,7 +444,7 @@ function setupClick(canvasID, inputData) {
     const points = chart.getElementsAtEventForMode(
       event, 'index', { intersect: false }, true
     );
-    console.log("onclick: points=",points);
+    //console.log("onclick: points=",points);
     
     if (!points.length) {
       box.style.display = "none";
@@ -478,7 +481,7 @@ function setupClick(canvasID, inputData) {
     box.style.top = (isTopChart) ? 1*vh : 51*vh;
     box.style.display = "block";
     box.style.fontSize=fontsize;
-    console.log(" box.style=",box.style);
+    //console.log(" box.style=",box.style);
 
     // move lower charts also at click; because no named functions possible,
     // code duplication (without the mousedown "if" and w/o min drag condition)

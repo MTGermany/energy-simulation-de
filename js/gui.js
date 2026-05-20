@@ -38,6 +38,7 @@ let strategyIndex=0; //!!
 function implementStrategy(selectedIndex) {
   strategyIndex=selectedIndex;
   console.log("implementStrategy: strategieIndex=",strategyIndex);
+  updateSimulation(strategyIndex);
 }
 
 
