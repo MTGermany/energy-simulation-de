@@ -211,17 +211,17 @@ a:hover {
 
 #merkelsmileys{
   position: absolute;
-  top: 63vmin;
-  left: 3vw;
+  top: 60vmin;
+  left: 4vw;
   /* DOS here; width controlled by image in javascript: */
   z-index: 0; /* the higher the integer, the more on top */
 }
 #raute{
   position: absolute;
-  top: 70vmin;
+  top: 71vmin;
   left: 3vw;
-  width: 8vmin; /* works with "%" size in <img ...> in html */
-  height: 6vmin;
+  width: 14vmin; /* works with "%" size in <img ...> in html */
+  height: 10vmin; /* DOS *?
   z-index: 0; /* the higher the integer, the more on top */
 }
 

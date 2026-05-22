@@ -129,12 +129,12 @@ function toggleGraphics(){
 
 const smileImgs=[5];
 
-for(var i=0; i<5; i++){
+for(var i=0; i<7; i++){
   smileImgs[i] = document.createElement("img");
   let str_imgfile="figs/smiley"+(i+1).toString()+".png";
   smileImgs[i].src=str_imgfile;
-  smileImgs[i].width=8*vmin; //WATCH OUT! Only direct numbers, no pix, vw etc
-  smileImgs[i].height=8*vmin;
+  smileImgs[i].width=10*vmin; //WATCH OUT! Only direct numbers, no pix, vw etc
+  smileImgs[i].height=10*vmin;
   //console.log("smileImgs[i]=",smileImgs[i]);
 
 }
@@ -260,7 +260,7 @@ slider_Nuclear.oninput = function() {
   slider_NuclearStr.innerHTML
     = Math.round(this.value)+" GW";
 
-  let merkelIndex=Math.min(4, Math.round(pow0_Nuclear/5.));
+  let merkelIndex=Math.min(6, Math.round(pow0_Nuclear/5.));
   let imageDiv=document.getElementById("merkelsmileys");
   //console.log("merkelIndex=",merkelIndex);
   imageDiv.replaceChild(smileImgs[merkelIndex], imageDiv.childNodes[0]);

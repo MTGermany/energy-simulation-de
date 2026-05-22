@@ -29,12 +29,14 @@ dataSupplyDemand/
 dataWind/
 *.eps
 *.fig
+*.xcf
 js/displayText.js
 js/seedrandom.min.js
 js/*save*
 js/takeTwo_alpha.gnu
 
 figs/Merkelraute_Template.png
+figs/Merkelraute.png
 references/Energy-charts_stromerzeugung_2025.pdf
 scenarios_Frauenhofer/
 *sketch*
