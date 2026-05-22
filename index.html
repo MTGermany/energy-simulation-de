@@ -153,7 +153,7 @@
 <tr>
   <td>Kohle</td>
   <td> <input id="slider_Coal" type="range" 
-              min="0" max="30" step="1"></td>
+              min="0" max="30" step="0.1"></td>
   <td> <div id="slider_CoalStr"></div> </td>
 </tr>
 
@@ -180,7 +180,7 @@
 <div id="controlStrategyDiv">
 <center>
 
-  <br><br><br>
+  <br>
   
 <h2>Batterien (&eta; = 0.9 * 0.9 = 81%) &nbsp;
   <a href="./infoBatt.html">(Info)</a></h2>
@@ -199,7 +199,7 @@
 <tr>
   <td>Kapazit&auml;t</td>
   <td> <input id="slider_battEnergy" type="range" 
-              min="0" max="200" step="10"></td>
+              min="0" max="1" step="0.005"></td>
   <td> <div id="slider_battEnergyStr"></div></td> 
 </tr>
 </table>
@@ -226,10 +226,11 @@
   <td> <div id="slider_H2DischargeStr"></div></td> 
 </tr>
 
+<!-- nonlinear scale x in [0,1], energy=energymax*x^displayExp -->
 <tr>
   <td>Kapazit&auml;t</td>
   <td> <input id="slider_H2Energy" type="range" 
-              min="0" max="20000" step="10"></td>
+              min="0" max="1" step="0.005"></td>
   <td> <div id="slider_H2EnergyStr"></div></td> 
 </tr>
 
@@ -244,7 +245,7 @@
 <tr>
   <td>allle Nachbarn</td>
   <td> <input id="slider_importPow" type="range" 
-              min="0" max="15" step="1"></td>
+              min="0" max="20" step="1"></td>
   <td> <div id="slider_importPowStr"></div></td> 
 </tr>
 
@@ -255,7 +256,7 @@
 
 <h2>Strategie &nbsp; <a href="infoStrategy.html">(Info)</a> </h2>
 
-<select name="stragies" id="selectStrategy"
+<select name="strategies" id="selectStrategy"
 	onchange="implementStrategy(this.selectedIndex)">
   <option value="now">Aktuelle Strategie</option> 
   <option value="climate">Klimaschoner</option> 
@@ -330,6 +331,7 @@ pointing from top to bottom chart
 
 
 <div id="generalInfo"></div>
+<div id="infoImportExport"></div>
 <div id="clickInfo"></div>
 
 <div id="CO2Info"></div>

@@ -95,7 +95,9 @@ function buildDatasetsEnergymix(inputData) {
   //console.log("datasets=",datasets);
 
 
-  const total = inputData.map(d => ({
+  const demandSet=mapData("load");
+  
+  const supplySet = inputData.map(d => ({
     x: d.timeUTC_ms,
     y:
     1.00*(
@@ -121,7 +123,7 @@ function buildDatasetsEnergymix(inputData) {
   datasets.push({
     //label: "Nachfrage+Export+Laden",
     label: "Nachfrage",
-    data: total,
+    data: demandSet,
     borderColor: "#000",
     borderWidth: 3,
     fill: false,
@@ -314,18 +316,23 @@ function updateZoom(chart, otherChart, chartData, redrawBottom){
     event, 'index', { intersect: false }, true );
       
   if(points.length){
-        const it_day=points[0].index;  // points[0] ... [16] all the same
-	const it_h=24*it_day;
-        const itmin_h=Math.max(Math.min(
-	  it_h-itHalfInterval,24*(chartData.length-1)-2*itHalfInterval),0); 
-        const itmax_h=itmin_h+2*itHalfInterval;
-	const itmin_day=itmin_h/24;
-	const itmax_day=itmax_h/24;
-    console.log("updateZoom: it_h=",it_h," itmin_h=",itmin_h," itmax_h=",itmax_h);
+    const it_day=points[0].index;  // points[0] ... [16] all the same
+    const it_h=24*it_day;
+        //const itmin_h=Math.max(Math.min(
+	//  it_h-itHalfInterval,24*(chartData.length-1)-2*itHalfInterval),0); 
+    const itmin_h=Math.max(it_h-itHalfInterval,0); 
+    const itmax_h=Math.min(it_h+itHalfInterval, itmax); // from simulation
+    const itmin_day=Math.floor(itmin_h/24);
+    const itmax_day=Math.min(Math.floor(itmax_h/24),chartData.length-1);
+    if(true){
+      console.log("graphics, updateZoom: it_h=",it_h,
+		  " itmin_h=",itmin_h," itmax_h=",itmax_h,
+		  " itmin_day=",itmin_day," itmax_day=", itmax_day);
+    }
 
     // move lower chart ranges 
 
-    if(redrawBottom){updateRange(itmin_h,itmax_h);}
+    if(redrawBottom){updateRangeClipped(itmin_h,itmax_h);}
 
       // draw zoomed lines on zoomInCanvas
       // need separate transparently overlain canvas because
@@ -366,7 +373,7 @@ function updateZoom(chart, otherChart, chartData, redrawBottom){
     zoomInCanvas.height=100*vh;
     //zoomInCanvas.zIndex="2"; // DOS
     //zoomInCanvas.bringToFront; // DOS
-    console.log("zoomInCanvas=",zoomInCanvas);
+    //console.log("zoomInCanvas=",zoomInCanvas);
     const ctx = zoomInCanvas.getContext('2d');
 
     ctx.strokeStyle="rgb(0,0,0)";
@@ -499,8 +506,3 @@ function setupClick(canvasID, inputData) {
   };
 }
 
-// ----------------------------
-// main
-
-
-//initChart;

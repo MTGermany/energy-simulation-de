@@ -30,10 +30,10 @@ body{
   background-color: #FFFFFF;
 }
 
-button,select{    /* see also toggle control */
+button,select{    /* see also toggle control; select=combobox,choice */
     font-size: 2.2vmin;
     width: 17vw;
-    height: 9vh;
+    height: 6vh;
 }
 
 
@@ -318,12 +318,26 @@ a:hover {
       z-index: 0;
 }
 
+#infoImportExport {
+      position: absolute;
+      border: 0px solid #ccc;
+      padding: 8px;
+      display: block;
+      left: 20vw;
+      top: 81vh;
+      font-size: 2.0vmin;
+      /*width:  15vw; 
+      height: 12vh;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);*/
+      z-index: 0;
+}
+
 #CO2Info {
       position: absolute;
       border: 0px solid #ccc;
       padding: 8px;
       display: block;
-      left: 25vw;
+      left: 32vw;
       top: 87vh;
       color: rgb(200,0,0);
       font-size: 3vmin;

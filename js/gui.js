@@ -35,10 +35,11 @@ function handleWindowResize() {
 }
 
 let strategyIndex=0; //!!
-function implementStrategy(selectedIndex) {
+function implementStrategy(selectedIndex) { //choice box combo box
   strategyIndex=selectedIndex;
   console.log("implementStrategy: strategieIndex=",strategyIndex);
   updateSimulation(strategyIndex);
+  updateRangeClipped(itminClipped,itmaxClipped);
 }
 
 
@@ -150,10 +151,10 @@ document.getElementById("merkelsmileys").appendChild(smileImgs[0]);
 // round => commaDigits=0
 // e.g., setSlider(slider_loadGen, slider_loadGenStr, 100*loadGenRel, 0, "%");
 
-function setSlider(slider, slider_valField, value, commaDigits, str_units){
+function setSlider(slider, slider_strField, value, commaDigits, str_units){
   var formattedValue=value.toFixed(commaDigits);
   slider.value=formattedValue;
-  slider_valField.innerHTML=formattedValue+" "+str_units; 
+  slider_strField.innerHTML=formattedValue+" "+str_units; 
 }
 
 
@@ -320,19 +321,25 @@ setSlider(slider_battCharge, slider_battChargeStr, battCharge, 0,
 	  " GW (100%)");
 
 
-// battery capacity
+// battery capacity (nonlin scale H2Energy=H2EnergyMax*sliderval^displayExp)
+
+const displayExp=3; 
 
 var battEnergy=battEnergy0;
 var slider_battEnergy = document.getElementById('slider_battEnergy');
 var slider_battEnergyStr = document.getElementById("slider_battEnergyStr");
 slider_battEnergy.oninput = function() {
   console.log("in slider_battEnergy.oninput: this.value=" + this.value);
-  battEnergy=parseFloat(this.value);
+  battEnergy=battEnergyMax*Math.pow(parseFloat(this.value),displayExp);
   slider_battEnergyStr.innerHTML
-    = Math.round(this.value)+" GWh ("+formd0(100*battEnergy/battEnergy0)+"%)";
+    = Math.round(battEnergy)+" GWh ("+formd0(100*battEnergy/battEnergy0)+"%)";
 }
-setSlider(slider_battEnergy, slider_battEnergyStr, battEnergy, 0,
-	  " GWh (100%)");
+
+// here setSlider not useable
+
+slider_battEnergy.value=Math.pow(battEnergy0/battEnergyMax,1/displayExp);
+slider_battEnergyStr.innerHTML= Math.round(battEnergy0)+" GWh (100%)";
+
 
 // pumphydro=const
 
@@ -346,7 +353,7 @@ var H2Charge=H2Charge0;
 var slider_H2Charge = document.getElementById('slider_H2Charge');
 var slider_H2ChargeStr = document.getElementById("slider_H2ChargeStr");
 slider_H2Charge.oninput = function() {
-  //console.log("in slider_H2Charge.oninput: this.value=" + this.value);
+  console.log("in slider_H2Charge.oninput: this.value=" + this.value);
   H2Charge=parseFloat(this.value);
   slider_H2ChargeStr.innerHTML
     = Math.round(this.value)+" GW";
@@ -360,26 +367,28 @@ var H2Discharge=H2Discharge0;
 var slider_H2Discharge = document.getElementById('slider_H2Discharge');
 var slider_H2DischargeStr = document.getElementById("slider_H2DischargeStr");
 slider_H2Discharge.oninput = function() {
-  //console.log("in slider_H2Discharge.oninput: this.value=" + this.value);
+  console.log("in slider_H2Discharge.oninput: this.value=" + this.value);
   H2Discharge=parseFloat(this.value);
-  slider_H2DischargeStr.innerHTML
-    = Math.round(this.value)+" GW";
+  slider_H2DischargeStr.innerHTML = Math.round(this.value)+" GW";
 }
 setSlider(slider_H2Discharge, slider_H2DischargeStr, H2Discharge0, 0, " GW");
 
 
-// H2 capacity
+// H2 capacity (nonlinear scale H2Energy=H2EnergyMax*sliderval^displayExp)
 
 var H2Energy=H2Energy0;
 var slider_H2Energy = document.getElementById('slider_H2Energy');
 var slider_H2EnergyStr = document.getElementById("slider_H2EnergyStr");
 slider_H2Energy.oninput = function() {
   //console.log("in slider_H2Energy.oninput: this.value=" + this.value);
-  H2Energy=parseFloat(this.value);
-  slider_H2EnergyStr.innerHTML
-    = Math.round(this.value)+" GWh";
+  H2Energy=H2EnergyMax*Math.pow(parseFloat(this.value),displayExp);
+  slider_H2EnergyStr.innerHTML= Math.round(H2Energy)+" GWh";
 }
-setSlider(slider_H2Energy, slider_H2EnergyStr, H2Energy0, 0, " GW");
+
+// here setSlider not useable
+
+slider_H2Energy.value=Math.pow(H2Energy0/H2EnergyMax,1/displayExp);
+slider_H2EnergyStr.innerHTML= Math.round(H2Energy0)+" GWh";
 
 
 // ------------------------------------------------
@@ -425,9 +434,10 @@ function handleMouseMove(event,canvas){
 }
 
 function handleMouseUp(event){
-  //console.log("handleMouseUp from div: redo simulation");
+  console.log("handleMouseUp from table onmouseup element");
   mousedown=false;
   updateSimulation(strategyIndex);
+  updateRangeClipped(itminClipped,itmaxClipped);
 }
 
 

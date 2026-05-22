@@ -32,6 +32,12 @@ supplydemanddata2025
 
 */
 
+const nt=winddata.length;
+let itmax=nt-1;  // itmax may become < nt-1 if Dunkelflaute/Hellbrise
+
+const itHalfInterval=3*24;
+let itminClipped=0;  // initial clippings for lower charts
+let itmaxClipped=2*itHalfInterval;
 
 function simulation(strategy){
 
@@ -205,7 +211,7 @@ simulation.prototype.useHydroBattStorage=function(it){
 }
 
 
-// only charge hydro
+// only charge H2
 
 simulation.prototype.chargeH2Storage=function(it){
   let loc_mismatch=this.mismatch();
@@ -230,12 +236,14 @@ simulation.prototype.chargeH2Storage=function(it){
 } // chargeH2Storage
 
 
+// change and discharge H2 storage
+
 simulation.prototype.useH2Storage=function(it){
   let loc_mismatch=this.mismatch();
   if(loc_mismatch>=0){// power left for electrolysis
 
     var H2ChargeMax=Math.min((H2Energy-this.storage.H2)/H2eta, H2Charge);
-    if(false){
+    if(this.debug){
       console.log("sim.useH2Storage: it=",it,
 		  " loc_mismatch=", loc_mismatch,
 		  " H2Energy=",H2Energy,
@@ -257,7 +265,7 @@ simulation.prototype.useH2Storage=function(it){
   else{ // loc_mismatch<0
 
     loc_mismatch=this.mismatch();
-    var H2DischargeMax=Math.min(this.storage.H2, H2Discharge0);
+    var H2DischargeMax=Math.min(this.storage.H2, H2Discharge);
 
     if(-loc_mismatch<=H2DischargeMax){
       this.storage.H2 +=loc_mismatch; // <0
@@ -397,38 +405,42 @@ simulation.prototype.handleHellbrise=function(it){
   return true;
 }
 
-simulation.prototype.add=function(energyName,it){
-  let loadBalanced=false;
-  const loc_mismatch=this.mismatch();
-  
-  if(loc_mismatch<-(this.rangesMax[energyName]-this.rangesMin[energyName])){
-    this.hourlymix[energyName]=this.rangesMax[energyName]; 
-  }
-     
-  else{
-    this.hourlymix[energyName] -= loc_mismatch;
-    loadBalanced=true;
-  }
-  return loadBalanced;
-}
-
 simulation.prototype.handleDunkelflaute=function(it){
   if (this.mismatch()<-loadSheddingFactor*this.hourlymix.load){
     this.hourlymix.loadShedding=-this.mismatch();
     console.log("handleDunkelflaute: it=",it,
 		" blackout due to load shedding > maximum factor ",
 		loadSheddingFactor);
+    this.displayResults(it);
     return false; // alert Dunkelflaute
   }
   this.hourlymix.loadShedding=-this.mismatch();  
-  console.log("imposed load shedding of ",-this.mismatch(),
+  console.log("it=",it," imposed load shedding of ",-this.mismatch(),
 		" GW to prevent blackout");
   return true;
 
 }
 
 
+simulation.prototype.add=function(energyName,it){
+  let loadBalanced=false;
+  const loc_mismatch=this.mismatch();
+  const addMax=this.rangesMax[energyName]-this.hourlymix[energyName];
   
+  if(loc_mismatch<-addMax){
+    this.hourlymix[energyName]=this.rangesMax[energyName]; 
+    this.hourlyCurtailment[energyName]=0;
+  }
+     
+  else{
+    this.hourlymix[energyName] -= loc_mismatch;
+    this.hourlyCurtailment[energyName]=addMax+loc_mismatch;
+    loadBalanced=true;
+  }
+  return loadBalanced;
+}
+
+
 
 /*###############################################################
  if r<1 (not added to max)
@@ -437,7 +449,7 @@ simulation.prototype.handleDunkelflaute=function(it){
  a1,a2=realized addtl power (<=A1,A2) is solution of the conditions 
 
  (I)  a1+a2=neededPow
- (II) a1/(A1-a1)=lambda*a2/(A2-a2)
+ (II) a1/(A1-a1)=lambda*a2/(A2-a2) (lambda=odds ratio A1,A2)
  
 #################################################################*/
 
@@ -457,13 +469,20 @@ simulation.prototype.addTwo=function(energyName1, energyName2, lambda, it){
     this.hourlyCurtailment[energyName2]=0; // loadBalanced remains false
   }
   else{
+    const SMALL_VAL=1e-6;
     loadBalanced=true;
     let a1=0;
     let a2=0;
-    if(Math.abs(lambda-1)<1e-4){
+    
+    if(A1<SMALL_VAL){a1=0; a2=neededPow;}
+    
+    else if(A2<SMALL_VAL){a2=0; a1=neededPow;}
+
+    else if(Math.abs(lambda-1)<SMALL_VAL){
       a1=neededPow/(1+A2/A1);
       a2=neededPow-a1;
     }
+    
     else{
       const p=0.5*(A2-neededPow+lambda*(A1+neededPow))/(1-lambda);
       const sqrt_term=Math.sqrt(p*p+lambda*neededPow*A1/(1-lambda));
@@ -491,6 +510,29 @@ simulation.prototype.addTwo=function(energyName1, energyName2, lambda, it){
   return loadBalanced;
 }
 
+simulation.prototype.displayResults=function(it){
+  console.log(
+    "it=",it,
+    " W_load=",  this.hourlymix.load,
+    " W_supply=",  this.supply(),
+    " W_mismatch=",this.mismatch(),
+    "\n W_nuclear=",  this.hourlymix.nuclear.toFixed(1),
+    "\n W_nuclear_curtailment=",  this.hourlyCurtailment.nuclear.toFixed(1),
+    "\n W_solar=",  this.hourlymix.solar.toFixed(1),
+    "\n W_solar_curtailment=",  this.hourlyCurtailment.solar.toFixed(1),
+    "\n W_windOn=",  this.hourlymix.windOn.toFixed(1),
+    "\n W_windOn_curtailment=",  this.hourlyCurtailment.windOn.toFixed(1),
+    "\n W_windOff=",  this.hourlymix.windOff.toFixed(1),
+    "\n W_windOff_curtailment=",  this.hourlyCurtailment.windOff.toFixed(1),
+    "\n W_import=",  Math.max(0,+this.hourlymix.importHrly).toFixed(1),
+    "\n W_export=",  Math.max(0,-this.hourlymix.importHrly).toFixed(1),
+    "\n W_gas=",  this.hourlymix.gas.toFixed(1),
+    "\n W_gas_curtailment=",  this.hourlyCurtailment.gas.toFixed(1),
+    "\n W_coal=",  this.hourlymix.coal.toFixed(1),
+    "\n W_coal_curtailment=",  this.hourlyCurtailment.coal.toFixed(1),
+    "\n W_hydro+W_biomass (fixed)=",(pow_runningHydro+pow_biomass).toFixed(1)
+  );
+}
 
 
 
@@ -501,7 +543,8 @@ simulation.prototype.addTwo=function(energyName1, energyName2, lambda, it){
 
 simulation.prototype.update=function(it){
 
-  //this.debug=(it==33);
+  //this.debug=(it<10);
+  if(this.debug){console.log("in sim.update: it=",it);}
   this.debug=false;
   
   this.rangesMax={
@@ -735,14 +778,17 @@ simulation.prototype.update=function(it){
   
   if(this.strategy==0){ //"2025"
 
-   // (1) add max sun, wind, and nuclear to max
-
+    // (1) add max sun, wind, and nuclear to max
+    // (default curtailment=0 for solar,windOn,windOff)
+    
     this.hourlymix.nuclear=this.rangesMax.nuclear;
-    this.hourlymix.solar=this.rangesMax.solar;
+    this.hourlyCurtailment.nuclear=0;
+    this.hourlymix.solar=this.rangesMax.solar; 
     this.hourlymix.windOn=this.rangesMax.windOn;
     this.hourlymix.windOff=this.rangesMax.windOff;
 
-    if(this.debug){
+    if(false){
+    //if(this.debug){
       console.log("it=",it," strategy 0 after (1): this.mismatch()=",
 		  this.mismatch()," this.load()=",this.load());
     }
@@ -790,11 +836,14 @@ simulation.prototype.update=function(it){
     
   } // strategy 0: 2025
 
+  //#####################################################
   if(this.strategy==1){// climate friendly / Klimaschoner
+  //#####################################################
 
     // (1) add max sun, wind, and nuclear to max
 
     this.hourlymix.nuclear=this.rangesMax.nuclear;
+    this.hourlyCurtailment.nuclear=0;
     this.hourlymix.solar=this.rangesMax.solar;
     this.hourlymix.windOn=this.rangesMax.windOn;
     this.hourlymix.windOff=this.rangesMax.windOff;
@@ -830,11 +879,14 @@ simulation.prototype.update=function(it){
     // (1) add everything to max
 
     this.hourlymix.nuclear=this.rangesMax.nuclear;
+    this.hourlyCurtailment.nuclear=0;
     this.hourlymix.solar=this.rangesMax.solar;
     this.hourlymix.windOn=this.rangesMax.windOn;
     this.hourlymix.windOff=this.rangesMax.windOff;
     this.hourlymix.gas=this.rangesMax.gas;
+    this.hourlyCurtailment.gas=0;
     this.hourlymix.coal=this.rangesMax.coal;
+    this.hourlyCurtailment.coal=0;
 
 
     // (2) only charge but do not discharge storages
@@ -997,6 +1049,7 @@ function displayResultsMain(){
   let windOn_av_data=W_windOn_data/(nt*pow0_WindOn);
   let windOff_av=W_windOff/(nt*pow0_WindOff);
   let windOff_av_data=W_windOff_data/(nt*pow0_WindOff);
+  let nuclear_av=(pow0_Nuclear>0) ? W_nuclear/(nt*pow0_Nuclear) : 0;
 
   // curtailment (in % of max availability)
 
@@ -1005,12 +1058,19 @@ function displayResultsMain(){
   let windOff_fracCurtail
       =W_windOff_curtailment/(W_windOff+W_windOff_curtailment);
   let nuclear_fracCurtail
-      =W_nuclear_curtailment/(W_nuclear+W_nuclear_curtailment);
+      =(pow0_Nuclear>0)
+      ? W_nuclear_curtailment/(W_nuclear+W_nuclear_curtailment) : 0;
   let gas_fracCurtail=W_gas_curtailment/(W_gas+W_gas_curtailment);
   let coal_fracCurtail=W_coal_curtailment/(W_coal+W_coal_curtailment);
 
+  // import/export balance (max import importPow0=max export)
+
+  let import_fracMax=(importPow0>0) ? W_import/(nt*importPow0) : 0;
+  let export_fracMax=(importPow0>0) ? W_export/(nt*importPow0) : 0;
+
+  
   // emission factors w/o additional emissions of H2 technology
-  // CO2 in 
+
   let emissionCO2=e_nuclear*W_nuclear+e_solar*W_solar
       + e_biomass*W_biomass+e_runningHydro*W_runningHydro
       + e_windOn*W_windOn+e_windOff*W_windOff
@@ -1051,10 +1111,25 @@ function displayResultsMain(){
   html += '\n</tr>\n<tr>'
   html += '<td> WindOff: '+(100*windOff_av).toFixed(1)+'%</td>'
   html += '<td>'+(100*windOff_fracCurtail).toFixed(1)+'% </td>'
+  html += '\n</tr>\n<tr>'
+  html += '<td> Nuclear: '+(100*nuclear_av).toFixed(1)+'%</td>'
+  html += '<td>'+(100*nuclear_fracCurtail).toFixed(1)+'% </td>'
   html += '\n</tr>\n</table></span>'
   box.innerHTML=html;
-  //box.style.fontSize=fontsize;
 
+
+  const boxImportExport = document.getElementById("infoImportExport");
+  //console.log("box=",box);
+  //const fontsize=(Math.round(2.5*vmin)).toString();
+  html = '<table class="infoTable"><tr> <th>Flow</th> <th>%Max</th></th>\n';
+  html += '<tr>\n'
+  html += '<td> Import: '+(0.001*W_import).toFixed(1)+' TWh</td>'
+  html += '<td>'+(100*import_fracMax).toFixed(1)+'</td>'
+  html += '\n</tr>\n<tr>'
+  html += '<td> Export: '+(0.001*W_export).toFixed(1)+' TWh</td>'
+  html += '<td>'+(100*export_fracMax).toFixed(1)+'</td>'
+  html += '\n</tr>\n</table></span>'
+  boxImportExport.innerHTML=html;
 
   const boxCO2 = document.getElementById("CO2Info");
   //console.log("boxCO2=",boxCO2);
@@ -1118,7 +1193,6 @@ function displayResultsStorage(){
 
 function runSimulation(strategy){
   //console.log("in runSimulation: strategy=",strategy);
-  let nt=winddata.length;
   energymix=[]; storage=[]; solarRegions=[]; windRegions=[];
   curtailment=[];
 
@@ -1142,12 +1216,13 @@ function runSimulation(strategy){
     }
   }
 
+  itmax=energymix.length-1; //!!
+  
   if(!noBreakdown){
-    let itmax=energymix.length-1;
     console.log("itmax=",itmax);
     console.log("Warning! Electricity system broke down during simulation"+
 		"at time "+energymix[itmax].timeStr);
-    displayHourlyResults(sim,itmax);
+    //displayHourlyResults(sim,itmax);
   }
 }
 
@@ -1169,6 +1244,7 @@ function updateChartsClipped(){
 
 function updateChartEnergymix(chart, canvasID, inputData){
   //console.log("chart=",chart);
+  //console.log("updateChartEnergymix: inputData=",inputData);
   chart.data.datasets=buildDatasetsEnergymix(inputData);
   chart.update('none');  // speedup w/respect to update() if no new structure
   setupClick(canvasID, inputData); // otherwise box outdated
@@ -1184,14 +1260,14 @@ function updateChartStorage(chart, canvasID, inputData){
   setupClick(canvasID, inputData); // otherwise box outdated
 }
 
-function updateSimulation(strategy){
+function updateSimulation(strategy,itminClipped,itmaxClipped){
   console.log("\n\n\nbefore updateSimulation, strategy=",strategy);
 
   // storageDaily=[]; // not needed
   //energymixDaily=[];
 
   runSimulation(strategy);
-  calcChartInput(itmin, itmax); // fills the *Daily and *Clipped variables
+  calcChartInput(itminClipped, itmaxClipped); // fills the *Daily and *Clipped variables
   updateCharts();
   displayText();
  
@@ -1200,10 +1276,10 @@ function updateSimulation(strategy){
   //console.log("after redoSimulation(): energymixClipped=",energymixClipped);
 }
 
-function calcClippedTimeseries(itmin,itmax){
+function calcClippedTimeseries(itminClipped,itmaxClipped){
   let energymixClipped=[];
   let storageClipped=[];
-  for(let it=Math.max(itmin,0); it<Math.min(itmax,energymix.length); it++){
+  for(let it=Math.max(itminClipped,0); it<=Math.min(itmaxClipped,energymix.length-1); it++){
     energymixClipped.push(energymix[it]);
     storageClipped.push(storage[it]);
   }
@@ -1249,7 +1325,8 @@ function calcDailyTimeseries(){
     
     for(let ihour=0; ihour<23; ihour++){
       let it=24*iday+ihour;
-      if(it>=energymix.length){console.log("error: nt=",nt," ihour=",ihour," it>=itmax");}
+      if(it>=nt){
+	console.log("error: nt=",nt," ihour=",ihour," it>=nt");}
       for(let ikey=0; ikey<keysMix.length; ikey++){
 	let key=keysMix[ikey];
 	energymixDaily[iday][key]+=energymix[it][key]/24;
@@ -1268,9 +1345,9 @@ function calcDailyTimeseries(){
   return [energymixDaily, storageDaily];
 }
 
-function calcChartInput(itmin,itmax){
+function calcChartInput(itminClipped,itmaxClipped){
   let dailyAvg=calcDailyTimeseries();
-  let clippedData=calcClippedTimeseries(itmin,itmax);
+  let clippedData=calcClippedTimeseries(itminClipped,itmaxClipped);
   energymixDaily=dailyAvg[0];
   storageDaily=dailyAvg[1];
   energymixClipped=clippedData[0];
@@ -1299,9 +1376,13 @@ function displayText(){
 
 
 
+// loads now clipped data and redraws lower charts
+// works standalone because itminClipped,itmaxClipped
+// and energymix[] and storage[] used in calcClippedTimeseries
+// global variables
 
-function updateRange(itmin,itmax){
-  let clippedData=calcClippedTimeseries(itmin,itmax);
+function updateRangeClipped(itminClipped,itmaxClipped){
+  let clippedData=calcClippedTimeseries(itminClipped,itmaxClipped);
   energymixClipped=clippedData[0];
   storageClipped=clippedData[1];
   updateChartsClipped();
@@ -1313,9 +1394,6 @@ function updateRange(itmin,itmax){
 // Main sim and graphics initialisation directly after loading
 // #################################################################
 
-let itHalfInterval=3*24;
-let itmin=0;  // initial clippings for lower charts
-let itmax=2*itHalfInterval;
 
 
 let energymix=[]; // array of objects; fill with energymix.push(hourlymix)
@@ -1332,7 +1410,7 @@ let curtailment=[];
 runSimulation(strategyIndex); // fills energymix, storage, solar/windRegions
 //console.log("storage=",storage);
 
-calcChartInput(itmin, itmax); // fills the *Daily and *Clipped variables
+calcChartInput(itminClipped, itmaxClipped); // fills the *Daily and *Clipped variables
 displayText();
 
 // initChart(isEnergymix, isDaily, inputData) fills allCharts[0] ... [3]

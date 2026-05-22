@@ -47,8 +47,8 @@ const fWP0=0.045;        // "Anteil der WP bei Wohnungsheizungen 2025"
 const pow00_PV=102.5*70.6/87.5; // avg eff. nom power PV (2025) OK
 const pow00_WindOn=62.8;    // Nom eff power wind onshore (2025) OK
 const pow00_WindOff=9.4;   // Nom eff power wind offshore (2025) OK
-const pow00_Coal=31;        // Nominal power coal (2025) OK
-const pow00_Gas=35.5;         // Nominal power gas (2025) google, OK
+const pow00_Coal=31;        // Nominal power coal (2025) 31 OK
+const pow00_Gas=35.5;         // Nominal power gas (2025) google, 35.5 OK
 const pow00_Nuclear=0;      // Nominal power nuclear (2025) OK ;-(
 const pow_runningHydro=2.0; // assumed to be constant, google OK
 const pow_biomass=4.8;        // assumed to be constant, google OK
@@ -57,6 +57,7 @@ const pow_biomass=4.8;        // assumed to be constant, google OK
 
 const battCharge0=10;     // charge and discharge power [GW] batteries (2025)
 const battEnergy0=25;     // energy-charts.info
+const battEnergyMax=1000; // needed because nonl scale (in [0,1] in html)
 const battEta=0.8;        // roundtrip (electricity-electricity) efficiency 
 
 const hydroCharge0=9.4;    // max charge and discharge power [GW] (OK, const)
@@ -66,11 +67,13 @@ const hydroEta=0.8;        // roundtrip (electricity-electricity) efficiency
 const H2Charge0=2;       // H2 (2025)  (do not use as reference)
 const H2Discharge0=5;   
 const H2Energy0=10;       // not yet any industrial scale storage    
+const H2EnergyMax=20000;  // needed because nonl scale (in [0,1] in html)
 const H2eta=0.24;     
 
 // maximum import/export 2025 [GW]
+// (then net import/export balance 22 GW as data)
 
-const importPow0=13;
+const importPow0=15;
 
 
 //####################################################################
