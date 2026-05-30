@@ -75,7 +75,7 @@ function toggleControl(){
   if(supplyDemandShown){
     controlSupplyDemandWindow.style.display = 'block';  
     controlStrategyWindow.style.display = 'none';  
-    toggleButton.innerHTML="Gehe zu Speicherattributen/Strategie";
+    toggleButton.innerHTML="Gehe zu Speicher-<br>attributen/Strategie";
   }
   else{
     controlSupplyDemandWindow.style.display = 'none';  

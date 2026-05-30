@@ -13,7 +13,7 @@ input[type=range] {
     appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  width: 15vw;  /* works globally; inside sub-elements DOS */
+  width: 14vw;  /* works globally; inside sub-elements DOS */
   background: transparent
 }
 input[type=range]:focus {
@@ -23,7 +23,7 @@ input[type=range]:focus {
 /* set chrome* sub-elements of sliders */
 
 input[type=range]::-webkit-slider-runnable-track {
-  height: 2.5vmin;  /* works */
+  height: 1.2vw;  /* works */
   cursor: pointer;
   /*box-shadow: 3px 3px 3px #000000, 0px 0px 1px #0d0d0d; /* works */
   box-shadow: 0.5vmin 0.5vmin 0.5vmin #000000, 0vmin 0vmin 0.2vmin #0d0d0d; /* works */
@@ -37,8 +37,8 @@ input[type=range]:focus::-webkit-slider-runnable-track {
 input[type=range]::-webkit-slider-thumb {
   box-shadow: 0.2vmin 0.2vmin 0.2vmin #000000, 0px 0px 0.2vmin #0d0d0d;
   border: 0.2vmin solid #000000;
-  height: 3.5vmin;  /* works */
-  width: 2.0vmin;  /* works */
+  height: 1.6vw;  /* works */
+  width: 1.1vw;  /* works */
   border-radius: 0.5vmin;
   background: #666699;
   cursor: pointer;

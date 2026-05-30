@@ -1,25 +1,31 @@
 
 <!DOCTYPE html public>
-<html lang="en">
+<html lang="de">
 
 <head>
     <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 
-    <link href="css/styleSliders.css" rel="stylesheet" type="text/css" ></img>
+    <link href="css/styleSliders.css" rel="stylesheet" type="text/css" >
     <link href="css/styleEnergySimulation.css" 
-          rel="stylesheet" type="text/css"></img>
+          rel="stylesheet" type="text/css">
     <link rel="shortcut icon" type="image/jpg" href="./favicon.jpg">
     </script>
 
     
-    <title>Energie-Simulation</title>
+    <title>Energie-Simulation </title>
 </head>
 
 
 <body>
 <div id="header"> 
-  <h1><center>Energie-Simulation</center></h1>
+  <center><h1>Energie-Simulation</h1> </center>
 </div>
+
+<div id="infoDiv">
+  <a href="info.html"><img width="100%" 
+     src="figs/infoBlue.png" onclick="showInfo()"></img></a>
+</div>
+
 
 
 <!-- ################################################# -->
@@ -30,7 +36,7 @@
 <div id="toggleControlDiv"><button id="toggleControlButton"
 				   width="10vw"
 				   onclick='toggleControl()'>
-    Gehe zu Speicherattributen/ Strategie</button>
+    Gehe zu Speicher-<br>attributen/Strategie</button>
 </div>
 
 <div id="toggleGraphicsDiv"><button id="toggleGraphicsButton"
@@ -57,7 +63,7 @@
 <div id="controlSupplyDemandDiv" onmousedown="handleMouseDown(event)">
 
 
-  <br><br><br>
+  <br>
 
   
   <center>
@@ -91,7 +97,6 @@
   <td> <div id="slider_WPStr"></div> </td>
 </tr>
 </table>
-
 
 
 <h2>Kraftwerkspark</h2>

@@ -386,7 +386,7 @@ simulation.prototype.curtail=function(energyName,it){
 simulation.prototype.handleHellbrise=function(it){
   console.log("Hellbrise! Too little demand or too much supply",
 	      " shut off baseload power");
-  let shutoffFactor=this.mismatch()/supplymin;
+  let shutoffFactor=this.mismatch()/this.supply();
   let stabreserveFactor=(pow_rotatingMass-minPow_rotatingMass)
       /pow_rotatingMass;
   if (shutoffFactor>stabreserveFactor){
@@ -830,7 +830,7 @@ simulation.prototype.update=function(it){
 		  " should be <0 at this point!");
     }
   
-    if(this.addTwo("gas","coal",1.01,it)){return true;}
+    if(this.addTwo("gas","coal",0.8,it)){return true;}
     
     return this.handleDunkelflaute(it);
     
@@ -894,7 +894,7 @@ simulation.prototype.update=function(it){
     if(this.chargeHydroBattStorage(it)){return true;}
     if(this.chargeH2Storage(it)){return true;} // changes this.storage
 
-    // (3) import/export (last chance to get energy into system;
+    // (3) import/export (previous to last chance to get energy into system;
     // only exports if still supply surplus after charging everything
 
     if(this.importExport(it)){return true;}
@@ -1101,7 +1101,7 @@ function displayResultsMain(){
   const box = document.getElementById("generalInfo");
   //console.log("box=",box);
   //const fontsize=(Math.round(2.5*vmin)).toString();
-  let html = '<table class="infoTable"><tr> <th>C-Faktor</th> <th>Curtail</th></th>\n';
+  let html = '<table class="infoTable"><tr> <th>C-Faktor</th> <th>Curtail</th>\n';
   html += '<tr>\n'
   html += '<td class="important"> Solar: '+(100*solar_av).toFixed(1)+'%</td>'
   html += '<td>'+(100*solar_fracCurtail).toFixed(1)+'%</td>'

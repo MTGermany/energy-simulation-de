@@ -1,0 +1,345 @@
+<!DOCTYPE html public>
+<html lang="de">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+
+    <link href="css/styleEnergySimulation.css" 
+          rel="stylesheet" type="text/css">
+    <link rel="shortcut icon" type="image/jpg" href="./favicon.jpg">
+    </script>
+
+    
+    <title>Wie Energie-Simulation.de funktioniert</title>
+</head>
+
+<body>
+
+  <div id="standaloneInfo">
+    
+    <h2><a href="index.html"> &lArr; Zur&uuml;ck zur Simulation</a></h2>
+
+<h1>Wie Energie-Simulation.de funktioniert</h1>
+
+<h2>Allgemeines</h2>
+
+Energy-simulation.de simuliert stundenaufgel&ouml;st alle Aspekte der
+elektrischen 
+Energiefl&uuml;sse,
+<ul>
+  <li> Den Kraftwerkspark, also erneuerbare Energien, Kernenergie und
+    konventionelle Kraftwerke</li>
+  
+
+  <li> Verschiedene Energiespeicher mit den Parametern Kapazit&auml;t,
+      maximale Lade- und Entladeleistung und Roundtrip-Wirkungsgrad</li>
+
+  <li> Import und Export</li>
+
+  <li> Matchen von Nachfrage unter verschiedenen Strategien wie die
+  aktuelle Strategie, "Klimaschoner", "Sicherheitsfetischist" und
+    "Gr&uuml;n".</li>
+
+</ul>
+Zun&auml;chst wird mit den Wetterdaten von 2025 das gesamte Jahr faktisch
+(Standardeinstellungen) sowie kontrafaktisch (was w&auml;re, wenn wir
+jetzt noch Kernkraftwerke h&auml;tten? oder doppelt so viel Offshore-Windkraft?) simuliert. In einer sp&auml;teren
+Ausbaustufe werden auch 30-Jahre Stresstests m&ouml;glich sein.
+
+<br><br> Im jetztigen Ausbauzustand ber&uuml;cksichtigt der Simulator
+<strong>keinerlei Energiepreise</strong> und nimmt den <i> best
+  case</i> einer <strong> Kupferplatte Deutschland</strong> an. Strom
+  kann also in beliebiger St&auml;rke verlustfrei von und zu beliebigen Orten
+  flie&szlig;en.
+
+<br><br>
+Der Output sind
+<ul>
+  <li>Jahresverl&auml;ufe der Energiefl&uuml;sse und
+Speicherst&auml;nde, die interaktiv auf Wochenverl&auml;ufe gezoomt werden
+    k&ouml;nnen,</li>
+  <li> Curtailment-Faktoren (erzwungene Abschaltungen) und finaler CO<sub>2</sub>-Footprint, </li>
+  <li> und ob in einer gewissen Stunde dieses Jahres im
+  kontrafaktischen Simulationsszenario ein Blackout bzw eine
+    Hellbrise-Krise zu erwarten w&auml;re.</li>
+</ul>
+
+Anderen Simulatoren wie der von
+<a href="https://www.energy-charts.info/charts/power_simulated/chart.htm">Energy-Charts</a>
+beschr&auml;nken sich ausschlie&szlig;lich auf Erneuerbare Energien, die je
+nach User-Input starr nach oben oder unten skaliert werden, nicht
+jedoch Kernenergie oder konventionelle Kraftwerke. Anders als
+mein Simulator ignorieren sie Strategien sowie Curtailment
+bzw. Kannibalismus-Effekte. Vielmehr werden Angebot und Nachfrage
+durch beliebige viel Speicher (unbekannten Wirkungsgrades) und ggf durch beliebig viel Import und
+Export ausgeglichen.
+
+<h2>Bedienung</h2>
+
+Der Simulator startet automatisch mit dem Wetter, dem Kraftwerks- und
+Speicherpark und der Strategie von 2025.
+
+<h3>Kontrollpanel (linker bzw oberer Teil des Simulators)</h3>
+Mit den Schiebereglern k&ouml;nnen sie den Kraftwerkspark ver&auml;ndern. Es
+wird sofort neu simuliert. Mit dem Button "Gehe zu
+Speicherattribute/Strategie" k&ouml;nnen Sie entsprechende die Parameter
+der Speicher oder den Import/Export &auml;ndern oder eine andere
+Strategie ausw&auml;hlen. Jedes Verschieben der Regler und jede neue
+Auswahl einer Strategie bewirkt eine Neu-Simulation.
+
+<h3> Ergebnisfenster (rechts bzw. unten)</h3>
+Oben ist das Jahresprofil des Energiemix abgebildet. Durch Klicken oder Ziehen mit
+der Maus im oberen Diagramm k&ouml;nnen Sie unten jeweils einen
+detaillierten Wochenzeitraum darstellen. <strong>Wichtig:</strong> Die Summe der gerade
+erzeugten Leistungen abz&uuml;glich der exportierten bzw in Speicher
+geleiteten Leistungen (unter der Null-Linie) ergibt genau die Nachfrage
+(schwarze Kurve), au&szlig;er es ist <i> load shedding</i>, die
+Vorstufe eines Blackouts, angesagt. <br><br>
+
+Mit dem Button "Gehe zur Speicheransicht" im Kontrollpanel sehen Sie
+das gleiche f&uuml;r die Speicherzust&auml;nde (geladene Energie).<br><br>
+
+Der CO<sub>2eq</sub> Footprint und eine evtl Kannibalisierung vor
+allem der Windenergie werden unten im Kontrollpanel dargestellt.
+<strong> Hinweis: </strong> 2025 betr&auml;gt der Footprint der deutschen
+  Energiequellen nicht, wie oft
+  kolportiert, um 340 g/kWh (siehe
+  z.B. <a href="https://app.electricitymaps.com/map/zone/DE/all/yearly">
+  Electricitymaps in der Standardeinstellung</a>, sondern <strong>um 370
+  g/kWh</strong>, was man sieht, wenn man rechts oben beim
+Zahnradsymbol die "Electricity flows" ausstellt. Der Unterschied kommt
+durch die "sauberen" Importe von Hydro-Strom aus Skandinavien und
+  Kernkraftstrom aus Frankreich zu Zeiten, in denen der heimische Mix
+  besonders "dreckig" ist.
+
+<br><br>
+<center>
+<img src="figs/electricitymaps2025.png" width="60%"/>
+</center>
+
+<h2> Der Kraftwerkspark</h2>
+
+<h3> Solar</h3>
+
+Der Solar-Output ist direkt proportional zur einfallenden
+Gesamtstrahlung (diffus und gerichtet), der im Simulator anhand der
+gemessenen Einstrahlungsintensit&auml;t an 6 Standorten f&uuml;r typische
+Regionen (SO, SW, Mitte-Ost, Mitte-West, NO, NW) modelliert
+wird. Eine Verfeinerung auf mehr Regionen bringt kaum mehr
+Genauigkeit, w&uuml;rde 
+aber im Simulator zur mangelnden Responsiveness f&uuml;hre. 
+
+<br><br>
+Solarpanels haben einen 
+Wirkungsgrad von etwa 20%, der jedoch bei K&auml;lte/W&auml;rme zunimmt bzw
+abnimmt.  Im Simulator wird die Nennleistung bei einer
+Einstrahlungsst&auml;rke von 1000 W/m<sup>2</sup> im Fr&uuml;hjahr und
+Herbst angenommen. Im Winter bzw Sommer w&uuml;rden dann bei 1000
+W/m<sup>2</sup> 108% bzw 92% der Nennleistung abgegeben (wobei der
+Winter-Wert nie erreicht wird; im Winter haben Solarzellen in
+Deutschland einen Kapazit&auml;tsfaktor von gerade mal 3%)
+
+
+
+<h3>Windenergie</h3>
+
+Unterschieden weden vier Onshore-Standorte (S&uuml;ddeutschland,
+Mitteldeutschland, NO- und NW-Deutschland) sowie zwei
+Offshore-Regionen (Ostsee, Nordsee) mit typischen
+Winddaten. Prinzipiell skaliert die Windkraftleistung mit der dritten
+(!) Potenz der Windgeschwindigkeit, was anhand der Energieflussdichte
+durch eine Fl&auml;che A klar wird:
+<br><br>
+<i>P=W/t=1/2*rho*A*x*v<sup>2</sup>/t=1/2*rho*A*v<sup>3</sup></i>
+<br><br>
+In Praxi gibt es bei WKAs drei
+Grenzgeschwindigkeiten <i>v<sub>ci</sub></i> und folgende
+Leistungscharakteristik:
+<br><br>
+<ul>
+  <li><i>P=0</i> &nbsp; falls <i>v &lt; v<sub>c1</sub></i></li>
+  <li><i>P=P_N(v/v<sub>c2</sub>)^3</i> &nbsp; falls
+	  <i> v<sub>c1</sub> &lt; v &lt; v<sub>c2</sub></i></li>
+  <li><i>P=P_N</i> &nbsp; falls
+	  <i>v<sub>c2</sub> &lt; v &lt; v<sub>c3</sub></i></li>
+  <li><i>P=0</i> &nbsp; falls <i> v &gt; v<sub>c3</sub></i> (Sturm) </li>
+</ul>
+wobei alle drei Grenzgeschwindigkeiten bei Offshore-WKA h&ouml;her sind
+als bei Onshore.
+
+<h3> Kern-, Kohle und Gaskraftwerke</h3>
+Diese werden durch ihren Kapazit&auml;tsfaktor (Anteil der Zeiten, zu
+denen sie online sind), ihrer Lastfolgef&auml;higkeit (Prozent der
+Nennleistung pro Stundeund) ihrer
+minimalen Leistung in Prozent der Maximal- bzw Nennleistung
+charakterisiert:
+<br><br>
+
+<table class="infoGenTable">
+  <tr> <th>Kraftwerk</th> <th>Kapazit&auml;tsfaktor</th>
+    <th>Lastfolge</th><th>P<sub>min</sub></th></tr>
+  <tr> <td> Kernkraft   </td><td>90%</td><td>40% / h</td><td>40%</td></tr>
+  <tr> <td> Gaskraft    </td><td>90%</td><td>100% / h</td><td>10%</td></tr>
+  <tr> <td> Kohlenkraft </td><td>90%</td><td>30% / h</td><td>20%</td></tr>
+  </table>
+    
+<h3> Sonstige</h3>
+
+Biomasse und Wasserkraft wird als gegeben und unver&auml;nderbar
+angenommen (um den Simulator nicht zu &uuml;berladen), weitere Kraftwerksarten wie &Ouml;l oder Benzin haben nur einen
+minimalen Anteil und werden ignoriert.
+<ul>
+  <li> Leistung Biomasse: 4.8 GW konstant</li>
+  <li> Leistung Laufwasser: 2 GW konstant</li>
+</ul>
+
+
+<h2> Energiefl&uuml;sse zum Ausgleich: Speicher, Import und Export</h2>
+    
+<h3> Speicher</h3>
+
+Es gibt im Simulator drei Speicherkategorien:
+<ul>
+  <li> Batteriespeicher: Einstellbare Lade- und Entladeleistung sowie
+    Kapazit&auml;t, vorgegebener Roundtrip-Wirkungsgrad 80%</li>
+  
+  <li> Hydro-Speicher (Punpspeicher): Vorgegeben Lade- und
+  Entladeleistung von 9.4 GW, vorgegebene Kapazit&auml;t von 40 GW (da
+  Hydrospeicher in Deutschland ausgereizt sind), fester
+    Roundtrip-Wirkungsgrad 80%. </li>
+
+  <li> Power2Gas bzw H<sub>2</sub>-Speicher. Beim H2-System ist im
+  Allgemeinen die Ladeleistung (durch Hydrolyseure) viel geringer als
+  die Entladeleistung (durch Gaskraftwerke oder Brennstoffzellen),
+  sodass sie neben der Energie (bis in den zweistelligen TWh-Bereich)
+  separat geregelt werden k&ouml;nnen. Der Roundtrip-Wirkungsgrad des
+  gesamten H2-Systems (Elektrolyse, evtl. Methanisierung, Transport
+  zur Kaverne, Ein- und Auslagern, Transport zum Gaskraftwerk,
+    Verbrennen) wird mit 24% angenommen.</li>
+</ul>
+<strong>Wichtig:</strong> In der Speicheransicht wird die letztendlich
+nutzbare gespeicherte elektrische Energie abz&uuml;glich aller
+Wirkungsgrade angegeben. 1 GWh Strom zum Einspeichern ins
+Wasserstoffsystem ergeben also nur 240 MWh gespeicherte
+Elektrizit&auml;t.
+
+<h3>Import/Export</h3>
+
+Einstellbare maximale Import=Exportleistung. <strong>
+  Wichtig:</strong>:
+Da ich die <i>Kupferplatte
+Deutschland</i> annehme, sind die f&uuml;r den Jetztfall  2025 simulierten Importe und
+Exporte sehr viel kleiner als die publizierten, die Differenz
+(Import&uuml;berschuss von 22 TWh) stimmt aber. Das kommt einfach daher,
+  da ich, im Gegensatz zur Wirklichkeit mit Leitungsengp&auml;ssen, nie
+  gleichzeitigen Import und Export an verschiedenen Kuppelstellen annehme.
+    
+<h2>Strategien</h2>
+
+Im Allgemeinen ist (hoffentlich!) immer mehr Strompotential verf&uuml;gbar
+als nachgefragt wird: W&uuml;rde  man den gesamten Kraftwerkspark maximal aufdrehen,
+die Speicher mit maximaler Leistung entleeren und so viel es geht
+importieren, so
+h&auml;tte man
+oft ein Vielfaches der Last. Die Strategie muss also entscheiden, was
+abgeschaltet wird, ob die Speicher nicht besser geladen als entladen
+oder ob nicht besser exportiert statt importiert wird. Die Nachfrage
+muss 24/7/365 genau gedeckt werden! Im Simulator kann man folgende
+Strategien w&auml;hlen:
+
+<h3> Strategie "2025"</h3>
+
+Die genaue 2025 realisierte Strategie weicht sicherlich etwas ab, aber
+im Wesentlichen gilt folgendes Regelwerk
+<ol>
+  <li> Nehme zun&auml;chst maximale Einspeisung von Solar und Wind
+    sowie minimale Leistung konventioneller Kraftwerke an</li>
+  
+  <li> Falls dies die Last bereits &uuml;bersteigt, exportiere,
+  andernfalls importiere zum Lastausgleich</li>
+
+  <li> Falls immer noch eine Nachfrage-Angebot-Diskrepanz besteht,
+  gleiche diese, so weit es geht, zuerst mit Pumpspeichern und
+    Batterien, dann mit H2-Speichern aus.</li>
+
+  <li> Falls immer noch zu viel Angebot besteht, betreibe (so weit es
+  geht) Curtailment in der Reihenfolge Wind Offshore, Wind Onshore,
+  Solar. Falls dann immer noch zu viel Angebot besteht, ist der Notfall
+    <strong>Hellbrise</strong> eingetreten, der zwei Stufen enth&auml;lt:
+  Herunterfahren der konventionellen Kraftwerke unterhalb der
+  Sicheheitslimits bzw Abschalten und Blackout durch
+  Schwingungsinstabilit&auml;t.</li>
+
+  <li> Falls hingegen nach dem Abgleich mit Import/Export und
+  Batterien zu wenig Angebot besteht, drehe Kohle- und Gaskraftwerke
+    im Verh&auml;ltnis 5:4 bis zur maximalen Leistung auf</li>
+
+  <li> Falls immer noch zu wenig Angebot da ist, ist der Notfall
+  <strong>Dunkelflaute</strong> eingetreten. Auch dieser hat zwei Stufen:
+  Zun&auml;chst <strong>load shedding</strong> (einige Nachfrager werden nicht mehr
+    bedient), dann Blackout durch Angebotsmangel.</li>
+  </ol>
+
+    <h3> Strategie "Klimaschoner" </h3>
+
+<ol>
+  <li> Nehme zun&auml;chst maximale Einspeisung von Solar, Wind und Nuklear
+    sowie minimale Leistung konventioneller Kraftwerke an</li>
+  
+  <li> Import/Export und Laden/Entladen der Speicher werden vertauscht.</li>
+
+  <li> Falls immer noch zu viel Angebot besteht, betreibe (so weit es
+  geht) Curtailment in der Reihenfolge Wind Offshore, Wind Onshore,
+  Solar, Kernkraft. Falls dann immer noch zu viel Angebot besteht, ist
+  der Notfall 
+    <strong>Hellbrise</strong> eingetreten, der wie oben behandelt wird</li>
+
+  <li> Falls hingegen nach dem Abgleich mit Import/Export und
+  Batterien zu wenig Angebot besteht, drehe <emph>zuerst</emph>
+  die Gaskraftwerke, erst dann die Kohlekraftwerke auf.</li>
+
+  <li> Falls immer noch zu wenig Angebot da ist, ist der Notfall
+  <strong>Dunkelflaute</strong> eingetreten (siehe oben). </li>
+  </ol>
+
+    <h3> Strategie "Safety First" </h3>
+
+    <ol>
+      <li> Schaue zun&auml;chst, was passiert, wenn ich den gesamten Kraftwerkspark auf Maximum
+	aufdrehe </li>
+      <li> Falls zu viel Energie, lade zuerst die Hydro- und
+	Batteriespeicher auf, dann erst die H2-Speicher</li>
+      <li> Ausgleich durch Import/Export.</li>
+      <li> Falls im vorherigen Schritt
+      zu wenig Energie im System ist, entlade die Speicher, erst Hydro, dann
+      Batterien, dann H2. Letzte Chance f&uuml;r den Ausgleich. Ansonsten
+      tritt auch hier der Krisenfall <strong> Dunkelflaute</strong>
+	ein.</li>
+      
+      <li> Falls nach Speicher laden und Export immer noch zu viel
+      Energie im System, betreibe Curtailment bis zum Minimum in
+      m&ouml;glichst klimafreundlicher Reihenfolge (da keine Relevanz
+	f&uuml;r die Sicherheit):
+	Kohle -> Gas -> Offshore -> Onshore -> Solar ->
+      Nuklear. Falls dann immer noch zu viel Energie im System, haben
+	wir die schon bekannte <strong>Hellbrise.</strong>
+     </li>
+    </ol>
+
+    <h3> Strategie "Gr&uuml;n"</h3>
+
+Diese ist wie die Strategie "Klimaschoner", nur dass Kernkraft zuerst
+      als auf das Minimum gefahren angenommen wird und nur, wenn es nicht anders
+      geht, wieder hochgedreht wird.
+
+
+
+
+  <h2><a href="index.html"> &lArr; Zur&uuml;ck zur Simulation</a></h2>
+
+
+  </div>
+
+</body>
+
+</html>

@@ -17,23 +17,23 @@ INFO: full HD =1080p (1920×1080 px), aspect ratio 5/3;
 
 
 body{
-  overflow: hidden; /* Hide scrollbars */
+    /*overflow: hidden;*/  /* Hide scrollbars */
 
   margin: 0;
   padding: 0;
   /*overflow-x: hidden;*/ /* remove horizontal scrollbar */
   font-family: 'helvetica', sans-serif;
                  /*font-size: 14px;*/
-  font-size: 2.2vmin;
+  font-size: 1.5vw;
   /*text-align: center;*/
   color: #000000;   /* text color */
   background-color: #FFFFFF;
 }
 
 button,select{    /* see also toggle control; select=combobox,choice */
-    font-size: 2.2vmin;
-    width: 17vw;
-    height: 6vh;
+    font-size: 1.5vw;
+    width: 20vw;
+    height: 7vh;
 }
 
 
@@ -42,18 +42,18 @@ button,select{    /* see also toggle control; select=combobox,choice */
 /* text layout of sliders: tables override general text spec) */
 
 th{                    /* only used in infotext */
-  font-size: 2.4vmin;
+  font-size: 1.5vw;
   /*font-weight: bold; */
 
 }
 
 td{
-  font-size:2.2vmin; 
+  font-size:1.2vw; 
   /*font-weight: bold; */
 }
 
 td.important{
-  font-size:2.0vmin; 
+  font-size:1.2vw; 
   font-weight: bold; 
   color: #dd0033;
 }
@@ -69,13 +69,24 @@ table.infoTable td {
    color: rgb(205,0,0);
 }
 
+table.infoGenTable {
+   border-collapse: collapse;
+   border: 1px ridge rgb(0,0,0);
+   color: rgb(0,0,0);
+}
+table.infoGenTable td,th {
+   padding: 4;
+   border: 1px ridge rgb(0,0,0);
+}
+
+
 table.impressumTable {
    border-collapse: collapse;
    background-color: rgba(255,255,255,0.7);
 }
 table.impressumTable td {
    border: 1px ridge rgb(0,0,0);
-   font-size:1.8vmin; 
+   font-size:1.2vw; 
 }
 
 
@@ -85,17 +96,26 @@ table.impressumTable td {
 
  h1{
      font-family: helvetica, sans-serif;
-     font-size: 4.2vmin;
+     font-size: 2.5vw;
      font-weight: bold;
-     color: #446;
+     color: #448;
      padding-top:0px;
  }
 
  h2{
      font-family: helvetica, sans-serif;
-     font-size: 2.7vmin;
+     font-size: 1.9vw;
      font-weight: bold;
-     color: #446;
+     color: #448;
+     padding-top:0px;
+ }
+ 
+ h3{
+     font-family: helvetica, sans-serif;
+     font-size: 1.7vw;
+     font-weight: bold;
+     font-style: italic;
+     color: #448;
      padding-top:0px;
  }
 
@@ -141,10 +161,13 @@ a:hover {
 /* basic settings for landscape formats !! check with ../js/media.js */
 /*#############################################################*/
 
-@media all and  (min-aspect-ratio: 6/5){
+/* @media all and  (min-aspect-ratio: 6/5){*/
+@media all{
 
 
-/* (1) landscape: the title */
+
+
+/* (1) landscape: the title / header */
 
  
 #header{
@@ -152,7 +175,7 @@ a:hover {
   top: 0vh;
   left: 10vw;
   /*width:  60vw; */
-  height: 6vmin;
+  height: 3vw;
   /* font-size: 2.9vmin; size and weight overridden by h1*/
   padding-left: 0.5em;
   padding-right: 0.5em;
@@ -162,6 +185,16 @@ a:hover {
   z-index: 4; /* the higher the integer, the more on top */
 }
 
+/* (1a) landscape: position of the info button */
+
+#infoDiv{
+  position: absolute;
+  top: 1vh;
+  height: 4vw;
+  left: 3vw;
+  width: 3vw;
+  z-index: 2; /* the higher the integer, the more on top */
+}
 
 
 /* (2) landscape: control panels with button */
@@ -170,15 +203,15 @@ a:hover {
 #toggleControlDiv{
   position: absolute;
   top: 11vmin;
-  left: 2vw;
-  /* width, height DOS, control at button button,select{ */
+  left: 1vw;
+  /* width, height DOS, control at button,select{ */
   z-index: 4; /* the higher the integer, the more on top */
 }
 
 #toggleGraphicsDiv{
   position: absolute;
   top: 11vh;
-  left: 20vw;
+  left: 22vw;
   /*width: 14vmin;*/ /* width DOS, control at button */
   /*height: 8vmin;*/
   z-index: 4; /* the higher the integer, the more on top */
@@ -294,13 +327,23 @@ a:hover {
 }
 
 
-#clickInfo {
+#clickInf o{
       position: absolute;
       border: 1px solid #ccc;
       padding: 8px;
       display: none;
       background: white;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      z-index: 0;
+}
+
+#standaloneInfo {
+      position: absolute;
+      border: 0px solid #ccc;
+      padding: 30px;
+      display: block;
+      overflow-y: auto;
+      width:  50vw; 
       z-index: 0;
 }
 
@@ -311,12 +354,14 @@ a:hover {
       display: block;
       left: 5vw;
       top: 81vh;
-      font-size: 2.0vmin;
+      font-size: 1.3vw; /* body font 1.5vw */
       /*width:  15vw; 
       height: 12vh;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);*/
       z-index: 0;
 }
+
+
 
 #infoImportExport {
       position: absolute;
@@ -325,7 +370,7 @@ a:hover {
       display: block;
       left: 20vw;
       top: 81vh;
-      font-size: 2.0vmin;
+      font-size: 1.5vw;
       /*width:  15vw; 
       height: 12vh;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);*/
@@ -340,7 +385,7 @@ a:hover {
       left: 32vw;
       top: 87vh;
       color: rgb(200,0,0);
-      font-size: 3vmin;
+      font-size: 1.5vw;
       font-weight: bold;
       z-index: 0;
 }
@@ -351,16 +396,6 @@ a:hover {
 
 
 
-/* (2a) landscape: position of the info button */
-
-#infoDiv{
-  position: absolute;
-  top: 1vmin;
-  height: 8vmin;
-  left: 102vmin;
-  width: 8vmin;
-  z-index: 2; /* the higher the integer, the more on top */
-}
 
 
 /* (2f) landscape: position of the copyright left bottom of simCanvas*/

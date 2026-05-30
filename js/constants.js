@@ -61,7 +61,7 @@ const battEnergyMax=1000; // needed because nonl scale (in [0,1] in html)
 const battEta=0.8;        // roundtrip (electricity-electricity) efficiency 
 
 const hydroCharge0=9.4;    // max charge and discharge power [GW] (OK, const)
-const hydroEnergy0=40;     // storage energy [GWh] (const)
+const hydroEnergy0=40;     // storage energy [GWh] (const) (40)
 const hydroEta=0.8;        // roundtrip (electricity-electricity) efficiency 
 
 const H2Charge0=2;       // H2 (2025)  (do not use as reference)
@@ -120,11 +120,11 @@ const frac_solar=[19./109, 27./109, 21./109, 14./109, 14./109, 14./109];
 // Constants related to operations
 //####################################################################
 
-const gas_minRelPow=0.1;  // min relative load (ramping per h unrestricted)
+const gas_minRelPow=0.10;  // min relative load (ramping per h unrestricted)
 const gas_av=0.9;         // availability
 const coal_minRelPow=0.20;
 const coal_av=0.9;
-const nuclear_minRelPow=0.5;
+const nuclear_minRelPow=0.40;
 const nuclear_av=0.9;
 const solar_av=0.82; // also due to suboptimal alignment
 const windOn_av=0.905; // fitting to the data 2025
