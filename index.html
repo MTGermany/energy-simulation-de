@@ -44,14 +44,11 @@
     Gehe zur Speicheransicht</button>
 </div>
 
-<!--
-<div id="simDiv"><button id="simButton"
-			 onclick='updateSimulation(strategyIndex)'>
-    Simuliere!</button>
-</div>
--->
 
-<div id="merkelsmileys"></div>
+
+<div id="merkelsmileys">
+
+</div>
 <div id="raute">
   <img src='figs/Merkelraute_small.png' width="100%">
 </div>
@@ -61,11 +58,7 @@
 <!-- ################################################# -->
 
 <div id="controlSupplyDemandDiv" onmousedown="handleMouseDown(event)">
-
-
   <br>
-
-  
   <center>
 
     <h2>Nachfrage</h2>
@@ -97,13 +90,22 @@
   <td> <div id="slider_WPStr"></div> </td>
 </tr>
 </table>
+</center>
+</div>  <!--id="controlSupplyDemandDiv"-->
 
 
-<h2>Kraftwerkspark</h2>
-(Biomasse 4 MW und 2 Wasserkraft 2 MW konstant wie bisher)
+
+
+<div id="controlPlantsDiv" onmousedown="handleMouseDown(event)">
+  <br>
+<center>
+  <h2>Kraftwerkspark</h2>
+
+
+(Biomasse 4 MW und<br>Wasserkraft 2 MW<br>konstant wie bisher)
+
 <br>
-  </center>
-  
+
 <p align="right" margin-right="3vw">
   <table id="mainTable" border="0" cellspacing="3vmin"
 	 cellpadding="1vmin"  onmouseup="handleMouseUp(event)" >
@@ -171,11 +173,8 @@
 </tr>
 
 </table>
-</p>
-
-
-
-</div>  <!--id="controlSupplyDemandDiv"-->
+</center>
+</div>  <!--id="controlPlantsDiv"-->
 
   
 

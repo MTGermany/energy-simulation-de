@@ -32,8 +32,8 @@ body{
 
 button,select{    /* see also toggle control; select=combobox,choice */
     font-size: 1.5vw;
-    width: 20vw;
-    height: 7vh;
+    width: 19vw;
+    height: 4vw;
 }
 
 
@@ -172,7 +172,7 @@ a:hover {
  
 #header{
   position: absolute;
-  top: 0vh;
+  top: -0.5vw;
   left: 10vw;
   /*width:  60vw; */
   height: 3vw;
@@ -202,7 +202,7 @@ a:hover {
 
 #toggleControlDiv{
   position: absolute;
-  top: 11vmin;
+  top: 5vw;
   left: 1vw;
   /* width, height DOS, control at button,select{ */
   z-index: 4; /* the higher the integer, the more on top */
@@ -210,7 +210,7 @@ a:hover {
 
 #toggleGraphicsDiv{
   position: absolute;
-  top: 11vh;
+  top: 5vw;
   left: 22vw;
   /*width: 14vmin;*/ /* width DOS, control at button */
   /*height: 8vmin;*/
@@ -221,14 +221,84 @@ a:hover {
 
 #controlSupplyDemandDiv{ 
   position: absolute;
-  top: 15vmin;
-  height: 88vmin;
-  left: 2vmin;
+  top: 7vw;
+  /* height: 88vmin; */
+  left: 1vw;
   width: 38.5vw;
   /*background-color: rgb(230,230,255);*/
   display: block;
   z-index: 1; /* the higher the integer, the more on top */
 }
+
+#controlPlantsDiv{ 
+  position: absolute;
+  top: 20vw;
+  /*height: 88vmin;*/
+  left: 1vw;
+  width: 38.5vw;
+  /*background-color: rgb(230,230,255);*/
+  display: block;
+  z-index: 1; /* the higher the integer, the more on top */
+}
+
+/* landscape: Merkelsmileys */
+
+#merkelsmileys{
+  position: absolute;
+  top: 23vw;
+  left: 33.5vw;
+  /* DOS here; width controlled by image in javascript: */
+  z-index: 0; /* the higher the integer, the more on top */
+}
+#raute{
+  position: absolute;
+  top: 28vw;
+  left: 32vw;
+  width: 7vw; /* works with "%" size in <img ...> in html */
+  height: 5vw; /* DOS *?
+  z-index: 0; /* the higher the integer, the more on top */
+}
+
+
+#generalInfo {
+      position: absolute;
+      border: 0px solid #ccc;
+      padding: 8px;
+      display: block;
+      left: 2vw;
+      top: 48vw;
+      font-size: 1.3vw; /* body font 1.5vw */
+      /*width:  15vw; 
+      height: 12vh;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);*/
+      z-index: 0;
+}
+#infoImportExport {
+      position: absolute;
+      border: 0px solid #ccc;
+      padding: 8px;
+      display: block;
+      left: 20vw;
+      top: 48vw;
+      font-size: 1.3vw;
+      z-index: 0;
+}
+
+#CO2Info {
+      position: absolute;
+      border: 0px solid #ccc;
+      padding: 8px;
+      display: block;
+      left: 20vw;
+      top: 55.5vw;
+      color: rgb(200,0,0);
+      font-size: 1.5vw;
+      font-weight: bold;
+      z-index: 0;
+}
+
+
+/* landscape: strategy, buffer, import/export layer */
 
 #controlStrategyDiv{ /* Also contains info text for non-BaWue simulations!*/
   position: absolute;
@@ -240,23 +310,6 @@ a:hover {
   display: none;  z-index: 3; /* the higher the integer, the more on top */
 }
 
-/* (2) landscape: Merkelsmileys */
-
-#merkelsmileys{
-  position: absolute;
-  top: 60vmin;
-  left: 4vw;
-  /* DOS here; width controlled by image in javascript: */
-  z-index: 0; /* the higher the integer, the more on top */
-}
-#raute{
-  position: absolute;
-  top: 71vmin;
-  left: 3vw;
-  width: 14vmin; /* works with "%" size in <img ...> in html */
-  height: 10vmin; /* DOS *?
-  z-index: 0; /* the higher the integer, the more on top */
-}
 
 
 /* (3) landscape: the semi-transparent zoon region over areaGraphics1 */
@@ -327,7 +380,7 @@ a:hover {
 }
 
 
-#clickInf o{
+#clickInfo{
       position: absolute;
       border: 1px solid #ccc;
       padding: 8px;
@@ -347,48 +400,9 @@ a:hover {
       z-index: 0;
 }
 
-#generalInfo {
-      position: absolute;
-      border: 0px solid #ccc;
-      padding: 8px;
-      display: block;
-      left: 5vw;
-      top: 81vh;
-      font-size: 1.3vw; /* body font 1.5vw */
-      /*width:  15vw; 
-      height: 12vh;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);*/
-      z-index: 0;
-}
 
 
 
-#infoImportExport {
-      position: absolute;
-      border: 0px solid #ccc;
-      padding: 8px;
-      display: block;
-      left: 20vw;
-      top: 81vh;
-      font-size: 1.5vw;
-      /*width:  15vw; 
-      height: 12vh;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);*/
-      z-index: 0;
-}
-
-#CO2Info {
-      position: absolute;
-      border: 0px solid #ccc;
-      padding: 8px;
-      display: block;
-      left: 32vw;
-      top: 87vh;
-      color: rgb(200,0,0);
-      font-size: 1.5vw;
-      font-weight: bold;
-      z-index: 0;
-}
 
 
 

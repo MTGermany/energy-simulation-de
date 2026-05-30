@@ -124,7 +124,7 @@ function toggleGraphics(){
 
 
 //####################################################################
-// Merkelsmileys
+// Merkelsmileys !!! not yet resize function after window scaling shifts impl.
 //####################################################################
 
 const smileImgs=[5];
@@ -133,8 +133,8 @@ for(var i=0; i<7; i++){
   smileImgs[i] = document.createElement("img");
   let str_imgfile="figs/smiley"+(i+1).toString()+".png";
   smileImgs[i].src=str_imgfile;
-  smileImgs[i].width=10*vmin; //WATCH OUT! Only direct numbers, no pix, vw etc
-  smileImgs[i].height=10*vmin;
+  smileImgs[i].width=4.5*vw; //WATCH OUT! Only direct numbers, no pix, vw etc
+  smileImgs[i].height=4.5*vw;
   //console.log("smileImgs[i]=",smileImgs[i]);
 
 }
