@@ -36,7 +36,7 @@ const nt=winddata.length;
 let itmax=nt-1;  // itmax may become < nt-1 if Dunkelflaute/Hellbrise
 
 const itHalfInterval=3*24;
-let itminClipped=180*24;  // initial clippings for lower charts
+let itminClipped=238*24;  // initial clippings for lower charts
 let itmaxClipped=itminClipped+2*itHalfInterval;
 
 function simulation(strategy){
