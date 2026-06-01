@@ -43,3 +43,7 @@ scenarios_Frauenhofer/
 js/AI*png
 graphics_test
 mails
+
+upload.sh
+betaTesterWanted.txt
+*.txt
