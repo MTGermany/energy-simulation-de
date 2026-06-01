@@ -1,15 +1,15 @@
 
 const colBiomass="rgba(0,127,0,1)";
 const colRunningHydro="rgb(0,0,255)";
-const colPumpHydro="rgb(0,0,155)";
-const colNuclear="rgb(200,0,200)";
-const colCoal="rgb(50,50,50)";
-const colGas="rgb(255,120,60)";
-const colH2="rgb(255,0,0)";
-const colWindOn="rgb(0,200,255)";
-const colWindOff="rgb(0,127,255)";
-const colSolar="rgb(255,200,0)";
-const colImport="rgb(180,180,180)";
+const colPumpHydro="rgb(0,0,185)";
+const colNuclear="rgb(170,100,255)";
+const colCoal="rgb(100,100,100)";
+const colGas="rgb(155,155,155)";
+const colH2="rgb(185,0,0)";
+const colWindOn="rgb(0,215,255)";
+const colWindOff="rgb(0,160,180)";
+const colSolar="rgb(255,220,0)";
+const colImport="rgb(255,150,70)";
 const colBatt="rgb(150,0,200)";
 
 

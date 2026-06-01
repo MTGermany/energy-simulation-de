@@ -24,7 +24,7 @@ body{
   /*overflow-x: hidden;*/ /* remove horizontal scrollbar */
   font-family: 'helvetica', sans-serif;
                  /*font-size: 14px;*/
-  font-size: 1.5vw;
+  font-size: 1.3vw;
   /*text-align: center;*/
   color: #000000;   /* text color */
   background-color: #FFFFFF;
@@ -69,6 +69,16 @@ table.infoTable td {
    color: rgb(205,0,0);
 }
 
+table.mainTable {
+    border: 0px;
+    border-collapse: collapse;
+    cellspacing: 3vmin; /* DOS */
+    cellpadding: 10vmin; /* DOS */
+}
+table.mainTable td,th {
+   padding: 3;
+}
+
 table.infoGenTable {
    border-collapse: collapse;
    border: 1px ridge rgb(0,0,0);
@@ -96,7 +106,7 @@ table.impressumTable td {
 
  h1{
      font-family: helvetica, sans-serif;
-     font-size: 2.5vw;
+     font-size: 2.3vw;
      font-weight: bold;
      color: #448;
      padding-top:0px;
@@ -104,19 +114,21 @@ table.impressumTable td {
 
  h2{
      font-family: helvetica, sans-serif;
-     font-size: 1.9vw;
+     font-size: 1.7vw;
      font-weight: bold;
      color: #448;
-     padding-top:0px;
+     margin-top:1.5vw;
+     margin-bottom: 1vw;
  }
  
  h3{
      font-family: helvetica, sans-serif;
-     font-size: 1.7vw;
+     font-size: 1.5vw;
      font-weight: bold;
      font-style: italic;
      color: #448;
-     padding-top:0px;
+     padding-top:0.3vw;
+     margin-bottom: 0px;
  }
 
 
@@ -218,11 +230,13 @@ a:hover {
 }
 
 
+/* ################################################################## */
+/* landscape: first control panel layer: Supply/demand and energy mix */
+/* ################################################################## */
 
 #controlSupplyDemandDiv{ 
   position: absolute;
   top: 7vw;
-  /* height: 88vmin; */
   left: 1vw;
   width: 38.5vw;
   /*background-color: rgb(230,230,255);*/
@@ -232,7 +246,7 @@ a:hover {
 
 #controlPlantsDiv{ 
   position: absolute;
-  top: 20vw;
+  top: 19vw;
   /*height: 88vmin;*/
   left: 1vw;
   width: 38.5vw;
@@ -245,15 +259,16 @@ a:hover {
 
 #merkelsmileys{
   position: absolute;
-  top: 23vw;
-  left: 33.5vw;
+  top: 21vw;
+  left: 32.5vw;
   /* DOS here; width controlled by image in javascript: */
   z-index: 0; /* the higher the integer, the more on top */
 }
+
 #raute{
   position: absolute;
-  top: 28vw;
-  left: 32vw;
+  top: 26vw;
+  left: 31vw;
   width: 7vw; /* works with "%" size in <img ...> in html */
   height: 5vw; /* DOS *?
   z-index: 0; /* the higher the integer, the more on top */
@@ -266,7 +281,7 @@ a:hover {
       padding: 8px;
       display: block;
       left: 2vw;
-      top: 48vw;
+      top: 47vw;
       font-size: 1.3vw; /* body font 1.5vw */
       /*width:  15vw; 
       height: 12vh;
@@ -279,7 +294,7 @@ a:hover {
       padding: 8px;
       display: block;
       left: 20vw;
-      top: 48vw;
+      top: 47vw;
       font-size: 1.3vw;
       z-index: 0;
 }
@@ -290,21 +305,30 @@ a:hover {
       padding: 8px;
       display: block;
       left: 20vw;
-      top: 55.5vw;
+      top: 54.5vw;
       color: rgb(200,0,0);
       font-size: 1.5vw;
       font-weight: bold;
       z-index: 0;
 }
 
+#impressum{ 
+  position: absolute;
+  top: 59vw;  /* % takes care of scrollbars, vmin/vh not*/
+  left: 10vw;
+  width: 24vw;
+  z-index: 1; /* the higher the integer, the more on top landscape */
+}
 
-/* landscape: strategy, buffer, import/export layer */
+/* ################################################################## */
+/* landscape: second control panel layer: strategy, buffer, import/export */
+/* ################################################################## */
+
 
 #controlStrategyDiv{ /* Also contains info text for non-BaWue simulations!*/
   position: absolute;
-  top: 15vmin;
-  height: 88vmin;
-  left: 2vmin;
+  top: 7vw;
+  left: 1vw;
   width: 38.5vw;
   /* background-color: rgb(230,230,255);*/
   display: none;  z-index: 3; /* the higher the integer, the more on top */
@@ -412,16 +436,7 @@ a:hover {
 
 
 
-/* (2f) landscape: position of the copyright left bottom of simCanvas*/
-/* Safari bug with using bottom => use always top */
 
-#impressum{ 
-  position: absolute;
-  top: 90%;  /* % takes care of scrollbars, vmin/vh not*/
-  left: 60vw;
-  width: 24vw;
-  z-index: 1; /* the higher the integer, the more on top landscape */
-}
 
 
 /* (3) landscape: position of the flags for language selection: 

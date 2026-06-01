@@ -27,9 +27,9 @@ function handleWindowResize() {
   vmin=Math.min(vw, vh);
   vmax=Math.max(vw, vh);
   for(var i=0; i<5; i++){
-    smileImgs[i].width=8*vmin; // rounding automatically; no ".."!
-    smileImgs[i].height=8*vmin;
-    console.log("smileImgs[i]=",smileImgs[i]);
+    smileImgs[i].width=4*vw; // rounding automatically; no ".."!
+    smileImgs[i].height=4*vw;
+    //console.log("smileImgs[i]=",smileImgs[i]);
   }
   console.log("in handleWindowResize(): vw=",vw," vh=",vh);
 }
@@ -68,18 +68,30 @@ function toggleControl(){
   var toggleButton=document.getElementById('toggleControlButton');
   var controlSupplyDemandWindow
       =document.getElementById('controlSupplyDemandDiv');
+  var controlPlantsWindow
+      =document.getElementById('controlPlantsDiv');
   var controlStrategyWindow
       =document.getElementById('controlStrategyDiv');
+  var Merkel1Window
+      =document.getElementById('merkelsmileys');
+  var Merkel2Window
+      =document.getElementById('raute');
   supplyDemandShown = !supplyDemandShown;
   
   if(supplyDemandShown){
     controlSupplyDemandWindow.style.display = 'block';  
+    controlPlantsWindow.style.display = 'block';  
+    Merkel1Window.style.display = 'block';  
+    Merkel2Window.style.display = 'block';  
     controlStrategyWindow.style.display = 'none';  
     toggleButton.innerHTML="Gehe zu Speicher-<br>attributen/Strategie";
   }
   else{
     controlSupplyDemandWindow.style.display = 'none';  
-    controlStrategyWindow.style.display = 'block';  
+    controlPlantsWindow.style.display = 'none';  
+    Merkel1Window.style.display = 'none';  
+    Merkel2Window.style.display = 'none';  
+   controlStrategyWindow.style.display = 'block';  
     toggleButton.innerHTML="Gehe zu Angebot/Nachfrage";
   }
    
@@ -133,13 +145,15 @@ for(var i=0; i<7; i++){
   smileImgs[i] = document.createElement("img");
   let str_imgfile="figs/smiley"+(i+1).toString()+".png";
   smileImgs[i].src=str_imgfile;
-  smileImgs[i].width=4.5*vw; //WATCH OUT! Only direct numbers, no pix, vw etc
-  smileImgs[i].height=4.5*vw;
+  smileImgs[i].width=4*vw; //WATCH OUT! Only direct numbers, no pix, vw etc
+  smileImgs[i].height=4*vw;
   //console.log("smileImgs[i]=",smileImgs[i]);
 
 }
 console.log(document.getElementById("merkelsmileys"));
 document.getElementById("merkelsmileys").appendChild(smileImgs[0]);
+//document.getElementById("merkelsmileys").appendChild(smileImgs[1]);
+//document.getElementById("merkelsmileys").appendChild(smileImgs[2]);
 
 
 
@@ -255,15 +269,23 @@ var pow0_Nuclear=pow00_Nuclear;
 var slider_Nuclear = document.getElementById('slider_Nuclear');
 var slider_NuclearStr = document.getElementById("slider_NuclearStr");
 slider_Nuclear.oninput = function() {
-  //console.log("in slider_Nuclear.oninput: this.value=" + this.value);
+  console.log("in slider_Nuclear.oninput: this.value=" + this.value);
   pow0_Nuclear=parseFloat(this.value);
   slider_NuclearStr.innerHTML
     = Math.round(this.value)+" GW";
 
   let merkelIndex=Math.min(6, Math.round(pow0_Nuclear/5.));
   let imageDiv=document.getElementById("merkelsmileys");
-  //console.log("merkelIndex=",merkelIndex);
+
+
   imageDiv.replaceChild(smileImgs[merkelIndex], imageDiv.childNodes[0]);
+
+  // When clicking at rather than moving the sliders, a 
+  // childNodes[1] is created by bug. Remove it (array.splice does not work!)
+  if(imageDiv.childNodes.length>1){
+    imageDiv.removeChild(imageDiv.children[1]);
+  }
+  //console.log("imageDiv.childNodes=",imageDiv.childNodes);
 }
 setSlider(slider_Nuclear, slider_NuclearStr, pow0_Nuclear, 0, " GW");
 
