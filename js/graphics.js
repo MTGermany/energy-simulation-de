@@ -309,11 +309,14 @@ function initChart(isEnergymix, isDaily, inputData) {
 }  // initChart
 
 
-
+// draws the graphical zoom area and helper lines (chartData daily data)
+// redrawBottom=false during dragging (smoother feeling) and true onmouseup
 
 function updateZoom(chart, otherChart, chartData, redrawBottom){
   const points = chart.getElementsAtEventForMode(
     event, 'index', { intersect: false }, true );
+
+  console.log("points=",points);
       
   if(points.length){
     const it_day=points[0].index;  // points[0] ... [16] all the same
@@ -393,6 +396,90 @@ function updateZoom(chart, otherChart, chartData, redrawBottom){
     ctx.fillStyle="rgba(0,0,50,0.1)";
     ctx.fillRect(xPixLow,0,xPixHi-xPixLow,yPixMin);
   }
+}
+
+
+// as updateZoom, only that the user-input (variable points) is replaced by
+// chosen initial ranges itmin_in, itmax_in
+
+function initZoom(chart, otherChart, chartData, itmin_in, itmax_in){
+  const it_day=Math.round(itmin_in/24);
+  const it_h=24*it_day;
+        //const itmin_h=Math.max(Math.min(
+	//  it_h-itHalfInterval,24*(chartData.length-1)-2*itHalfInterval),0); 
+
+  const itmin_h=Math.max(it_h-itHalfInterval,0); 
+
+  const itmax_h=Math.min(it_h+itHalfInterval, itmax); // from simulation
+
+  const itmin_day=Math.floor(itmin_h/24);
+
+  const itmax_day=Math.min(Math.floor(itmax_h/24),chartData.length-1);
+
+  if(true){
+      console.log("graphics, updateZoom: it_h=",it_h,
+		  " itmin_h=",itmin_h," itmax_h=",itmax_h,
+		  " itmin_day=",itmin_day," itmax_day=", itmax_day);
+  }
+
+    // move lower chart ranges 
+
+    //if(redrawBottom){updateRangeClipped(itmin_h,itmax_h);}
+
+      // draw zoomed lines on zoomInCanvas
+      // need separate transparently overlain canvas because
+      // chart's redraw overrides zoon-in lines
+
+
+    const xAxis = chart.scales.x;
+    const yAxis = chart.scales.y;
+    const xmin = xAxis.min;   // Get the minimum X value
+    const xmax = xAxis.max;  
+    const ymin = yAxis.min; 
+    const other_xAxis = otherChart.scales.x;
+    const other_yAxis = otherChart.scales.y;
+    const other_xmin = other_xAxis.min;   // Get the minimum X value
+    const other_xmax = other_xAxis.max;  
+    const other_ymin = other_yAxis.min; 
+
+
+    // otherChart at same x but +50*vw y value (css)
+
+    const xPixMin=xAxis.getPixelForValue(xmin);
+    const xPixLow=xAxis.getPixelForValue(chartData[itmin_day].timeUTC_ms);
+    const xPixHi=xAxis.getPixelForValue(chartData[itmax_day].timeUTC_ms);
+    const xPixMax = xAxis.getPixelForValue(xmax);
+
+    const yPixMin = yAxis.getPixelForValue(ymin);
+
+    const other_xPixMin = other_xAxis.getPixelForValue(other_xmin);
+    const other_xPixMax = other_xAxis.getPixelForValue(other_xmax);
+
+    const other_yPixMin = other_yAxis.getPixelForValue(other_ymin)+50*vh;
+
+      
+    const zoomInCanvas=document.getElementById("zoomInCanvas");
+    zoomInCanvas.width=60*vw;                 // as css zoomInRegion
+    zoomInCanvas.height=100*vh;
+
+    const ctx = zoomInCanvas.getContext('2d');
+
+    ctx.strokeStyle="rgb(0,0,0)";
+    ctx.beginPath();
+    ctx.moveTo(xPixLow, yPixMin);
+    ctx.lineTo(other_xPixMin, other_yPixMin);
+
+    ctx.moveTo(xPixHi, yPixMin);
+    ctx.lineTo(other_xPixMax, other_yPixMin);
+
+    // draw the Path
+	
+    ctx.stroke();
+
+    // draw semitransparent rectangle denoting the range in top chart
+
+    ctx.fillStyle="rgba(0,0,50,0.1)";
+    ctx.fillRect(xPixLow,0,xPixHi-xPixLow,yPixMin);
 }
 
 

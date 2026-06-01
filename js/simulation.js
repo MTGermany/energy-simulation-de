@@ -36,8 +36,8 @@ const nt=winddata.length;
 let itmax=nt-1;  // itmax may become < nt-1 if Dunkelflaute/Hellbrise
 
 const itHalfInterval=3*24;
-let itminClipped=0;  // initial clippings for lower charts
-let itmaxClipped=2*itHalfInterval;
+let itminClipped=180*24;  // initial clippings for lower charts
+let itmaxClipped=itminClipped+2*itHalfInterval;
 
 function simulation(strategy){
 
@@ -1421,5 +1421,11 @@ initChart(true, false, energymixClipped); // initializes allCharts[1]
 
 initChart(false, true, storageDaily); // initializes allCharts[2]
 initChart(false, false, storageClipped); // initializes allCharts[3]
+//updateZoom(Chart.getChart(canvasIDs[0]), Chart.getChart(canvasIDs[1]),
+//	   energymixDaily, false);
+
+//console.log("allCharts[0]=",allCharts[0],"allCharts[1]=",allCharts[1]," energymixDaily=",energymixDaily);
+
+initZoom(allCharts[0], allCharts[1], energymixDaily, itminClipped, itmaxClipped);
 
 

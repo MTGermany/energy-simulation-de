@@ -229,6 +229,7 @@ slider_PV.oninput = function() {
   slider_PVStr.innerHTML
     = Math.round(this.value)+" GW ("+formd0(100*pow0_PV/pow00_PV)+"%)"
   + " &nbsp;"
+  //updateSimulation(strategyIndex);
 }
 setSlider(slider_PV, slider_PVStr, pow0_PV, 0,
 	  " GW (100%)  &nbsp;");
@@ -456,7 +457,7 @@ function handleMouseMove(event,canvas){
 }
 
 function handleMouseUp(event){
-  console.log("handleMouseUp from table onmouseup element");
+  console.log("handleMouseUp from table onmouseup or ontouchend element");
   mousedown=false;
   updateSimulation(strategyIndex);
   updateRangeClipped(itminClipped,itmaxClipped);
