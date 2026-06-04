@@ -52,8 +52,9 @@
 <!-- ################################################# -->
 
 <div id="merkelsmileys">
-
+ <!-- <img src='figs/smiley1.png' width="100%"> --> <!-- incompatible here-->
 </div>
+
 <div id="raute">
   <img src='figs/Merkelraute_small.png' width="100%">
 </div>
@@ -62,7 +63,7 @@
 <!-- Control panel 1: supply and demand
 <!-- ################################################# -->
 
-<div id="controlSupplyDemandDiv" onmousedown="handleMouseDown(event)">
+<div id="controlPanel1Div" onmousedown="handleMouseDown(event)">
   <br>
   <center>
 
@@ -95,24 +96,20 @@
   <td> <div id="slider_WPStr"></div> </td>
 </tr>
 </table>
-</center>
-</div>  <!--id="controlSupplyDemandDiv"-->
 
 
-
-
-<div id="controlPlantsDiv" onmousedown="handleMouseDown(event)">
-  <br>
-<center>
+    
   <h2>Kraftwerkspark</h2>
 
 
 (Biomasse 4 MW und<br>Wasserkraft 2 MW<br>konstant wie bisher)
 
-<br>
+  <br>
+  
+  </center>
+  
+ <p align="right">   <!-- margin DOS -->
 
-<p align="right" margin-right="6vw">
-    
   <table class="mainTable"  onmouseup="handleMouseUp(event)"
 	 ontouchend="handleMouseUp(event)">
 
@@ -179,17 +176,17 @@
 </tr>
 
 </table>
-</center>
+
 <hr>
 
-</div>  <!--id="controlPlantsDiv"-->
+</div>  <!--id="controlPanel1Div"-->
 
   
 
 <!-- ################################################# -->
 <!-- Control panel 2: storage, import/export/strategy
 <!-- ################################################# -->
-<div id="controlStrategyDiv">
+<div id="controlPanel2Div">
 <center>
 
   <br>

@@ -9,6 +9,10 @@
 /* Remove default browser styling */
 
 
+
+/* @media all and  (min-aspect-ratio: 1/1){  */
+@media all{
+
 input[type=range] {
     appearance: none;
   -webkit-appearance: none;
@@ -52,7 +56,7 @@ input[type=range]::-webkit-slider-thumb {
 
 input[type=range]::-moz-range-track{
   /* width: 80%;*/  /* !!! here ONLY relative values possible!!!! */
-  height: 2.0vmin;
+    height: 1.2vw;
   cursor: pointer;
   box-shadow: 0.2vmin 0.2vmin 0.2vmin #000000, 0px 0px 0.2vmin #0d0d0d;
   background: #ddddf5;
@@ -64,10 +68,37 @@ input[type=range]::-moz-range-track{
 input[type=range]::-moz-range-thumb {
   box-shadow: 0.2vmin 0.2vmin 0.2vmin #000000, 0px 0px 0.2vmin #0d0d0d;
   border: 0.2vmin solid #000000;
-  height: 2.5vmin;
+  height: 2vw;
   width: 0.5vmin;
   border-radius: 0.5vmin;
   background: #666699;
   cursor: pointer;
 }
 
+} /* default landscape */
+
+
+
+/* portrait */
+
+@media all and  (max-aspect-ratio: 1/1){  
+input[type=range] {
+    width: 20vw;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    height: 1.6vw;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  height: 2.5vw;  
+  width: 1.5vw;
+}
+
+input[type=range]::-moz-range-track{
+      height: 1.6vw;
+}
+
+input[type=range]::-moz-range-thumb {
+    height: 2.5vw;
+}

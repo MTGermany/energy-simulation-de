@@ -16,44 +16,37 @@ INFO: full HD =1080p (1920×1080 px), aspect ratio 5/3;
 /*#############################################################*/
 
 
-body{
-    /*overflow: hidden;*/  /* Hide scrollbars */
+/* general links */
 
-  margin: 0;
-  padding: 0;
-  /*overflow-x: hidden;*/ /* remove horizontal scrollbar */
-  font-family: 'helvetica', sans-serif;
-                 /*font-size: 14px;*/
-  font-size: 1.3vw;
-  /*text-align: center;*/
-  color: #000000;   /* text color */
-  background-color: #FFFFFF;
+a {
+	color: #07A;
+	font-weight: normal;
+ }
+
+a:link {
+	color: #07A;
+	text-decoration: none;
 }
 
-button,select{    /* see also toggle control; select=combobox,choice */
-    font-size: 1.5vw;
-    width: 19vw;
-    height: 4vw;
+a:visited {
+	color: #957;
+	text-decoration: none;
+}
+
+a:active {
+	text-decoration: underline;
+	background-color: #F80;
+}
+
+a:hover {
+	text-decoration: underline;
+	color: #07A;
 }
 
 
-
-
-/* text layout of sliders: tables override general text spec) */
-
-th{                    /* only used in infotext */
-  font-size: 1.5vw;
-  /*font-weight: bold; */
-
-}
-
-td{
-  font-size:1.2vw; 
-  /*font-weight: bold; */
-}
+/* general tables ( some specific fonts in the aspect reatio sections) */
 
 td.important{
-  font-size:1.2vw; 
   font-weight: bold; 
   color: #dd0033;
 }
@@ -71,12 +64,11 @@ table.infoTable td {
 
 table.mainTable {
     border: 0px;
-    border-collapse: collapse;
-    cellspacing: 3vmin; /* DOS */
-    cellpadding: 10vmin; /* DOS */
+    border-collapse: collapse; /* cellspacing,-padding DOS */
 }
+
 table.mainTable td,th {
-   padding: 3;
+   padding: 3px;
 }
 
 table.infoGenTable {
@@ -96,13 +88,44 @@ table.impressumTable {
 }
 table.impressumTable td {
    border: 1px ridge rgb(0,0,0);
-   font-size:1.2vw; 
 }
 
 
 
+/* suppresses borders on images used as links */
 
-/* <h2>, <h3> not used in the main sim page but in some help pages */
+img {
+    border-width: 0;
+}
+
+
+
+/*#############################################################*/
+/* basic settings for landscape formats (=default)*/
+/* !! consolidate with js/gui.js -> isLandscape */
+/*#############################################################*/
+
+/* @media all and  (min-aspect-ratio: 1/1){ */
+@media all{
+
+
+/* (0) landscape: textual elements */
+
+    
+body{
+    /*overflow: hidden;*/  /* Hide scrollbars */
+
+  margin: 0;
+  padding: 0;
+  /*overflow-x: hidden;*/ /* remove horizontal scrollbar */
+  font-family: 'helvetica', sans-serif;
+                 /*font-size: 14px;*/
+  font-size: 1.3vw;
+  /*text-align: center;*/
+  color: #000000;   /* text color */
+  background-color: #FFFFFF;
+}
+
 
  h1{
      font-family: helvetica, sans-serif;
@@ -133,71 +156,37 @@ table.impressumTable td {
 
 
 
-/* suppresses borders on images used as links */
 
-img {
-    border-width: 0;
+/* text layout of sliders: tables override general text spec) */
+
+th{                    /* only used in infotext */
+  font-size: 1.5vw;
+  /*font-weight: bold; */
+
 }
 
-
-/* general links */
-
-a {
-	color: #07A;
-	font-weight: normal;
- }
-
-a:link {
-	color: #07A;
-	text-decoration: none;
-}
-
-a:visited {
-	color: #957;
-	text-decoration: none;
-}
-
-a:active {
-	text-decoration: underline;
-	background-color: #F80;
-}
-
-a:hover {
-	text-decoration: underline;
-	color: #07A;
+td{
+  font-size:1.2vw; 
+  /*font-weight: bold; */
 }
 
 
 
-/*#############################################################*/
-/* basic settings for landscape formats !! check with ../js/media.js */
-/*#############################################################*/
+/* ################################################################## */
+/* (1) landscape: title and selectoing views */
+/* ################################################################## */
 
-/* @media all and  (min-aspect-ratio: 6/5){*/
-@media all{
+/* title/header */
 
-
-
-
-/* (1) landscape: the title / header */
-
- 
 #header{
   position: absolute;
   top: -0.5vw;
   left: 10vw;
-  /*width:  60vw; */
-  height: 3vw;
   /* font-size: 2.9vmin; size and weight overridden by h1*/
-  padding-left: 0.5em;
-  padding-right: 0.5em;
-  padding-top: 0.2em;
-  padding-bottom: 0.2em;
-  /*background-color: rgba(255,255,255,0.7);*/
   z-index: 4; /* the higher the integer, the more on top */
 }
 
-/* (1a) landscape: position of the info button */
+/* position of the info button */
 
 #infoDiv{
   position: absolute;
@@ -209,14 +198,13 @@ a:hover {
 }
 
 
-/* (2) landscape: control panels with button */
-/* Notice: table elements relevant for font size */
+/* select control and display (table elements relevant for font size) */
 
 #toggleControlDiv{
   position: absolute;
   top: 5vw;
   left: 1vw;
-  /* width, height DOS, control at button,select{ */
+  /* width, height here DOS, change at button,select{ */
   z-index: 4; /* the higher the integer, the more on top */
 }
 
@@ -229,37 +217,32 @@ a:hover {
   z-index: 4; /* the higher the integer, the more on top */
 }
 
+button,select{    /* see also toggle control; select=combobox,choice */
+    font-size: 1.5vw;
+    width: 19vw;
+    height: 4vw;
+}
+
 
 /* ################################################################## */
-/* landscape: first control panel layer: Supply/demand and energy mix */
+/* (2) landscape: first control panel layer: Supply/demand and energy mix */
 /* ################################################################## */
 
-#controlSupplyDemandDiv{ 
+#controlPanel1Div{ 
   position: absolute;
   top: 7vw;
   left: 1vw;
-  width: 38.5vw;
+  width: 35vw;
   /*background-color: rgb(230,230,255);*/
   display: block;
   z-index: 1; /* the higher the integer, the more on top */
 }
 
-#controlPlantsDiv{ 
-  position: absolute;
-  top: 19vw;
-  /*height: 88vmin;*/
-  left: 1vw;
-  width: 38.5vw;
-  /*background-color: rgb(230,230,255);*/
-  display: block;
-  z-index: 1; /* the higher the integer, the more on top */
-}
 
-/* landscape: Merkelsmileys */
 
 #merkelsmileys{
   position: absolute;
-  top: 21vw;
+  top: 20vw;
   left: 32.5vw;
   /* DOS here; width controlled by image in javascript: */
   z-index: 0; /* the higher the integer, the more on top */
@@ -267,13 +250,31 @@ a:hover {
 
 #raute{
   position: absolute;
-  top: 26vw;
+  top: 24vw;
   left: 31vw;
   width: 7vw; /* works with "%" size in <img ...> in html */
-  height: 5vw; /* DOS *?
+  height: 5vw; /* DOS */
   z-index: 0; /* the higher the integer, the more on top */
 }
 
+
+
+/* ################################################################## */
+/* (3) landscape: second control panel layer: strategy etc */
+/* ################################################################## */
+
+#controlPanel2Div{ /* Also contains info text for non-BaWue simulations!*/
+  position: absolute;
+  top: 7vw;
+  left: 1vw;
+  width: 38.5vw;
+  /* background-color: rgb(230,230,255);*/
+  display: none;  z-index: 3; /* the higher the integer, the more on top */
+}
+
+/* ################################################################## */
+/* (4) landscape: textual sim output (below both control panels)   */
+/* ################################################################## */
 
 #generalInfo {
       position: absolute;
@@ -282,10 +283,7 @@ a:hover {
       display: block;
       left: 2vw;
       top: 47vw;
-      font-size: 1.3vw; /* body font 1.5vw */
-      /*width:  15vw; 
-      height: 12vh;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);*/
+      font-size: 1.3vw; 
       z-index: 0;
 }
 #infoImportExport {
@@ -320,25 +318,45 @@ a:hover {
   z-index: 1; /* the higher the integer, the more on top landscape */
 }
 
+
+
+
+
 /* ################################################################## */
-/* landscape: second control panel layer: strategy, buffer, import/export */
+/* (5) landscape: the graphics side                                   */
 /* ################################################################## */
 
 
-#controlStrategyDiv{ /* Also contains info text for non-BaWue simulations!*/
+
+/* The container of the daily charts canvasses 1 and 3 */
+
+
+#areaGraphics1, #areaGraphics3, #zoomInRegion{
   position: absolute;
-  top: 7vw;
-  left: 1vw;
-  width: 38.5vw;
-  /* background-color: rgb(230,230,255);*/
-  display: none;  z-index: 3; /* the higher the integer, the more on top */
+  left:   40vw;
+  top:   3vh;
+  width:  59vw; 
+  height: 47vh;
+  margin-right: 0vw;
+  margin-left: 0vw;
+  z-index: 0;
 }
 
+/* The container of the hourly charts canvasses 2 and 4 */
 
+#areaGraphics2, #areaGraphics4{
+  position: absolute;
+  left:   40vw;
+  top:   50vh;
+  width:  59vw; 
+  height: 47vh;
+  margin-right: 0vw;
+  margin-left: 0vw;
+  /*background-color: rgb(235,235,255);*/
+  z-index: 0;
+}
 
-/* (3) landscape: the semi-transparent zoon region over areaGraphics1 */
-
-
+/* semi-transparent zoom region over areaGraphics1,3 */
 
 #zoomInRegion{
   position: absolute;
@@ -349,60 +367,9 @@ a:hover {
   margin-right: 0vw;
   margin-left: 0vw;
   /*z-index: 0; */  /* DOS  falls andere Werte als =0 gesetzt! */
-  
 }
 
-
-/* (3) landscape: the container of the charts canvas */
-
-#areaGraphics1{
-  position: absolute;
-  left:   40vw;
-  top:   3vh;
-  width:  59vw; /* canvas inside area no drawing limit but define pixel */
-  height: 47vh; /* range by embedding graphics region zoomInRegion */
-  margin-right: 0vw;
-  margin-left: 0vw;
-  /*background-color: rgb(235,235,255);*/
-  z-index: 0;
-}
-
-#areaGraphics2{
-  position: absolute;
-  left:   40vw;
-  top:   50vh;
-  width:  59vw; 
-  height: 47vh;
-  margin-right: 0vw;
-  margin-left: 0vw;
-  /*background-color: rgb(235,235,255);*/
-  z-index: 0;
-}
-
-#areaGraphics3{
-  position: absolute;
-  left:   40vw;
-  top:   3vh;
-  width:  59vw; 
-  height: 47vh;
-  margin-right: 0vw;
-  margin-left: 0vw;
-  /*background-color: rgb(235,235,255);*/
-  z-index: 0;
-}
-
-#areaGraphics4{
-  position: absolute;
-  left:   40vw;
-  top:   50vh;
-  width:  59vw; 
-  height: 47vh;
-  margin-right: 0vw;
-  margin-left: 0vw;
-  /*background-color: rgb(235,235,255);*/
-  z-index: 0;
-}
-
+/* display data when clicking over areaGraphics1,3 */
 
 #clickInfo{
       position: absolute;
@@ -413,6 +380,14 @@ a:hover {
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       z-index: 0;
 }
+
+
+
+/* ################################################################## */
+/* (6) landscape: the separate info.html page                         */
+/* ################################################################## */
+
+
 
 #standaloneInfo {
       position: absolute;
@@ -426,56 +401,225 @@ a:hover {
 
 
 
+} /* end landscape */
+
+
+
+/*#############################################################*/
+/* basic settings for portrait formats
+/* !! consolidate with js/gui.js -> isLandscape */
+/*#############################################################*/
+
+@media all and  (max-aspect-ratio: 1/1){  
+
+/* (0) landscape: textual elements */
+
+    
+body{
+  font-size: 2vw;
+}
+
+
+ h1{
+     font-size: 3.3vw;
+ }
+
+ h2{
+     font-size: 2.5vw;
+     margin-top:2.5vw;
+     margin-bottom: 2vw;
+ }
+ 
+ h3{
+     font-family: helvetica, sans-serif;
+     font-size: 2.1vw;
+     margin-bottom: 0px;
+ }
 
 
 
 
+/* text layout of sliders: tables override general text spec) */
+
+th{                 
+  font-size: 2.2vw;
+  /*font-weight: bold; */
+
+}
+
+td{
+  font-size:2vw; 
+  /*font-weight: bold; */
+}
 
 
+/* ################################################################## */
+/* (1) portrait: title and selecting views */
+/* ################################################################## */
+
+/* position of the info button */
+
+#infoDiv{
+  top: 1vw;
+  height: 6vw;
+  left: 3vw;
+  width: 6vw;
+}
 
 
+/* title/header */
+
+#header{
+  top: -0vw;
+  left: 12vw;
+  z-index: 4; /* the higher the integer, the more on top */
+}
 
 
+/* select control and display (table elements relevant for font size) */
 
+#toggleControlDiv{
+  top: 1vw;
+  left: 45vw;
+  z-index: 4; /* the higher the integer, the more on top */
+}
 
-
-/* (3) landscape: position of the flags for language selection: 
-right top of simCanvas */
-
-#infoFlags{
+#toggleGraphicsDiv{
   position: absolute;
-  top:   94.5%;
-  left:   95vmin;
-  width:  16vmin; /* no height */
-  z-index: 2;
+  top: 1vw;
+  left: 71vw;
+  z-index: 4; /* the higher the integer, the more on top */
+}
+
+button,select{    /* see also toggle control; select=combobox,choice */
+    font-size: 2.3vw;
+    width: 23vw;
+    height: 6vw;
+}
+
+
+/* ################################################################## */
+/* (2) portrait: first control panel layer: Supply/demand and energy mix */
+/* ################################################################## */
+
+#controlPanel1Div{ 
+  top: 6vw;
+  left: 3vw;
+  width: 55vw;
+}
+
+
+/* watch out; need to adapt size in graphics javaScript */
+
+#merkelsmileys{
+  top: 27vw;
+  left: 46vw;
+}
+
+#raute{
+  top: 33vw;
+  left: 44vw;
+  width: 10vw; /* works with "%" size in <img ...> in html */
+  /* height: 7vw;*/ /* height DOS */
+}
+
+
+/* ################################################################## */
+/* (3) portrait: second control panel layer: strategy etc */
+/* ################################################################## */
+
+#controlPanel2Div{ /* Also contains info text for non-BaWue simulations!*/
+  top: 6vw;
+  left: 3vw;
+  width: 60vw;
+}
+
+
+/* ################################################################## */
+/* (4) portrait: textual sim output (to side of both control panels)
+/* ################################################################## */
+
+#generalInfo { /* font size by table specs */
+      left: 70vw;
+      top: 25vw;
+}
+#infoImportExport {
+      left: 69.5vw;
+      top: 42vw;
+}
+
+#CO2Info {
+      left: 74vw;
+      top: 55vw;
+      font-size: 2.4vw;
+}
+
+#impressum{ 
+  position: absolute;
+  top: 150vw;  /* % takes care of scrollbars, vmin/vh not*/
+  left: 20vw;
+  width: 40vw;
 }
 
 
 
 
-/* (6) landscape: infotext div-box landscape (sub-div! no pos info, just below the sliders*/
 
-ul { margin-left: 2vmin; padding: 0vmin; }
+/* ################################################################## */
+/* (5) portrait: the graphics side                                   */
+/* ################################################################## */
 
-ul.noindent {   /* then in html <ul class="noindent">...</ul>*/
-    margin-left: 5px;
-    margin-right: 0px;
-    padding-left: 10px;
-    padding-right: 0px;
+
+
+/* The container of the daily charts canvasses 1 and 3 */
+
+
+#areaGraphics1, #areaGraphics3{
+  left:   1vw;
+  top:   65vw;
+  width:  98vw; 
+  height: 60vw;
 }
 
-#infotext{ /* inside #sliders, hence no positional info*/
-  border:0px solid black; /* 1px with frame */
-  width: 44vmin; /* DOS with calc(98.0vw-121.0vmin);*/
-  /*height: 27vmin;*/
-  text-align: left;
-  padding-top: 0vmin;
-  padding-left: 2vmin;
-  padding-right: 2vmin;
-  background-color: rgba(0,40,255,0.0);
-  overflow:auto;
-  z-index: 2;
+/* The container of the hourly charts canvasses 2 and 4 */
+
+#areaGraphics2, #areaGraphics4{
+  left:   1vw;
+  top:   125vw;
+  width:  98vw; 
+  height: 60vw;
+}
+
+/* semi-transparent zoom region over areaGraphics1,3 (only top different)*/
+
+#zoomInRegion{
+  left:   5vw;     /* same as#areaGraphics1 */
+  top:   67vw;
+  width:  90vw; 
+  height: 50vw;     /* reaches down to #areaGraphics2 */
+  z-index: 0;   /* DOS  falls andere Werte als =0 gesetzt! */
+}
+
+/* display data when clicking over areaGraphics1,3 */
+/* !!! watch out! need also adapt the graphics js code for positioning */
+
+#clickInfo{
+      border: 1px solid #ccc;
+      padding: 8px;
+      display: none;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      z-index: 0;
 }
 
 
-} /* end @media filter landscape normal */
+
+
+
+
+
+
+    
+} /* end portrait */
+
+

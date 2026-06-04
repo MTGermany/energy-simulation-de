@@ -1395,7 +1395,6 @@ function updateRangeClipped(itminClipped,itmaxClipped){
 // #################################################################
 
 
-
 let energymix=[]; // array of objects; fill with energymix.push(hourlymix)
 let storage=[]; // array of objects; fill with hourly_state
 let solarRegions=[];
@@ -1427,5 +1426,4 @@ initChart(false, false, storageClipped); // initializes allCharts[3]
 //console.log("allCharts[0]=",allCharts[0],"allCharts[1]=",allCharts[1]," energymixDaily=",energymixDaily);
 
 initZoom(allCharts[0], allCharts[1], energymixDaily, itminClipped, itmaxClipped);
-
 

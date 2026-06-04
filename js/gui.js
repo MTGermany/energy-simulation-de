@@ -16,7 +16,8 @@ let vh = 0.01*Math.max(document.documentElement.clientHeight || 0,
 		       window.innerHeight || 0);
 let vmin=Math.min(vw, vh);
 let vmax=Math.max(vw, vh);
-
+let isLandscape=(vw>vh); // consolidate with css -> "aspect-ratio" !
+console.log("vw=",vw," vh=",vh," isLandscape=",isLandscape);
 window.addEventListener("resize", handleWindowResize); //eventListener needed!
 
 function handleWindowResize() {
@@ -26,9 +27,10 @@ function handleWindowResize() {
 		     window.innerHeight || 0);
   vmin=Math.min(vw, vh);
   vmax=Math.max(vw, vh);
+  isLandscape=(vw>vh);
   for(var i=0; i<5; i++){
-    smileImgs[i].width=4*vw; // rounding automatically; no ".."!
-    smileImgs[i].height=4*vw;
+    smileImgs[i].width=(isLandscape) ? 4*vw : 6*vw; 
+    smileImgs[i].height=(isLandscape) ? 4*vw : 6*vw; 
     //console.log("smileImgs[i]=",smileImgs[i]);
   }
   console.log("in handleWindowResize(): vw=",vw," vh=",vh);
@@ -66,12 +68,10 @@ function toggleControl(){
   //console.log("in toggleControl");
 
   var toggleButton=document.getElementById('toggleControlButton');
-  var controlSupplyDemandWindow
-      =document.getElementById('controlSupplyDemandDiv');
-  var controlPlantsWindow
-      =document.getElementById('controlPlantsDiv');
-  var controlStrategyWindow
-      =document.getElementById('controlStrategyDiv');
+  var controlPanel1Window
+      =document.getElementById('controlPanel1Div');
+  var controlPanel2Window
+      =document.getElementById('controlPanel2Div');
   var Merkel1Window
       =document.getElementById('merkelsmileys');
   var Merkel2Window
@@ -79,19 +79,17 @@ function toggleControl(){
   supplyDemandShown = !supplyDemandShown;
   
   if(supplyDemandShown){
-    controlSupplyDemandWindow.style.display = 'block';  
-    controlPlantsWindow.style.display = 'block';  
+    controlPanel1Window.style.display = 'block';  
     Merkel1Window.style.display = 'block';  
     Merkel2Window.style.display = 'block';  
-    controlStrategyWindow.style.display = 'none';  
+    controlPanel2Window.style.display = 'none';  
     toggleButton.innerHTML="Gehe zu Speicher-<br>attributen/Strategie";
   }
   else{
-    controlSupplyDemandWindow.style.display = 'none';  
-    controlPlantsWindow.style.display = 'none';  
+    controlPanel1Window.style.display = 'none';  
     Merkel1Window.style.display = 'none';  
     Merkel2Window.style.display = 'none';  
-   controlStrategyWindow.style.display = 'block';  
+   controlPanel2Window.style.display = 'block';  
     toggleButton.innerHTML="Gehe zu Angebot/Nachfrage";
   }
    
@@ -145,8 +143,8 @@ for(var i=0; i<7; i++){
   smileImgs[i] = document.createElement("img");
   let str_imgfile="figs/smiley"+(i+1).toString()+".png";
   smileImgs[i].src=str_imgfile;
-  smileImgs[i].width=4*vw; //WATCH OUT! Only direct numbers, no pix, vw etc
-  smileImgs[i].height=4*vw;
+  smileImgs[i].width=(isLandscape) ? 4*vw : 6*vw; 
+  smileImgs[i].height=(isLandscape) ? 4*vw : 6*vw; 
   //console.log("smileImgs[i]=",smileImgs[i]);
 
 }
