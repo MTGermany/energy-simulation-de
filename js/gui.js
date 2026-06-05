@@ -36,7 +36,7 @@ function handleWindowResize() {
   }
 
   // consolidate font size also in graphics.js
-  Chart.defaults.font.size = (isLandscape) ? 1.2*vw : 2*vw; 
+  Chart.defaults.font.size = (isLandscape) ? 1.0*vw : 2*vw; 
   //console.log("in handleWindowResize(): vw=",vw," vh=",vh);
 }
 

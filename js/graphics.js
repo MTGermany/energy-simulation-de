@@ -18,7 +18,7 @@ const colBatt="rgb(150,0,200)";
 
 // also set fontsize in gui.js -> handleWindowResize()
 
-Chart.defaults.font.size = (isLandscape) ? 1.2*vw : 2*vw; // OK also
+Chart.defaults.font.size = (isLandscape) ? 1.0*vw : 2*vw; // OK also
 Chart.maintainAspectRatio= false; // DOS; need to define in Chart.options
 Chart.responsive=true; // OK
 Chart.animation=false; // DOS, in options

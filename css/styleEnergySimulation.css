@@ -615,14 +615,125 @@ button,select{    /* see also toggle control; select=combobox,choice */
       z-index: 0;
 }
 
-
-
-
-
-
-
-
     
 } /* end portrait */
 
+
+/*#############################################################*/
+/* Settings for very portrait formats
+/* !! consolidate with js/gui.js -> isLandscape */
+/*#############################################################*/
+
+
+@media all and  (min-aspect-ratio: 2/1){  
+body{
+  font-size: 2.6vmin;
+}
+
+
+ h1{
+     font-size: 4.6vmin;
+ }
+
+ h2{
+     font-size: 3.4vmin;
+     margin-top:3vmin;
+     margin-bottom: 2vmin;
+ }
+ 
+ h3{
+     font-family: helvetica, sans-serif;
+     font-size: 3vmin;
+ }
+
+
+
+
+/* text layout of sliders: tables override general text spec) */
+
+th{                 
+  font-size: 3vmin;
+  /*font-weight: bold; */
+
+}
+
+td{
+  font-size:2.4vmin; 
+  /*font-weight: bold; */
+}
+
+
+#header{
+  top: -1vmin;
+  left: 20vmin;
+}
+
+#infoDiv{
+  top: 2vmin;
+  height: 8vmin;
+  left: 6vmin;
+  width: 6vmin;
+}
+
+#toggleControlDiv{
+  top: 10vmin;
+  left: 2vmin;
+}
+
+#toggleGraphicsDiv{
+  top: 10vmin;
+  left: 44vmin;
+}
+
+button,select{    /* see also toggle control; select=combobox,choice */
+    font-size: 3vmin;
+    width: 38vmin;
+    height: 8vmin;
+}
+
+/* (2) wide landscape: first control panel layer */
+
+#controlPanel1Div{ 
+  top: 14vmin;
+  left: 2vmin;
+  width: 35vw;
+}
+
+
+
+#merkelsmileys{
+  top: 40vmin;
+  left: 65vmin;
+}
+
+#raute{
+  top: 48vmin;
+  left: 62vmin;
+  width: 14vmin; /* works with "%" size in <img ...> in html */
+}
+
+/* (3) wide landscape: second control panel layer */
+
+#controlPanel2Div{ /* Also contains info text for non-BaWue simulations!*/
+  top: 14vmin;
+  left: 2vmin;
+  width: 38.5vw;
+}
+
+/* (5) wide landscape: the graphics side                                   */
+
+#areaGraphics1, #areaGraphics3, #zoomInRegion{
+  top:   1.5vw;
+  height: 23.5vw;
+}
+#areaGraphics2, #areaGraphics4{
+  top:   25vw;
+  height: 23.5vw;
+}
+#zoomInRegion{
+  height: 23.5vw;
+}
+
+
+}
 
