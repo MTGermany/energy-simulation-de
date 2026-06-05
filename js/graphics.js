@@ -16,9 +16,9 @@ const colBatt="rgb(150,0,200)";
 
 
 
+// also set fontsize in gui.js -> handleWindowResize()
 
-
-Chart.defaults.font.size = Math.round(2*vmin); // OK
+Chart.defaults.font.size = (isLandscape) ? 1.2*vw : 2*vw; // OK also
 Chart.maintainAspectRatio= false; // DOS; need to define in Chart.options
 Chart.responsive=true; // OK
 Chart.animation=false; // DOS, in options
@@ -327,7 +327,7 @@ function updateZoom(chart, otherChart, chartData, redrawBottom){
     const itmax_h=Math.min(it_h+itHalfInterval, itmax); // from simulation
     const itmin_day=Math.floor(itmin_h/24);
     const itmax_day=Math.min(Math.floor(itmax_h/24),chartData.length-1);
-    if(true){
+    if(false){
       console.log("graphics, updateZoom: it_h=",it_h,
 		  " itmin_h=",itmin_h," itmax_h=",itmax_h,
 		  " itmin_day=",itmin_day," itmax_day=", itmax_day);
@@ -352,10 +352,13 @@ function updateZoom(chart, otherChart, chartData, redrawBottom){
     const other_xmin = other_xAxis.min;   // Get the minimum X value
     const other_xmax = other_xAxis.max;  
     const other_ymin = other_yAxis.min; 
-
-
+ 
     // otherChart at same x but +50*vw y value (css)
 
+    // quick hack!!
+
+    const dyBot=(isLandscape) ? 50*vh : 58.5*vw;
+    
     const xPixMin=xAxis.getPixelForValue(xmin);
     const xPixLow=xAxis.getPixelForValue(chartData[itmin_day].timeUTC_ms);
     const xPixHi=xAxis.getPixelForValue(chartData[itmax_day].timeUTC_ms);
@@ -366,14 +369,14 @@ function updateZoom(chart, otherChart, chartData, redrawBottom){
     const other_xPixMin = other_xAxis.getPixelForValue(other_xmin);
     const other_xPixMax = other_xAxis.getPixelForValue(other_xmax);
 
-    const other_yPixMin = other_yAxis.getPixelForValue(other_ymin)+50*vh;
+    const other_yPixMin = other_yAxis.getPixelForValue(other_ymin)+dyBot;
 
       
     //const zoomInRegion=document.getElementById("zoomInRegion");
     //zoomInRegion.zIndex="2";
     const zoomInCanvas=document.getElementById("zoomInCanvas");
-    zoomInCanvas.width=60*vw;                 // as css zoomInRegion
-    zoomInCanvas.height=100*vh;
+    zoomInCanvas.width=(isLandscape) ? 59*vw : 95*vw; // as css zoomInRegion
+    zoomInCanvas.height=(isLandscape) ? 94*vh : 120*vw;
     //zoomInCanvas.zIndex="2"; // DOS
     //zoomInCanvas.bringToFront; // DOS
     //console.log("zoomInCanvas=",zoomInCanvas);
@@ -395,6 +398,13 @@ function updateZoom(chart, otherChart, chartData, redrawBottom){
 
     ctx.fillStyle="rgba(0,0,50,0.1)";
     ctx.fillRect(xPixLow,0,xPixHi-xPixLow,yPixMin);
+
+    console.log("updateZoom: itmin_day=",itmin_day,
+		" itmax_day=",itmax_day,
+		" xmin=",xmin," xmax=",xmax," xPixLow=",xPixLow,
+		" xPixHi=",xPixHi);
+    console.log("zoom: xAxis=",xAxis);
+
   }
 }
 
@@ -541,7 +551,7 @@ function setupClick(canvasID, inputData) {
     //console.log("onclick: points=",points);
     
     if (!points.length) {
-      box.style.display = "none";
+      box.style.display = "none";  // box=clickinfo html element
       return;
     }
 
@@ -569,12 +579,12 @@ function setupClick(canvasID, inputData) {
     }
 
 
-    let fontsize=(Math.round(2.0*vmin)).toString();
-    box.innerHTML = html;
+    box.innerHTML = html;   // box=clickinfo html element
     box.style.left = event.pageX + 10 + "px"; //!!
-    box.style.top = (isTopChart) ? 1*vh : 51*vh;
+    box.style.top = (isLandscape) ? ((isTopChart) ? 1*vh : 51*vh)
+      :((isTopChart) ? 65*vw : 125*vw);
     box.style.display = "block";
-    box.style.fontSize=fontsize;
+
     //console.log(" box.style=",box.style);
 
     // move lower charts also at click; because no named functions possible,

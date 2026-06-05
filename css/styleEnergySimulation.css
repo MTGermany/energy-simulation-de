@@ -357,6 +357,7 @@ button,select{    /* see also toggle control; select=combobox,choice */
 }
 
 /* semi-transparent zoom region over areaGraphics1,3 */
+/* also consolidate with gui.js -> zoomInCanvas.width */
 
 #zoomInRegion{
   position: absolute;
@@ -577,7 +578,7 @@ button,select{    /* see also toggle control; select=combobox,choice */
 #areaGraphics1, #areaGraphics3{
   left:   1vw;
   top:   65vw;
-  width:  98vw; 
+  width:  95vw; 
   height: 60vw;
 }
 
@@ -586,17 +587,19 @@ button,select{    /* see also toggle control; select=combobox,choice */
 #areaGraphics2, #areaGraphics4{
   left:   1vw;
   top:   125vw;
-  width:  98vw; 
+  width:  95vw; 
   height: 60vw;
 }
 
 /* semi-transparent zoom region over areaGraphics1,3 (only top different)*/
+/* also consolidate with gui.js -> zoomInCanvas.width, .height */
+
 
 #zoomInRegion{
-  left:   5vw;     /* same as#areaGraphics1 */
+  left:   1vw;     /* same as#areaGraphics1 */
   top:   67vw;
-  width:  90vw; 
-  height: 50vw;     /* reaches down to #areaGraphics2 */
+  width:  95vw; 
+  height: 120vw;     /* reaches down to #areaGraphics2 */
   z-index: 0;   /* DOS  falls andere Werte als =0 gesetzt! */
 }
 

@@ -17,7 +17,7 @@ let vh = 0.01*Math.max(document.documentElement.clientHeight || 0,
 let vmin=Math.min(vw, vh);
 let vmax=Math.max(vw, vh);
 let isLandscape=(vw>vh); // consolidate with css -> "aspect-ratio" !
-console.log("vw=",vw," vh=",vh," isLandscape=",isLandscape);
+
 window.addEventListener("resize", handleWindowResize); //eventListener needed!
 
 function handleWindowResize() {
@@ -28,12 +28,16 @@ function handleWindowResize() {
   vmin=Math.min(vw, vh);
   vmax=Math.max(vw, vh);
   isLandscape=(vw>vh);
+  
   for(var i=0; i<5; i++){
     smileImgs[i].width=(isLandscape) ? 4*vw : 6*vw; 
     smileImgs[i].height=(isLandscape) ? 4*vw : 6*vw; 
     //console.log("smileImgs[i]=",smileImgs[i]);
   }
-  console.log("in handleWindowResize(): vw=",vw," vh=",vh);
+
+  // consolidate font size also in graphics.js
+  Chart.defaults.font.size = (isLandscape) ? 1.2*vw : 2*vw; 
+  //console.log("in handleWindowResize(): vw=",vw," vh=",vh);
 }
 
 let strategyIndex=0; //!!
@@ -148,7 +152,7 @@ for(var i=0; i<7; i++){
   //console.log("smileImgs[i]=",smileImgs[i]);
 
 }
-console.log(document.getElementById("merkelsmileys"));
+//console.log(document.getElementById("merkelsmileys"));
 document.getElementById("merkelsmileys").appendChild(smileImgs[0]);
 //document.getElementById("merkelsmileys").appendChild(smileImgs[1]);
 //document.getElementById("merkelsmileys").appendChild(smileImgs[2]);
