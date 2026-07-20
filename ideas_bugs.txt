@@ -1,0 +1,99 @@
+
+Ideas
+
+
+In Info Scatterplot Preis-Export und Regr-Linie, in roten
+Ergebnisdaten Handelsgewinn mit Linie (kannVerlust sein, obwohl mehr
+Strom verkauft als gekauft)
+
+
+Knoepfe li unnten fuer feste Sim-Szenarien
+
+Hauptknopf "Szenarien ohne Kernkraft"
+
+1. Zurueck zur Gegenwart
+
+2. +200% Solar (300%):           283 g/kWh, Curtail 26/17/24%
+
+3. +200% Wind:                   220 g/kWh, Curtail 0/28/57%
+
+4. +100% Solar und Wind:         223 g/kWh, Curtail 11/23/47%
+
+5. 4. +500% Batt (pow+cap):  	 209 g/kWh, Curtail 8/22/41%
+
+6. 5. + 1 TWh/10GW/30GW H2:	        205 g/kWh, Curtail 6/17/29
+
+7. 5. + 20 TWh/40GW/60GW H2:	 	170 g/kWh, Curtail 1/6/13
+
+8. 7. und Kohle weg	 	 	86 g/kWh,  Curtail 0/4/10
+
+9. 8. und Gas -50%	 	 Blackout(geringste Gasleistung 24GW
+
+10. Gas -100% und netzb Wechaelr.        na (Bug 12)
+
+11. gruene Strategie: Kaum Aenderung
+
+
+Hauptknopf "Szenarien mit Kernkraft"
+
+1. Gegenwart +30 GW KKW, -100% Kohle, 10GW Gas: 54 g/kWh 5/15/31 (blackout
+bei 0 Gas)
+
+2. 1. +40 GW KKW, kein Kohle/Gas        29 g/kWh 16/33/61
+
+3. wie 2, 50%VEE          		 31 g/kWh 4/10/20
+
+4. wie 3, keine Biomasse         	 n/a (Bug 11)
+
+5: wie 3, Speicher wie  5		 30 g/kWh, kaum Aenderungwg eta
+
+6: wie 3, alle Speicher voll aufdrehen 29 g/kWh, kaum Aenderung, 0% Curtail
+
+7: wie 6,alle VEE voll aufdrehen	 28 g/kWh 69/66/93
+
+8: wie 6, alle VEE auf 0		 33 g/kWh	 
+
+9: wie 6, VEE +200%			 28 g/kWh 36/45/71
+
+10: wie 9, Strategie Klima, safety, gruen 28/29/33 g/kWh, bei gruen
+60% KK curtail
+
+
+
+Summary: (1) Nur Kernkraft bringt's,
+         (2) Speicher sind dann sinnlos
+	 (3) nur Biomasse weg bringt <29 g/kWh
+
+Bugs/incompleteness:
+
+
+1. Nach Aenderung des Viewports updaten die
+"Lupenstreiche" nicht, nicht einmal nach Neusimulation, alles andere schon
+
+2. Bei viel EE ist gruen oft besser als Klimaschoner
+
+3. (minor) Check H2 Leistungsdef (Wirkungsgrad)
+
+4. Fill infobuttons with life (such that after going back sim state is
+retained)
+
+5. (minor) Erlaube H2 Lade- und Entladeleistung 100 GW, Kohle bis 100% range
+
+6. Klimaschoner schrumpft, wenn Kohle weg: unpausibel! 
+
+7. Anfangs-H2-Speicher auf 10% oder 2 Jahre simulieren bei
+>1TWh Speicher
+
+8.(solved) Warum geht Curtailment runter, wenn Kohle wegfaellt?
+Mindestbetrieb!
+
+9. Blackout Info und control (auch netzbild. Gleichrichter erlauben)
+
+10. (minor) rote Statistik Flow->Energy
+
+11. Biomasse auf 0 setzbar
+
+12. Knopf "Netzbilende Wechselricher" fehlt
+
+13. VEE bis auf 0 regelbar
+

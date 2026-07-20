@@ -1,0 +1,383 @@
+
+<!DOCTYPE html public>
+<html lang="de">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+
+    <link href="css/styleSliders.css" rel="stylesheet" type="text/css" >
+    <link href="css/styleEnergySimulation.css" 
+          rel="stylesheet" type="text/css">
+    <link rel="icon" href="figs/energyLogo.png">
+   <!-- <link rel="icon" href="figs/smiley1.png">
+   <!-- <link rel="icon" href="figs/favicon.jpg">-->
+    </script>
+
+    
+    <title>Energie-Simulation </title>
+</head>
+
+
+<body>
+<div id="header"> 
+  <center><h1>Energie-Simulation</h1> </center>
+</div>
+
+<div id="infoDiv">
+  <a href="info.html"><img width="100%" 
+     src="figs/infoBlue.png" onclick="showInfo()"></img></a>
+</div>
+
+
+
+<!-- ################################################# -->
+<!-- Top level controls which control panel and sim window to show
+<!-- ################################################# -->
+
+  
+<div id="toggleControlDiv"><button id="toggleControlButton"
+				   width="10vw"
+				   onclick='toggleControl()'>
+    Gehe zu Speicher-<br>attributen/Strategie</button>
+</div>
+
+<div id="toggleGraphicsDiv"><button id="toggleGraphicsButton"
+				   onclick='toggleGraphics()'>
+    Gehe zur Speicheransicht</button>
+</div>
+
+
+<!-- ################################################# -->
+<!-- Merkelraute; smileys programmatically produced by gui.js -->
+<!-- ################################################# -->
+
+<div id="merkelsmileys">
+ <!-- <img src='figs/smiley1.png' width="100%"> --> <!-- incompatible here-->
+</div>
+
+<div id="raute">
+  <img src='figs/Merkelraute_small.png' width="100%">
+</div>
+
+<!-- ################################################# -->
+<!-- Control panel 1: supply and demand
+<!-- ################################################# -->
+
+<div id="controlPanel1Div" onmousedown="handleMouseDown(event)">
+  <br>
+  <center>
+
+    <h2>Nachfrage</h2>
+
+<!-- all tables get an onmouseup event listener to update the --
+  -- simulation one the slider bars are released -->
+
+    <table class="mainTable"  onmouseup="handleMouseUp(event)"
+	   ontouchend="handleMouseUp(event)">
+
+
+  
+<tr>
+  <td>Allgemein</td>
+  <td> <input id="slider_Load" type="range" 
+              min="50" max="150" step="1"></td>
+  <td> <div id="slider_LoadStr"></div> </td> <!-- init in gui.js -->
+</tr>
+<tr>
+  <td>BEV (PKW und LKW)</td>
+  <td> <input id="slider_BEV" type="range" 
+              min="0" max="100" step="1"></td>
+  <td> <div id="slider_BEVStr"></div> </td>  <!-- init in gui.js -->
+</tr>
+<tr>
+  <td>W&auml;rmepumpen</td>
+  <td> <input id="slider_WP" type="range" 
+              min="0" max="100" step="1"></td>
+  <td> <div id="slider_WPStr"></div> </td>
+</tr>
+</table>
+
+
+    
+  <h2>Kraftwerkspark</h2>
+
+
+(Biomasse 4 MW und<br>Wasserkraft 2 MW<br>konstant wie bisher)
+
+  <br>
+  
+  </center>
+  
+ <p align="right">   <!-- margin DOS -->
+
+  <table class="mainTable"  onmouseup="handleMouseUp(event)"
+	 ontouchend="handleMouseUp(event)">
+
+<tr>
+  <td>PV</td>
+  <td> <input id="slider_PV" type="range" 
+              min="20" max="400" step="1"></td>
+  <td> <div id="slider_PVStr"></div> </td>
+</tr>
+
+<tr>
+  <td>Wind onshore</td>
+  <td> <input id="slider_WindOn" type="range" 
+              min="10" max="200" step="1"></td>
+  <td> <div id="slider_WindOnStr"></div> </td>
+</tr>
+
+<tr>
+  <td>Wind offshore</td>
+  <td> <input id="slider_WindOff" type="range" 
+              min="5" max="100" step="1"></td>
+  <td> <div id="slider_WindOffStr"></div> </td>
+</tr>
+
+<tr>
+  <td>Kernkraft</td>
+  <td> <input id="slider_Nuclear" type="range" 
+              min="0" max="50" step="1"></td>
+  <td> <div id="slider_NuclearStr"></div> </td>
+</tr>
+
+
+<!--
+<tr>
+  <td>Hydro</td>
+  <td> <input id="slider_Hydro" type="range" 
+              min="2" max="2.1" step="0.01"></td>
+  <td> 2 GW (fix) </td>
+</tr>
+
+
+<tr>
+  <td>Biomasse</td>
+  <td> <input id="slider_Bio" type="range" 
+              min="4" max="4.1" step="0.01"></td>
+  <td> 4 GW (fix) </td>
+</tr>
+-->
+
+
+<tr>
+  <td>Kohle</td>
+  <td> <input id="slider_Coal" type="range" 
+              min="0" max="30" step="0.1"></td>
+  <td> <div id="slider_CoalStr"></div> </td>
+</tr>
+
+
+<tr>
+  <td>Gas</td>
+  <td> <input id="slider_Gas" type="range" 
+              min="0" max="70" step="1"></td>
+  <td> <div id="slider_GasStr"></div> </td>
+</tr>
+
+</table>
+
+<hr>
+
+</div>  <!--id="controlPanel1Div"-->
+
+  
+
+<!-- ################################################# -->
+<!-- Control panel 2: storage, import/export/strategy
+<!-- ################################################# -->
+<div id="controlPanel2Div">
+<center>
+
+  <br>
+  
+<h2>Batterien (&eta; = 0.9 * 0.9 = 81%) &nbsp;
+  <a href="./infoBatt.html">(Info)</a></h2>
+   <!--DOS at padding, margin -->
+
+<table class="mainTable"  onmouseup="handleMouseUp(event)"
+       ontouchend="handleMouseUp(event)"> 
+
+<tr>
+  <td>Lade-/Entladeleistung</td>
+  <td> <input id="slider_battCharge" type="range" 
+              min="0" max="200" step="10"></td>
+  <td> <div id="slider_battChargeStr"></div></td>  <!-- init in gui.js -->
+</tr>
+
+<tr>
+  <td>Kapazit&auml;t</td>
+  <td> <input id="slider_battEnergy" type="range" 
+              min="0" max="1" step="0.005"></td>
+  <td> <div id="slider_battEnergyStr"></div></td> 
+</tr>
+</table>
+
+
+<h2>Wasserstoff (&eta; = 0.6 * 0.4 = 24%) &nbsp;
+  <a href="./infoH2.html">(Info)</a></h2>
+
+<table class="mainTable"  onmouseup="handleMouseUp(event)"
+       ontouchend="handleMouseUp(event)"> 
+
+<tr>
+  <td>Ladeleistung</td>
+  <td> <input id="slider_H2Charge" type="range" 
+              min="0" max="40" step="1"></td>
+  <td> <div id="slider_H2ChargeStr"></div></td> 
+</tr>
+
+<tr>
+  <td>Entladeleistung</td>
+  <td> <input id="slider_H2Discharge" type="range" 
+              min="0" max="100" step="1"></td>
+  <td> <div id="slider_H2DischargeStr"></div></td> 
+</tr>
+
+<!-- nonlinear scale x in [0,1], energy=energymax*x^displayExp -->
+<tr>
+  <td>Kapazit&auml;t</td>
+  <td> <input id="slider_H2Energy" type="range" 
+              min="0" max="1" step="0.005"></td>
+  <td> <div id="slider_H2EnergyStr"></div></td> 
+</tr>
+
+</table>
+
+
+
+<h2>Maximale Import- und Exportleistung </h2>
+
+<table class="mainTable"  onmouseup="handleMouseUp(event)"
+       ontouchend="handleMouseUp(event)"> 
+
+<tr>
+  <td>allle Nachbarn</td>
+  <td> <input id="slider_importPow" type="range" 
+              min="0" max="20" step="1"></td>
+  <td> <div id="slider_importPowStr"></div></td> 
+</tr>
+
+</table>
+
+
+
+
+<h2>Strategie &nbsp; <a href="infoStrategy.html">(Info)</a> </h2>
+
+<select name="strategies" id="selectStrategy"
+	onchange="implementStrategy(this.selectedIndex)">
+  <option value="now">Aktuelle Strategie</option> 
+  <option value="climate">Klimaschoner</option> 
+  <option value="safety">Safety first</option>
+  <option value="green">Gr&uuml;n</option>
+  <!-- <option value="economic">Sparfuchs</option>-->
+</select>
+<br>
+<hr>
+</center>
+</div>
+
+
+
+<!-- ################################################# -->
+<!-- The display/graphics side of the simulation       -->
+<!-- ################################################# -->
+
+<!-- canvas just for the two zoom-in lines 
+pointing from top to bottom chart
+(note that canvas always need a container for correct positioning) -->
+
+<!--  ATTENTION!!! Only works if this zoomInRegion is ABOVE -->
+<!-- the other canvas. Do not know why. Also, regardless of -->
+<!-- z index etc this canvas ALWAYS at bottom -->
+
+<div id="zoomInRegion" style.display="block">
+  <canvas id="zoomInCanvas" style="z-index: 0;">  <!-- DOS z index -->
+  </canvas>
+</div>
+
+
+<div id="areaGraphics1" style.display="block"
+     onmouseenter="handleMouseEnter(event)">
+  
+  <!-- for some unknown reason all event listeners inside canvas do
+  not work and outside they do not know the canvas => no x,y
+  => delegated to inside function setupClick() in
+  graphics.js-->
+  
+  <canvas id="chart1" style="z-index: 0;">
+          onmousemove="handleMouseMove(event)" <!-- DOS -->
+           style="border:1px solid #d3d3d3;">
+    Your browser does not support the HTML5 canvas tag.
+  </canvas>
+</div>
+
+
+
+
+<div id="areaGraphics2">
+  <canvas id="chart2">
+           style="border:1px solid #d3d3d3;">
+    Your browser does not support the HTML5 canvas tag.
+  </canvas>
+</div>
+
+
+<div id="areaGraphics3" style="display: none">
+  <canvas id="chart3">
+         style="border:1px solid #d3d3d3;">
+    Your browser does not support the HTML5 canvas tag.
+  </canvas>
+</div>
+
+
+<div id="areaGraphics4" style="display: none">
+  <canvas id="chart4">
+          style="border:1px solid #d3d3d3;">
+    Your browser does not support the HTML5 canvas tag.
+  </canvas>
+</div>
+
+
+<div id="generalInfo"></div>
+<div id="infoImportExport"></div>
+<div id="clickInfo"></div>
+
+<div id="CO2Info"></div>
+
+
+<!-- ################################################# -->
+<!-- Copyright/impressum                               -->
+<!-- ################################################# -->
+
+<div id="impressum">
+
+  <table class="impressumTable"> <tr>
+    <td> <a href="impressum.html"> &copy; Martin Treiber</a></td>
+    <TD> <a href="https://github.com/MTGermany/energy-simulation-de">
+          Offline: sources at GitHub</a></TD>
+  </TR></table>
+</div>
+
+<!-- ########################################################## -->
+<!-- specific scripts; position below any simulation elements ! -->
+<!-- ########################################################## -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="js/constants.js" type="text/javascript"></script> 
+<script src="js/gui.js" type="text/javascript"></script> 
+
+<script src="dataInput/wind2025.json" type="text/javascript"></script> 
+<script src="dataInput/solar2025.json" type="text/javascript"></script> 
+<script src="dataInput/supplyDemand2025.json" type="text/javascript"></script>
+<script src="js/data.js" type="text/javascript">></script>
+
+<script src="js/graphics.js" type="text/javascript"></script> 
+<script src="js/simulation.js" type="text/javascript"></script> 
+
+<!--<script src="js/seedrandom.min.js"></script> 
+
+</body>
+</html>
